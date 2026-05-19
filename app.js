@@ -23,6 +23,10 @@ app.use(session({
     }
 }));
 
+// Thêm vào app.js, sau phần app.use(session(...))
+const { generalLimiter } = require('./src/middlewares/rateLimitMiddleware');
+app.use(generalLimiter);
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'src/views'));
 
