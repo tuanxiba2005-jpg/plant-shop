@@ -1,0 +1,63 @@
+</main>
+
+<footer>
+    <div class="container">
+        <div class="row">
+
+            <div class="col-md-4 mb-3">
+                <div class="footer-title">🌿 Plant Shop</div>
+                <p>Mang thiên nhiên vào ngôi nhà bạn với những loài cây cảnh đẹp, chất lượng cao và giá cả hợp lý.</p>
+                <div class="mt-3">
+                    <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-icon"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+
+            <div class="col-md-2 mb-3">
+                <div class="footer-title">Danh mục</div>
+                <% if (typeof globalCategories !== 'undefined') { %>
+                    <% globalCategories.forEach(cat => { %>
+                    <div>
+                        <a href="/products?category=<%= cat._id %>"><%= cat.name %></a>
+                    </div>
+                    <% }) %>
+                <% } %>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="footer-title">Hỗ trợ</div>
+                <div><a href="#">Chính sách đổi trả</a></div>
+                <div><a href="#">Hướng dẫn chăm sóc cây</a></div>
+                <div><a href="#">Câu hỏi thường gặp</a></div>
+                <div><a href="#">Liên hệ</a></div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="footer-title">Liên hệ</div>
+                <p><i class="fas fa-map-marker-alt me-2" style="color: var(--primary-light);"></i>Hà Nội, Việt Nam</p>
+                <p><i class="fas fa-phone me-2" style="color: var(--primary-light);"></i>0123 456 789</p>
+                <p><i class="fas fa-envelope me-2" style="color: var(--primary-light);"></i>contact@plantshop.vn</p>
+            </div>
+
+        </div>
+
+        <hr class="footer-divider">
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center footer-bottom">
+            <span>© 2025 Plant Shop. All rights reserved.</span>
+            <span class="mt-2 mt-md-0">Made with 🌿 by Plant Shop Team</span>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="/js/main.js"></script>
+<% if (typeof extraJS !== 'undefined') { %>
+    <% extraJS.forEach(src => { %>
+        <script src="<%= src %>"></script>
+    <% }) %>
+<% } %>
+</body>
+</html>

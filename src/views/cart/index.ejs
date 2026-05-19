@@ -1,0 +1,64 @@
+<% extraJS = ['/js/cart.js'] %>
+<%- include('../layouts/header') %>
+
+<h3>🛒 Giỏ hàng</h3>
+<% if (items.length === 0) { %>
+    <div class="text-center py-5">
+        <i class="fas fa-shopping-cart fa-4x text-muted"></i>
+        <h5 class="mt-3">Giỏ hàng trống</h5>
+        <a href="/products" class="btn btn-success mt-2">Tiếp tục mua sắm</a>
+    </div>
+<% } else { %>
+<div class="table-responsive">
+    <table class="table align-middle" id="cartTable">
+        <thead class="table-success">
+            <tr>
+                <th>Sản phẩm</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th>Tổng</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <% items.forEach(item => { %>
+            <tr data-id="<%= item.product_id %>">
+                <td>
+                    <img src="/images/products/<%= item.image %>" width="60"
+                         class="me-2" onerror="this.src='/images/default.jpg'">
+                    <%= item.name %>
+                </td>
+                <td><%= parseInt(item.price).toLocaleString('vi-VN') %>đ</td>
+                <td style="width:130px">
+                    <div class="input-group input-group-sm">
+                        <button class="btn btn-outline-secondary btn-qty" data-action="minus">-</button>
+                        <input type="number" class="form-control text-center qty-input"
+                               value="<%= item.quantity %>" min="1" max="<%= item.stock %>">
+                        <button class="btn btn-outline-secondary btn-qty" data-action="plus">+</button>
+                    </div>
+                </td>
+                <td class="item-subtotal">
+                    <%= parseInt(item.subtotal).toLocaleString('vi-VN') %>đ
+                </td>
+                <td>
+                    <button class="btn btn-danger btn-sm btn-remove">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+<div class="text-end">
+    <h5>Tổng cộng:
+        <span class="text-success" id="cartTotal">
+            <%= parseInt(total).toLocaleString('vi-VN') %>đ
+        </span>
+    </h5>
+    <a href="/products" class="btn btn-outline-success me-2">Tiếp tục mua</a>
+    <a href="/orders/checkout" class="btn btn-success">Đặt hàng</a>
+</div>
+<% } %>
+
+<%- include('../layouts/footer') %>

@@ -1,0 +1,218 @@
+<% extraJS = [] %>
+<%- include('../layouts/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>📊 Admin Dashboard</h3>
+    <span class="text-muted">Xin chào, <strong><%= user.name %></strong></span>
+</div>
+
+<!-- Thống kê tổng quan -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div class="fs-1">🌿</div>
+            <h2 class="text-success fw-bold"><%= totalProducts %></h2>
+            <p class="text-muted mb-2">Sản phẩm</p>
+            <a href="/admin/products" class="btn btn-outline-success btn-sm">Quản lý</a>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div class="fs-1">📦</div>
+            <h2 class="text-warning fw-bold"><%= totalOrders %></h2>
+            <p class="text-muted mb-2">Đơn hàng</p>
+            <a href="/admin/orders" class="btn btn-outline-warning btn-sm">Quản lý</a>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div class="fs-1">👥</div>
+            <h2 class="text-info fw-bold"><%= totalUsers %></h2>
+            <p class="text-muted mb-2">Người dùng</p>
+            <a href="/admin/users" class="btn btn-outline-info btn-sm">Quản lý</a>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div class="fs-1">💰</div>
+            <h2 class="text-danger fw-bold">
+                <%= parseInt(totalRevenue).toLocaleString('vi-VN') %>đ
+            </h2>
+            <p class="text-muted mb-2">Doanh thu</p>
+            <a href="/admin/revenue" class="btn btn-outline-danger btn-sm">Xem báo cáo</a>
+        </div>
+    </div>
+</div>
+
+<!-- Thống kê trạng thái đơn hàng -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white fw-bold">
+                📋 Thống kê trạng thái đơn hàng
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <% const statusLabels = {
+                        pending: 'Chờ xác nhận',
+                        confirmed: 'Đã xác nhận',
+                        shipping: 'Đang giao',
+                        delivered: 'Đã giao',
+                        cancelled: 'Đã hủy'
+                    } %>
+                    <% const statusColors = {
+                        pending: 'warning',
+                        confirmed: 'info',
+                        shipping: 'primary',
+                        delivered: 'success',
+                        cancelled: 'danger'
+                    } %>
+                    <% const allStatuses = ['pending', 'confirmed', 'shipping', 'delivered', 'cancelled'] %>
+                    <% allStatuses.forEach(status => { %>
+                        <% const found = statusStats.find(s => s._id === status) %>
+                        <div class="col">
+                            <div class="border rounded p-3">
+                                <h4 class="text-<%= statusColors[status] %> fw-bold mb-1">
+                                    <%= found ? found.count : 0 %>
+                                </h4>
+                                <small class="text-muted"><%= statusLabels[status] %></small>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Biểu đồ doanh thu + Đơn hàng gần đây -->
+<div class="row mb-4">
+    <!-- Biểu đồ doanh thu -->
+    <div class="col-md-7 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-success text-white fw-bold d-flex justify-content-between">
+                <span>📈 Doanh thu năm <%= new Date().getFullYear() %></span>
+                <a href="/admin/revenue" class="text-white text-decoration-none small">
+                    Xem chi tiết →
+                </a>
+            </div>
+            <div class="card-body">
+                <canvas id="dashboardChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Đơn hàng gần đây -->
+    <div class="col-md-5 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-success text-white fw-bold d-flex justify-content-between">
+                <span>🕐 Đơn hàng gần đây</span>
+                <a href="/admin/orders" class="text-white text-decoration-none small">
+                    Xem tất cả →
+                </a>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <% if (recentOrders.length === 0) { %>
+                    <div class="text-center py-4 text-muted">
+                        Chưa có đơn hàng nào
+                    </div>
+                    <% } else { %>
+                    <% const badges = {
+                        pending: 'warning', confirmed: 'info',
+                        shipping: 'primary', delivered: 'success', cancelled: 'danger'
+                    } %>
+                    <% const labels = {
+                        pending: 'Chờ xác nhận', confirmed: 'Đã xác nhận',
+                        shipping: 'Đang giao', delivered: 'Đã giao', cancelled: 'Đã hủy'
+                    } %>
+                    <% recentOrders.forEach(order => { %>
+                    <div class="list-group-item px-3 py-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong class="small">
+                                    #<%= order._id.toString().slice(-6).toUpperCase() %>
+                                </strong>
+                                <br>
+                                <small class="text-muted">
+                                    <%= order.user_id?.name || 'N/A' %>
+                                </small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-<%= badges[order.status] %> d-block mb-1">
+                                    <%= labels[order.status] %>
+                                </span>
+                                <small class="text-success fw-bold">
+                                    <%= parseInt(order.total_price).toLocaleString('vi-VN') %>đ
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <% }) %>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quản lý nhanh -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white fw-bold">
+                ⚡ Truy cập nhanh
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 col-md-3 mb-3">
+                        <a href="/admin/products" class="text-decoration-none">
+                            <div class="card border-success h-100 p-3">
+                                <div class="fs-2">🌿</div>
+                                <p class="text-success fw-bold mb-0 mt-2">Sản phẩm</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-3 mb-3">
+                        <a href="/admin/orders" class="text-decoration-none">
+                            <div class="card border-warning h-100 p-3">
+                                <div class="fs-2">📦</div>
+                                <p class="text-warning fw-bold mb-0 mt-2">Đơn hàng</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-3 mb-3">
+                        <a href="/admin/users" class="text-decoration-none">
+                            <div class="card border-info h-100 p-3">
+                                <div class="fs-2">👥</div>
+                                <p class="text-info fw-bold mb-0 mt-2">Người dùng</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-3 mb-3">
+                        <a href="/admin/revenue" class="text-decoration-none">
+                            <div class="card border-danger h-100 p-3">
+                                <div class="fs-2">📊</div>
+                                <p class="text-danger fw-bold mb-0 mt-2">Doanh thu</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data cho biểu đồ -->
+<!-- Data cho biểu đồ -->
+<% if (typeof months !== 'undefined' && months) { %>
+<script>
+    window.dashboardData = <%- JSON.stringify(months) %>;
+</script>
+<% } else { %>
+<script>
+    window.dashboardData = [];
+</script>
+<% } %>
+
+<%- include('../layouts/footer') %>

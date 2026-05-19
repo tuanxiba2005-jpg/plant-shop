@@ -1,0 +1,399 @@
+<%- include('../layouts/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0">👥 Quản lý người dùng</h3>
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCreate">
+        <i class="fas fa-user-plus me-1"></i> Thêm người dùng
+    </button>
+</div>
+
+<!-- Thống kê nhanh -->
+<div class="row mb-4">
+    <div class="col-6 col-md-3 mb-2">
+        <div class="card border-0 text-center p-3" style="background: var(--primary-bg);">
+            <div class="fw-bold fs-4 text-success" id="countAll"><%= users.length %></div>
+            <div class="small text-muted">Tổng cộng</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+        <div class="card border-0 text-center p-3" style="background: #e8f4fd;">
+            <div class="fw-bold fs-4" style="color: #3498db;" id="countUser">
+                <%= users.filter(u => u.role === 'user').length %>
+            </div>
+            <div class="small text-muted">Khách hàng</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+        <div class="card border-0 text-center p-3" style="background: #fef9e7;">
+            <div class="fw-bold fs-4" style="color: #f39c12;" id="countStaff">
+                <%= users.filter(u => u.role === 'staff').length %>
+            </div>
+            <div class="small text-muted">Nhân viên</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3 mb-2">
+        <div class="card border-0 text-center p-3" style="background: #fdedec;">
+            <div class="fw-bold fs-4 text-danger" id="countBlocked">
+                <%= users.filter(u => u.isBlocked).length %>
+            </div>
+            <div class="small text-muted">Đã khóa</div>
+        </div>
+    </div>
+</div>
+
+<!-- Bộ lọc -->
+<div class="d-flex gap-2 mb-3 flex-wrap">
+    <button class="btn btn-sm btn-success filter-btn active" data-filter="all">Tất cả</button>
+    <button class="btn btn-sm btn-outline-secondary filter-btn" data-filter="user">Khách hàng</button>
+    <button class="btn btn-sm btn-outline-secondary filter-btn" data-filter="staff">Nhân viên</button>
+    <button class="btn btn-sm btn-outline-secondary filter-btn" data-filter="blocked">Đã khóa</button>
+</div>
+
+<!-- Bảng -->
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle" id="usersTable">
+                <thead class="table-success">
+                    <tr>
+                        <th>#</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Vai trò</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="usersBody">
+                    <% if (users.length === 0) { %>
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">Chưa có người dùng nào</td>
+                    </tr>
+                    <% } %>
+                    <% users.forEach((u, index) => { %>
+                    <tr data-role="<%= u.role %>" data-blocked="<%= u.isBlocked %>">
+                        <td class="text-muted small"><%= index + 1 %></td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div style="width:34px; height:34px; border-radius:50%; background:var(--primary-bg); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:600; color:var(--primary); flex-shrink:0;">
+                                    <%= u.name.charAt(0).toUpperCase() %>
+                                </div>
+                                <span class="fw-500"><%= u.name %></span>
+                            </div>
+                        </td>
+                        <td class="text-muted small"><%= u.email %></td>
+                        <td>
+                            <select class="form-select form-select-sm role-select"
+                                    data-id="<%= u._id %>"
+                                    style="width:110px; font-size:13px;">
+                                <option value="user"  <%= u.role === 'user'  ? 'selected' : '' %>>👤 Khách hàng</option>
+                                <option value="staff" <%= u.role === 'staff' ? 'selected' : '' %>>👔 Nhân viên</option>
+                            </select>
+                        </td>
+                        <td>
+                            <% if (u.isBlocked) { %>
+                                <span class="badge bg-danger">Đã khóa</span>
+                            <% } else { %>
+                                <span class="badge bg-success">Hoạt động</span>
+                            <% } %>
+                        </td>
+                        <td class="small text-muted">
+                            <%= new Date(u.createdAt).toLocaleDateString('vi-VN') %>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <!-- Nút sửa -->
+                                <button class="btn btn-sm btn-outline-primary btn-edit"
+                                        title="Sửa"
+                                        data-id="<%= u._id %>"
+                                        data-name="<%= u.name %>"
+                                        data-email="<%= u.email %>"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalEdit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <!-- Nút block/unblock -->
+                                <button class="btn btn-sm btn-toggle-block <%= u.isBlocked ? 'btn-outline-success' : 'btn-outline-warning' %>"
+                                        title="<%= u.isBlocked ? 'Mở khóa' : 'Khóa' %>"
+                                        data-id="<%= u._id %>"
+                                        data-blocked="<%= u.isBlocked %>">
+                                    <i class="fas <%= u.isBlocked ? 'fa-unlock' : 'fa-ban' %>"></i>
+                                </button>
+                                <!-- Nút xóa -->
+                                <button class="btn btn-sm btn-outline-danger btn-delete"
+                                        title="Xóa"
+                                        data-id="<%= u._id %>"
+                                        data-name="<%= u.name %>">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm người dùng -->
+<div class="modal fade" id="modalCreate" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Thêm người dùng</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="createError" class="alert alert-danger d-none"></div>
+                <div class="mb-3">
+                    <label class="form-label">Họ tên <span class="text-danger">*</span></label>
+                    <input type="text" id="createName" class="form-control" placeholder="Nguyễn Văn A">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email <span class="text-danger">*</span></label>
+                    <input type="email" id="createEmail" class="form-control" placeholder="example@email.com">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mật khẩu <span class="text-danger">*</span></label>
+                    <input type="password" id="createPassword" class="form-control" placeholder="Tối thiểu 6 ký tự">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Vai trò</label>
+                    <select id="createRole" class="form-select">
+                        <option value="user">👤 Khách hàng</option>
+                        <option value="staff">👔 Nhân viên</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-success" id="btnCreate">
+                    <i class="fas fa-plus me-1"></i>Thêm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Sửa người dùng -->
+<div class="modal fade" id="modalEdit" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-user-edit me-2"></i>Sửa người dùng</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="editError" class="alert alert-danger d-none"></div>
+                <input type="hidden" id="editId">
+                <div class="mb-3">
+                    <label class="form-label">Họ tên <span class="text-danger">*</span></label>
+                    <input type="text" id="editName" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email <span class="text-danger">*</span></label>
+                    <input type="email" id="editEmail" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mật khẩu mới
+                        <small class="text-muted fw-normal">(để trống nếu không đổi)</small>
+                    </label>
+                    <input type="password" id="editPassword" class="form-control" placeholder="Nhập mật khẩu mới...">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="btnEdit">
+                    <i class="fas fa-save me-1"></i>Lưu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Xác nhận xóa -->
+<div class="modal fade" id="modalDelete" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-trash me-2"></i>Xác nhận xóa</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p class="mb-1">Bạn chắc chắn muốn xóa</p>
+                <p class="fw-bold" id="deleteName"></p>
+                <small class="text-muted">Hành động này không thể hoàn tác!</small>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmDelete">
+                    <i class="fas fa-trash me-1"></i>Xóa
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let deleteId = null;
+
+// ---- Bộ lọc ----
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('active', 'btn-success');
+            b.classList.add('btn-outline-secondary');
+        });
+        this.classList.add('active', 'btn-success');
+        this.classList.remove('btn-outline-secondary');
+
+        const filter = this.dataset.filter;
+        document.querySelectorAll('#usersBody tr').forEach(row => {
+            const role = row.dataset.role;
+            const blocked = row.dataset.blocked === 'true';
+            if (filter === 'all') row.style.display = '';
+            else if (filter === 'user') row.style.display = role === 'user' ? '' : 'none';
+            else if (filter === 'staff') row.style.display = role === 'staff' ? '' : 'none';
+            else if (filter === 'blocked') row.style.display = blocked ? '' : 'none';
+        });
+    });
+});
+
+// ---- Đổi role ----
+document.querySelectorAll('.role-select').forEach(sel => {
+    sel.addEventListener('change', async function () {
+        const id = this.dataset.id;
+        const role = this.value;
+        const res = await fetch(`/admin/users/${id}/role`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Đã cập nhật vai trò!', 'success');
+            // Cập nhật data-role của row để filter hoạt động đúng
+            this.closest('tr').dataset.role = role;
+        } else {
+            showToast(data.message || 'Lỗi!', 'danger');
+        }
+    });
+});
+
+// ---- Thêm người dùng ----
+document.getElementById('btnCreate').addEventListener('click', async () => {
+    const name = document.getElementById('createName').value.trim();
+    const email = document.getElementById('createEmail').value.trim();
+    const password = document.getElementById('createPassword').value;
+    const role = document.getElementById('createRole').value;
+    const errEl = document.getElementById('createError');
+
+    if (!name || !email || !password) {
+        errEl.textContent = 'Vui lòng điền đầy đủ thông tin!';
+        errEl.classList.remove('d-none');
+        return;
+    }
+    if (password.length < 6) {
+        errEl.textContent = 'Mật khẩu tối thiểu 6 ký tự!';
+        errEl.classList.remove('d-none');
+        return;
+    }
+
+    const res = await fetch('/admin/users/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, role })
+    });
+    const data = await res.json();
+    if (data.success) {
+        showToast('Đã thêm người dùng!', 'success');
+        bootstrap.Modal.getInstance(document.getElementById('modalCreate')).hide();
+        setTimeout(() => location.reload(), 800);
+    } else {
+        errEl.textContent = data.message || 'Lỗi!';
+        errEl.classList.remove('d-none');
+    }
+});
+
+// ---- Mở modal sửa ----
+document.querySelectorAll('.btn-edit').forEach(btn => {
+    btn.addEventListener('click', function () {
+        document.getElementById('editId').value = this.dataset.id;
+        document.getElementById('editName').value = this.dataset.name;
+        document.getElementById('editEmail').value = this.dataset.email;
+        document.getElementById('editPassword').value = '';
+        document.getElementById('editError').classList.add('d-none');
+    });
+});
+
+// ---- Lưu sửa ----
+document.getElementById('btnEdit').addEventListener('click', async () => {
+    const id = document.getElementById('editId').value;
+    const name = document.getElementById('editName').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
+    const password = document.getElementById('editPassword').value;
+    const errEl = document.getElementById('editError');
+
+    if (!name || !email) {
+        errEl.textContent = 'Vui lòng điền đầy đủ thông tin!';
+        errEl.classList.remove('d-none');
+        return;
+    }
+
+    const res = await fetch(`/admin/users/${id}/update`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+    });
+    const data = await res.json();
+    if (data.success) {
+        showToast('Đã cập nhật!', 'success');
+        bootstrap.Modal.getInstance(document.getElementById('modalEdit')).hide();
+        setTimeout(() => location.reload(), 800);
+    } else {
+        errEl.textContent = data.message || 'Lỗi!';
+        errEl.classList.remove('d-none');
+    }
+});
+
+// ---- Block / Unblock ----
+document.querySelectorAll('.btn-toggle-block').forEach(btn => {
+    btn.addEventListener('click', async function () {
+        const id = this.dataset.id;
+        const res = await fetch(`/admin/users/${id}/toggle-block`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Đã cập nhật trạng thái!', 'success');
+            setTimeout(() => location.reload(), 800);
+        } else {
+            showToast(data.message || 'Lỗi!', 'danger');
+        }
+    });
+});
+
+// ---- Xóa ----
+document.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', function () {
+        deleteId = this.dataset.id;
+        document.getElementById('deleteName').textContent = this.dataset.name;
+        new bootstrap.Modal(document.getElementById('modalDelete')).show();
+    });
+});
+
+document.getElementById('btnConfirmDelete').addEventListener('click', async () => {
+    if (!deleteId) return;
+    const res = await fetch(`/admin/users/${deleteId}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+        showToast('Đã xóa người dùng!', 'success');
+        bootstrap.Modal.getInstance(document.getElementById('modalDelete')).hide();
+        setTimeout(() => location.reload(), 800);
+    } else {
+        showToast(data.message || 'Lỗi!', 'danger');
+    }
+});
+</script>
+
+<%- include('../layouts/footer') %>

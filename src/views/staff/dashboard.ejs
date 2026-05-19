@@ -1,0 +1,98 @@
+<%- include('../layouts/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">📋 Staff Dashboard</h4>
+    <span class="text-muted small">Xin chào, <%= user.name %></span>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 bg-success text-white shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="small">Tổng sản phẩm</div>
+                        <div class="fs-3 fw-bold"><%= totalProducts %></div>
+                    </div>
+                    <i class="fas fa-leaf fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 bg-primary text-white shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="small">Tổng đơn hàng</div>
+                        <div class="fs-3 fw-bold"><%= totalOrders %></div>
+                    </div>
+                    <i class="fas fa-boxes fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 bg-info text-white shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="small">Khách hàng</div>
+                        <div class="fs-3 fw-bold"><%= totalUsers %></div>
+                    </div>
+                    <i class="fas fa-users fa-2x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-success text-white fw-bold">
+        🕐 Đơn hàng gần đây
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Khách hàng</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày đặt</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% recentOrders.forEach(order => { %>
+                    <tr>
+                        <td><%= order.user_id?.name || 'Khách' %></td>
+                        <td class="text-success fw-bold">
+                            <%= parseInt(order.total_price).toLocaleString('vi-VN') %>đ
+                        </td>
+                        <td>
+                            <% if (order.status === 'pending') { %>
+                                <span class="badge bg-warning text-dark">Chờ xử lý</span>
+                            <% } else if (order.status === 'processing') { %>
+                                <span class="badge bg-info">Đang xử lý</span>
+                            <% } else if (order.status === 'shipped') { %>
+                                <span class="badge bg-primary">Đang giao</span>
+                            <% } else if (order.status === 'delivered') { %>
+                                <span class="badge bg-success">Đã giao</span>
+                            <% } else { %>
+                                <span class="badge bg-danger">Đã hủy</span>
+                            <% } %>
+                        </td>
+                        <td><%= new Date(order.createdAt).toLocaleDateString('vi-VN') %></td>
+                        <td>
+                            <a href="/staff/orders" class="btn btn-sm btn-outline-success">Xem</a>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<%- include('../layouts/footer') %>

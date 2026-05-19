@@ -1,0 +1,60 @@
+<% extraJS = [] %>
+<%- include('../layouts/header') %>
+
+<h3 class="fw-bold mb-4">📦 Đơn hàng của tôi</h3>
+
+<% if (orders.length === 0) { %>
+<div class="text-center py-5">
+    <div class="fs-1">📭</div>
+    <h5 class="text-muted mt-3">Bạn chưa có đơn hàng nào</h5>
+    <a href="/products" class="btn btn-success mt-3">Mua sắm ngay</a>
+</div>
+<% } else { %>
+<div class="row">
+    <% const badges = {
+        pending: 'warning', confirmed: 'info',
+        shipping: 'primary', delivered: 'success', cancelled: 'danger'
+    } %>
+    <% const labels = {
+        pending: 'Chờ xác nhận', confirmed: 'Đã xác nhận',
+        shipping: 'Đang giao', delivered: 'Đã giao', cancelled: 'Đã hủy'
+    } %>
+    <% orders.forEach(order => { %>
+    <div class="col-12 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="fw-bold">Đơn hàng #<%= order._id.toString().slice(-8).toUpperCase() %></span>
+                <span class="badge bg-<%= badges[order.status] %>">
+                    <%= labels[order.status] %>
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <small class="text-muted">📅 Ngày đặt:</small>
+                        <span class="ms-2">
+                            <%= new Date(order.createdAt).toLocaleDateString('vi-VN') %>
+                        </span>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">📍 Địa chỉ:</small>
+                        <span class="ms-2"><%= order.address %></span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <span class="text-success fw-bold fs-5">
+                    <%= parseInt(order.total_price).toLocaleString('vi-VN') %>đ
+                </span>
+                <a href="/orders/<%= order._id %>"
+                   class="btn btn-outline-success btn-sm">
+                   Xem chi tiết
+                </a>
+            </div>
+        </div>
+    </div>
+    <% }) %>
+</div>
+<% } %>
+
+<%- include('../layouts/footer') %>

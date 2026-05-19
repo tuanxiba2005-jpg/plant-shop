@@ -1,0 +1,70 @@
+<%- include('../layouts/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">📦 Quản lý đơn hàng</h4>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-success">
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Khách hàng</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày đặt</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.forEach(order => { %>
+                    <tr>
+                        <td><small class="text-muted">#<%= order._id.toString().slice(-6).toUpperCase() %></small></td>
+                        <td><%= order.user_id?.name || 'Khách' %></td>
+                        <td class="text-success fw-bold">
+                            <%= parseInt(order.total_price).toLocaleString('vi-VN') %>đ
+                        </td>
+                        <td>
+                            <select class="form-select form-select-sm status-select"
+                                    data-id="<%= order._id %>"
+                                    style="width: auto;">
+                                <option value="pending"    <%= order.status === 'pending'    ? 'selected' : '' %>>Chờ xử lý</option>
+                                <option value="processing" <%= order.status === 'processing' ? 'selected' : '' %>>Đang xử lý</option>
+                                <option value="shipped"    <%= order.status === 'shipped'    ? 'selected' : '' %>>Đang giao</option>
+                                <option value="delivered"  <%= order.status === 'delivered'  ? 'selected' : '' %>>Đã giao</option>
+                                <option value="cancelled"  <%= order.status === 'cancelled'  ? 'selected' : '' %>>Đã hủy</option>
+                            </select>
+                        </td>
+                        <td><%= new Date(order.createdAt).toLocaleDateString('vi-VN') %></td>
+                        <td>
+                            <% if (order.items && order.items.length > 0) { %>
+                                <small class="text-muted"><%= order.items.length %> sản phẩm</small>
+                            <% } %>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.status-select').forEach(select => {
+    select.addEventListener('change', async function () {
+        const id = this.dataset.id;
+        const status = this.value;
+        const res = await fetch(`/staff/orders/status/${id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status })
+        });
+        const data = await res.json();
+        if (!data.success) alert('Cập nhật thất bại!');
+    });
+});
+</script>
+
+<%- include('../layouts/footer') %>

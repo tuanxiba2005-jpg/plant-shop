@@ -1,0 +1,44 @@
+<%- include('../layouts/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">👥 Danh sách khách hàng</h4>
+    <span class="text-muted small">Tổng: <%= users.length %> khách hàng</span>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-success">
+                    <tr>
+                        <th>Tên</th>
+                        <th>Email</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày đăng ký</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% users.forEach(u => { %>
+                    <tr>
+                        <td>
+                            <i class="fas fa-user-circle text-muted me-2"></i>
+                            <%= u.name %>
+                        </td>
+                        <td><%= u.email %></td>
+                        <td>
+                            <% if (u.isBlocked) { %>
+                                <span class="badge bg-danger">Đã khóa</span>
+                            <% } else { %>
+                                <span class="badge bg-success">Hoạt động</span>
+                            <% } %>
+                        </td>
+                        <td><%= new Date(u.createdAt).toLocaleDateString('vi-VN') %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<%- include('../layouts/footer') %>

@@ -1,0 +1,174 @@
+<% extraJS = ['/js/admin/products.js'] %>
+<%- include('../layouts/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>🌿 Quản lý sản phẩm</h3>
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalAddProduct">
+        <i class="fas fa-plus"></i> Thêm sản phẩm
+    </button>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-success">
+                    <tr>
+                        <th>#</th>
+                        <th>Ảnh</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Danh mục</th>
+                        <th>Giá</th>
+                        <th>Tồn kho</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% products.forEach((product, index) => { %>
+                    <tr>
+                        <td><%= index + 1 %></td>
+                        <td>
+                            <img src="<%= product.image %>"
+                                 width="60" height="60"
+                                 style="object-fit:cover; border-radius:8px;"
+                                 onerror="this.src='/images/default.jpg'">
+                        </td>
+                        <td><%= product.name %></td>
+                        <td>
+                            <span class="badge bg-success">
+                                <%= product.category_id?.name || 'Chưa phân loại' %>
+                            </span>
+                        </td>
+                        <td class="text-success fw-bold">
+                            <%= parseInt(product.price).toLocaleString('vi-VN') %>đ
+                        </td>
+                        <td>
+                            <span class="badge <%= product.stock > 10 ? 'bg-success' : product.stock > 0 ? 'bg-warning' : 'bg-danger' %>">
+                                <%= product.stock %>
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-warning btn-sm btn-edit"
+                                data-id="<%= product._id %>"
+                                data-name="<%= product.name %>"
+                                data-price="<%= product.price %>"
+                                data-stock="<%= product.stock %>"
+                                data-description="<%= product.description %>"
+                                data-category="<%= product.category_id?._id %>">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm btn-delete"
+                                data-id="<%= product._id %>">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm sản phẩm -->
+<div class="modal fade" id="modalAddProduct" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">➕ Thêm sản phẩm</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/admin/products/create" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tên sản phẩm *</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <textarea name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Giá (đ) *</label>
+                            <input type="number" name="price" class="form-control" required min="0">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Tồn kho *</label>
+                            <input type="number" name="stock" class="form-control" required min="0">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Danh mục *</label>
+                        <select name="category_id" class="form-select" required>
+                            <option value="">-- Chọn danh mục --</option>
+                            <% categories.forEach(cat => { %>
+                            <option value="<%= cat._id %>"><%= cat.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ảnh sản phẩm</label>
+                        <input type="file" name="image" class="form-control" accept="image/*">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success">Thêm sản phẩm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Sửa sản phẩm -->
+<div class="modal fade" id="modalEditProduct" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">✏️ Sửa sản phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="formEdit" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tên sản phẩm *</label>
+                        <input type="text" name="name" id="editName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <textarea name="description" id="editDescription" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Giá (đ) *</label>
+                            <input type="number" name="price" id="editPrice" class="form-control" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label">Tồn kho *</label>
+                            <input type="number" name="stock" id="editStock" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Danh mục *</label>
+                        <select name="category_id" id="editCategory" class="form-select" required>
+                            <% categories.forEach(cat => { %>
+                            <option value="<%= cat._id %>"><%= cat.name %></option>
+                            <% }) %>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ảnh mới (để trống nếu không đổi)</label>
+                        <input type="file" name="image" class="form-control" accept="image/*">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-warning">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('../layouts/footer') %>

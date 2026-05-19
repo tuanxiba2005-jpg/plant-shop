@@ -1,0 +1,17 @@
+<% extraJS = [] %>
+<%- include('layouts/header') %>
+
+<div class="text-center py-5">
+    <div style="font-size:6rem;">⚠️</div>
+    <h1 class="display-1 fw-bold text-danger"><%= status || 500 %></h1>
+    <h3><%= message || 'Đã xảy ra lỗi' %></h3>
+    <p class="text-muted">Vui lòng thử lại hoặc quay về trang chủ.</p>
+    <a href="/" class="btn btn-success btn-lg mt-2">
+        <i class="fas fa-home me-2"></i>Về trang chủ
+    </a>
+    <a href="javascript:history.back()" class="btn btn-outline-secondary btn-lg mt-2 ms-2">
+        ← Quay lại
+    </a>
+</div>
+
+<%- include('layouts/footer') %>

@@ -1,0 +1,122 @@
+<% extraJS = ['/js/admin/revenue.js'] %>
+<%- include('../layouts/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>📊 Báo cáo doanh thu</h3>
+    <form action="/admin/revenue" method="GET" class="d-flex gap-2">
+        <select name="year" class="form-select" onchange="this.form.submit()">
+            <% 
+                // Lấy năm hiện tại
+                const currentYear = new Date().getFullYear();
+                // Đảm bảo biến year truyền từ controller là kiểu số để so sánh chính xác
+                const selectedYear = Number(year) || currentYear;
+            %>
+            <% for(let y = currentYear; y >= 2023; y--) { %>
+                <option value="<%= y %>" <%= y === selectedYear ? 'selected' : '' %>><%= y %></option>
+            <% } %>
+        </select>
+    </form>
+</div>
+
+<!-- Thống kê tổng quan -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <div class="fs-1">💰</div>
+            <h5 class="text-success fw-bold mt-2">
+                <%# Thêm fallback || 0 để tránh lỗi toLocaleString khi data trống %>
+                <%= Number(totalRevenue || 0).toLocaleString('vi-VN') %>đ
+            </h5>
+            <p class="text-muted mb-0">Tổng doanh thu</p>
+        </div>
+    </div>
+
+    <% 
+    const statusLabels = {
+        pending: 'Chờ xác nhận', confirmed: 'Đã xác nhận',
+        shipping: 'Đang giao', delivered: 'Đã giao', cancelled: 'Đã hủy'
+    }
+    const statusColors = {
+        pending: 'warning', confirmed: 'info',
+        shipping: 'primary', delivered: 'success', cancelled: 'danger'
+    } 
+    %>
+
+    <%# Kiểm tra nếu statusStats tồn tại mới chạy vòng lặp %>
+    <% if (typeof statusStats !== 'undefined' && statusStats.length > 0) { %>
+        <% statusStats.forEach(s => { %>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm text-center p-3">
+                <h5 class="text-<%= statusColors[s._id] || 'secondary' %> fw-bold mt-2"><%= s.count %></h5>
+                <p class="text-muted mb-0"><%= statusLabels[s._id] || s._id %></p>
+            </div>
+        </div>
+        <% }) %>
+    <% } %>
+</div>
+
+<!-- Biểu đồ doanh thu theo tháng -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-success text-white fw-bold">
+        📈 Doanh thu theo tháng năm <%= selectedYear %>
+    </div>
+    <div class="card-body">
+        <%# Đảm bảo bạn đã nạp thư viện Chart.js ở footer hoặc header %>
+        <canvas id="revenueChart" height="100"></canvas>
+    </div>
+</div>
+
+<!-- Top sản phẩm bán chạy -->
+<div class="card shadow-sm">
+    <div class="card-header bg-success text-white fw-bold">
+        🏆 Top sản phẩm bán chạy
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Số lượng bán</th>
+                    <th>Doanh thu</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (!topProducts || topProducts.length === 0) { %>
+                <tr>
+                    <td colspan="4" class="text-center py-4 text-muted">
+                        Chưa có dữ liệu sản phẩm
+                    </td>
+                </tr>
+                <% } else { %>
+                    <% topProducts.forEach((p, index) => { %>
+                    <tr>
+                        <td>
+                            <% if (index === 0) { %>🥇
+                            <% } else if (index === 1) { %>🥈
+                            <% } else if (index === 2) { %>🥉
+                            <% } else { %><%= index + 1 %>
+                            <% } %>
+                        </td>
+                        <td><%= p.name %></td>
+                        <td>
+                            <span class="badge bg-success"><%= p.totalQty %> sản phẩm</span>
+                        </td>
+                        <td class="text-success fw-bold">
+                            <%= Number(p.revenue || 0).toLocaleString('vi-VN') %>đ
+                        </td>
+                    </tr>
+                    <% }) %>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Data cho chart -->
+<script>
+    // Thêm fallback [] để script không bị crash nếu biến months bị null
+    window.revenueData = <%- JSON.stringify(typeof months !== 'undefined' ? months : []) %>;
+</script>
+
+<%- include('../layouts/footer') %>
