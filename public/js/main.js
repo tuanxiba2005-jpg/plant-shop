@@ -276,5 +276,3 @@ if (btnCancel) {
         }
     });
 }
-window.addEventListener('scroll', handleFooterVisibility);
-window.addEventListener('load', handleFooterVisibility);

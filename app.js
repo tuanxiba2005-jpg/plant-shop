@@ -3,11 +3,43 @@ const express = require('express');
 const session = require('express-session');
 const path = require('path');
 const Database = require('./src/config/Database');
+const helmet = require('helmet'); // thêm dòng này
 
 const app = express();
 app.set('trust proxy', 1);
 
 Database.getInstance().connect();
+
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "cdnjs.cloudflare.com",
+            ],
+            styleSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "cdnjs.cloudflare.com",
+            ],
+            fontSrc: [
+                "'self'",
+                "cdnjs.cloudflare.com",
+            ],
+            imgSrc: [
+                "'self'",
+                "data:",
+            ],
+            connectSrc: [
+                "'self'",
+                "cdnjs.cloudflare.com",  // cho phép load .map files
+            ],
+        },
+    },
+    crossOriginEmbedderPolicy: false,
+}));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
