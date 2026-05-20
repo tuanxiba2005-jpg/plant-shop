@@ -5,6 +5,7 @@ const path = require('path');
 const Database = require('./src/config/Database');
 
 const app = express();
+app.set('trust proxy', 1);
 
 Database.getInstance().connect();
 
@@ -23,14 +24,9 @@ app.use(session({
     }
 }));
 
-// Thêm vào app.js, sau phần app.use(session(...))
-const { generalLimiter } = require('./src/middlewares/rateLimitMiddleware');
-app.use(generalLimiter);
-
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'src/views'));
 
-// Truyền user, cartCount và categories vào tất cả views
 const Category = require('./src/models/Category');
 const categoryModel = new Category();
 

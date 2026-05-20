@@ -23,39 +23,39 @@ class UserController {
         res.render('user/register', { title: 'Đăng ký', error: null });
     }
 
-    async login(req, res) {
-        try {
-            const { email, password } = req.body;
-            const user = await this.userModel.findByEmail(email);
+async login(req, res) {
+    try {
+        const { email, password } = req.body;
+        const user = await this.userModel.findByEmail(email);
 
-            if (!user || !(await this.userModel.verifyPassword(password, user.password))) {
-                return res.render('user/login', {
-                    title: 'Đăng nhập',
-                    error: 'Email hoặc mật khẩu không đúng'
-                });
-            }
-            if (user.isBlocked) {
-                return res.render('user/login', {
-                    title: 'Đăng nhập',
-                    error: 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.'
-                });
-            }
-
-            req.session.user = {
-                id: user._id.toString(),
-                name: user.name,
-                email: user.email,
-                role: user.role
-            };
-
-            if (user.role === 'admin') return res.redirect('/admin/dashboard');
-            if (user.role === 'staff') return res.redirect('/staff/dashboard');
-            res.redirect('/');
-        } catch (err) {
-            console.error('Login error:', err);
-            res.render('user/login', { title: 'Đăng nhập', error: 'Lỗi server' });
+        if (!user || !(await this.userModel.verifyPassword(password, user.password))) {
+            return res.status(401).render('user/login', {  // thêm status(401)
+                title: 'Đăng nhập',
+                error: 'Email hoặc mật khẩu không đúng'
+            });
         }
+        if (user.isBlocked) {
+            return res.status(401).render('user/login', {  // thêm status(401)
+                title: 'Đăng nhập',
+                error: 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.'
+            });
+        }
+
+        req.session.user = {
+            id: user._id.toString(),
+            name: user.name,
+            email: user.email,
+            role: user.role
+        };
+
+        if (user.role === 'admin') return res.redirect('/admin/dashboard');
+        if (user.role === 'staff') return res.redirect('/staff/dashboard');
+        res.redirect('/');
+    } catch (err) {
+        console.error('Login error:', err);
+        res.status(500).render('user/login', { title: 'Đăng nhập', error: 'Lỗi server' });
     }
+}
 
     async register(req, res) {
         try {
