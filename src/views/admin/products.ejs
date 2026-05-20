@@ -8,6 +8,13 @@
     </button>
 </div>
 
+<% if (query && query.error) { %>
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-circle me-2"></i><%= query.error %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+<% } %>
+
 <div class="card shadow-sm">
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -28,7 +35,7 @@
                     <tr>
                         <td><%= index + 1 %></td>
                         <td>
-                            <img src="<%= product.image %>"
+                            <img src="/images/products/<%= product.image %>"
                                  width="60" height="60"
                                  style="object-fit:cover; border-radius:8px;"
                                  onerror="this.src='/images/default.jpg'">

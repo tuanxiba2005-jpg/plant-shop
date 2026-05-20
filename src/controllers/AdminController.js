@@ -58,7 +58,12 @@ class AdminController {
         try {
             const products = await this.productModel.findAllWithCategory();
             const categories = await this.categoryModel.findAll();
-            res.render('admin/products', { title: 'Quản lý sản phẩm', products, categories });
+            res.render('admin/products', {
+                title: 'Quản lý sản phẩm',
+                products,
+                categories,
+                query: req.query
+            });
         } catch (err) {
             res.status(500).render('error', { title: 'Lỗi', status: 500, message: err.message });
         }
@@ -71,7 +76,7 @@ class AdminController {
             await this.productModel.create({ name, description, price, stock, category_id, image });
             res.redirect('/admin/products');
         } catch (err) {
-            res.redirect('/admin/products');
+            res.redirect('/admin/products?error=' + encodeURIComponent(err.message));
         }
     }
 
@@ -83,7 +88,7 @@ class AdminController {
             await this.productModel.update(req.params.id, data);
             res.redirect('/admin/products');
         } catch (err) {
-            res.redirect('/admin/products');
+            res.redirect('/admin/products?error=' + encodeURIComponent(err.message));
         }
     }
 
@@ -114,7 +119,6 @@ class AdminController {
         }
     }
 
-    // Hiện tất cả user + staff
     async users(req, res) {
         try {
             const users = await this.userModel.getAllUsersAndStaff();
@@ -124,7 +128,6 @@ class AdminController {
         }
     }
 
-    // Tạo user hoặc staff mới
     async createUser(req, res) {
         try {
             const { name, email, password, role } = req.body;
@@ -143,7 +146,6 @@ class AdminController {
         }
     }
 
-    // Sửa thông tin user
     async updateUser(req, res) {
         try {
             const { name, email, password } = req.body;
@@ -154,10 +156,8 @@ class AdminController {
         }
     }
 
-    // Xóa user
     async deleteUser(req, res) {
         try {
-            // Không cho xóa chính mình
             if (req.params.id === req.session.user.id) {
                 return res.json({ success: false, message: 'Không thể xóa tài khoản đang đăng nhập' });
             }
@@ -168,7 +168,6 @@ class AdminController {
         }
     }
 
-    // Block / unblock
     async toggleBlockUser(req, res) {
         try {
             if (req.params.id === req.session.user.id) {
@@ -181,7 +180,6 @@ class AdminController {
         }
     }
 
-    // Đổi role user ↔ staff
     async updateRole(req, res) {
         try {
             const { role } = req.body;
