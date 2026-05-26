@@ -1,9 +1,10 @@
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
+const MongoStore = require('connect-mongo').default;       // <-- thêm
 const path = require('path');
 const Database = require('./src/config/Database');
-const helmet = require('helmet'); // thêm dòng này
+const helmet = require('helmet');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -14,28 +15,11 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: [
-                "'self'",
-                "'unsafe-inline'",
-                "cdnjs.cloudflare.com",
-            ],
-            styleSrc: [
-                "'self'",
-                "'unsafe-inline'",
-                "cdnjs.cloudflare.com",
-            ],
-            fontSrc: [
-                "'self'",
-                "cdnjs.cloudflare.com",
-            ],
-            imgSrc: [
-                "'self'",
-                "data:",
-            ],
-            connectSrc: [
-                "'self'",
-                "cdnjs.cloudflare.com",  // cho phép load .map files
-            ],
+            scriptSrc: ["'self'", "'unsafe-inline'", "cdnjs.cloudflare.com"],
+            styleSrc:  ["'self'", "'unsafe-inline'", "cdnjs.cloudflare.com"],
+            fontSrc:   ["'self'", "cdnjs.cloudflare.com"],
+            imgSrc:    ["'self'", "data:"],
+            connectSrc:["'self'", "cdnjs.cloudflare.com"],
         },
     },
     crossOriginEmbedderPolicy: false,
@@ -49,6 +33,12 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({                     // <-- thêm store
+        mongoUrl: process.env.MONGODB_URI,
+        collectionName: 'sessions',
+        ttl: 24 * 60 * 60,
+        autoRemove: 'native',
+    }),
     cookie: {
         maxAge: 24 * 60 * 60 * 1000,
         httpOnly: true,
@@ -73,13 +63,13 @@ app.use(async (req, res, next) => {
     next();
 });
 
-const indexRoutes = require('./src/routes/index');
-const productRoutes = require('./src/routes/productRoutes');
-const userRoutes = require('./src/routes/userRoutes');
-const cartRoutes = require('./src/routes/cartRoutes');
-const orderRoutes = require('./src/routes/orderRoutes');
-const adminRoutes = require('./src/routes/adminRoutes');
-const staffRoutes = require('./src/routes/staffRoutes');
+const indexRoutes  = require('./src/routes/index');
+const productRoutes= require('./src/routes/productRoutes');
+const userRoutes   = require('./src/routes/userRoutes');
+const cartRoutes   = require('./src/routes/cartRoutes');
+const orderRoutes  = require('./src/routes/orderRoutes');
+const adminRoutes  = require('./src/routes/adminRoutes');
+const staffRoutes  = require('./src/routes/staffRoutes');
 
 app.use('/', indexRoutes);
 app.use('/products', productRoutes);
