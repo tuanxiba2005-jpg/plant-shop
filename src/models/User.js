@@ -3,11 +3,13 @@ const bcrypt = require('bcryptjs');
 const Model = require('./Model');
 
 const userSchema = new mongoose.Schema({
-    name:      { type: String, required: true },
-    email:     { type: String, required: true, unique: true },
-    password:  { type: String, required: true },
-    role:      { type: String, enum: ['admin', 'staff', 'user'], default: 'user' },
-    isBlocked: { type: Boolean, default: false }
+    name:               { type: String, required: true },
+    email:              { type: String, required: true, unique: true },
+    password:           { type: String, required: true },
+    role:               { type: String, enum: ['admin', 'staff', 'user'], default: 'user' },
+    isBlocked:          { type: Boolean, default: false },
+    resetToken:         { type: String, default: null },        // token đặt lại mật khẩu
+    resetTokenExpiry:   { type: Date, default: null }           // hết hạn sau 15 phút
 }, { timestamps: true });
 
 class User extends Model {
@@ -28,6 +30,34 @@ class User extends Model {
         return await bcrypt.compare(password, hashed);
     }
 
+    // Lưu reset token vào DB
+    async saveResetToken(email, token) {
+        const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 phút
+        return await this.model.findOneAndUpdate(
+            { email },
+            { resetToken: token, resetTokenExpiry: expiry },
+            { new: true }
+        );
+    }
+
+    // Tìm user bằng reset token (còn hạn)
+    async findByResetToken(token) {
+        return await this.model.findOne({
+            resetToken: token,
+            resetTokenExpiry: { $gt: new Date() }
+        }).lean();
+    }
+
+    // Đặt lại mật khẩu và xóa token
+    async resetPassword(userId, newPassword) {
+        const hashed = await bcrypt.hash(newPassword, 10);
+        return await this.model.findByIdAndUpdate(userId, {
+            password: hashed,
+            resetToken: null,
+            resetTokenExpiry: null
+        });
+    }
+
     // Lấy tất cả user + staff (không lấy admin)
     async getAllUsersAndStaff() {
         return await this.model
@@ -37,7 +67,6 @@ class User extends Model {
             .lean();
     }
 
-    // Giữ lại để StaffController dùng
     async getAllUsers() {
         return await this.model.find({ role: 'user' })
             .select('-password')

@@ -204,6 +204,10 @@ function switchProfileTab(tab) {
     const tabBtn = document.getElementById('tab-' + tab);
     if (panel) panel.style.display = 'block';
     if (tabBtn) tabBtn.classList.add('active');
+    // Load địa chỉ khi mở tab address
+    if (tab === 'address' && typeof loadAddresses === 'function') {
+        loadAddresses('addressList');
+    }
 }
 
 // Hiện/ẩn mật khẩu

@@ -1,3 +1,4 @@
+<% extraJS = ['/js/address.js'] %>
 <%- include('../layouts/header') %>
 
 <div class="row">
@@ -11,8 +12,11 @@
         <form action="/orders/checkout" method="POST" id="checkoutForm">
             <!-- Thông tin giao hàng -->
             <div class="card shadow-sm mb-3">
-                <div class="card-header bg-success text-white fw-bold">
-                    <i class="fas fa-map-marker-alt me-2"></i>Thông tin giao hàng
+                <div class="card-header bg-success text-white fw-bold d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-map-marker-alt me-2"></i>Thông tin giao hàng</span>
+                    <button type="button" class="btn btn-light btn-sm" id="btnPickAddress">
+                        <i class="fas fa-map-marker-alt me-1"></i>Chọn địa chỉ đã lưu
+                    </button>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
@@ -21,12 +25,12 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-                        <input type="tel" name="phone" class="form-control"
+                        <input type="tel" name="phone" id="checkoutPhone" class="form-control"
                                placeholder="Nhập số điện thoại" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Địa chỉ giao hàng <span class="text-danger">*</span></label>
-                        <textarea name="address" class="form-control" rows="3"
+                        <textarea name="address" id="checkoutAddress" class="form-control" rows="3"
                                   placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố"
                                   required></textarea>
                     </div>
@@ -141,5 +145,79 @@
         </a>
     </div>
 </div>
+
+<!-- Modal: Chọn địa chỉ đã lưu -->
+<div class="modal fade" id="pickAddressModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fas fa-map-marker-alt me-2"></i>Chọn địa chỉ giao hàng</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="pickAddressList">
+                <div class="text-center py-3"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', async function () {
+    // Tự động điền địa chỉ mặc định khi load trang
+    try {
+        const res  = await fetch('/user/addresses');
+        const data = await res.json();
+        if (data.success && data.addresses.length > 0) {
+            const def = data.addresses.find(a => a.isDefault) || data.addresses[0];
+            document.getElementById('checkoutPhone').value   = def.phone;
+            document.getElementById('checkoutAddress').value = def.address;
+        }
+    } catch (e) {}
+
+    // Nút "Chọn địa chỉ đã lưu"
+    document.getElementById('btnPickAddress').addEventListener('click', async function () {
+        const modal = new bootstrap.Modal(document.getElementById('pickAddressModal'));
+        const list  = document.getElementById('pickAddressList');
+        list.innerHTML = '<div class="text-center py-3"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>';
+        modal.show();
+
+        try {
+            const res  = await fetch('/user/addresses');
+            const data = await res.json();
+
+            if (!data.success || data.addresses.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-map-marker-alt fa-2x mb-2 d-block"></i>
+                        Bạn chưa có địa chỉ nào.
+                        <a href="/user/profile?tab=address" class="d-block mt-2 text-success">Thêm địa chỉ ngay</a>
+                    </div>`;
+                return;
+            }
+
+            list.innerHTML = data.addresses.map(addr => `
+                <div class="border rounded p-3 mb-2 ${addr.isDefault ? 'border-success' : ''}"
+                     style="cursor:pointer;"
+                     onclick="applyAddress('${addr.phone.replace(/'/g,"\\'")}', '${addr.address.replace(/'/g,"\\'").replace(/\n/g,' ')}')">
+                    <div class="d-flex justify-content-between">
+                        <strong>${addr.name}</strong>
+                        ${addr.isDefault ? '<span class="badge bg-success">Mặc định</span>' : ''}
+                    </div>
+                    <div class="text-muted small">${addr.phone}</div>
+                    <div class="small">${addr.address}</div>
+                </div>
+            `).join('');
+        } catch (e) {
+            list.innerHTML = '<div class="text-danger text-center py-3">Lỗi tải địa chỉ.</div>';
+        }
+    });
+});
+
+function applyAddress(phone, address) {
+    document.getElementById('checkoutPhone').value   = phone;
+    document.getElementById('checkoutAddress').value = address;
+    bootstrap.Modal.getInstance(document.getElementById('pickAddressModal')).hide();
+}
+</script>
 
 <%- include('../layouts/footer') %>

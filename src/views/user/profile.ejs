@@ -1,3 +1,4 @@
+<% extraJS = ['/js/address.js'] %>
 <%- include('../layouts/header') %>
 
 <div class="row">
@@ -48,14 +49,14 @@
     <div class="col-md-9">
 
         <!-- Thông báo -->
-       <% if (locals.success) { %>
+        <% if (locals.success) { %>
         <div class="alert alert-success d-flex align-items-center gap-2 mb-3">
-         <i class="fas fa-check-circle"></i> <%= success %>
+            <i class="fas fa-check-circle"></i> <%= success %>
         </div>
         <% } %>
-         <% if (locals.error) { %>
-            <div class="alert alert-danger d-flex align-items-center gap-2 mb-3">
-                <i class="fas fa-exclamation-circle"></i> <%= error %>
+        <% if (locals.error) { %>
+        <div class="alert alert-danger d-flex align-items-center gap-2 mb-3">
+            <i class="fas fa-exclamation-circle"></i> <%= error %>
         </div>
         <% } %>
 
@@ -69,6 +70,11 @@
             <li class="nav-item ms-2">
                 <button class="nav-link" id="tab-password" onclick="switchProfileTab('password')">
                     <i class="fas fa-lock me-1"></i> Đổi mật khẩu
+                </button>
+            </li>
+            <li class="nav-item ms-2">
+                <button class="nav-link" id="tab-address" onclick="switchProfileTab('address')">
+                    <i class="fas fa-map-marker-alt me-1"></i> Địa chỉ giao hàng
                 </button>
             </li>
         </ul>
@@ -166,6 +172,99 @@
             </div>
         </div>
 
+        <!-- Panel: Địa chỉ giao hàng -->
+        <div id="panel-address" class="profile-panel" style="display:none;">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white fw-bold d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-map-marker-alt me-2"></i>Địa chỉ giao hàng</span>
+                    <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addAddressModal">
+                        <i class="fas fa-plus me-1"></i>Thêm địa chỉ
+                    </button>
+                </div>
+                <div class="card-body p-3">
+                    <div id="addressList">
+                        <div class="text-center py-3"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal: Thêm địa chỉ -->
+<div class="modal fade" id="addAddressModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Thêm địa chỉ mới</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form onsubmit="submitAddAddress(event)">
+                <div class="modal-body">
+                    <div id="addAddrError" class="text-danger small mb-2"></div>
+                    <div class="mb-3">
+                        <label class="form-label">Tên người nhận <span class="text-danger">*</span></label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                        <input type="tel" name="phone" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                        <textarea name="address" class="form-control" rows="3"
+                                  placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành" required></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" name="isDefault" value="true" class="form-check-input" id="addDefault">
+                        <label class="form-check-label" for="addDefault">Đặt làm địa chỉ mặc định</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success">Lưu địa chỉ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Sửa địa chỉ -->
+<div class="modal fade" id="editAddressModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Cập nhật địa chỉ</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form onsubmit="submitEditAddress(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="editAddrId">
+                    <div id="editAddrError" class="text-danger small mb-2"></div>
+                    <div class="mb-3">
+                        <label class="form-label">Tên người nhận <span class="text-danger">*</span></label>
+                        <input type="text" name="name" id="editAddrName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                        <input type="tel" name="phone" id="editAddrPhone" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                        <textarea name="address" id="editAddrAddress" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" name="isDefault" value="true" class="form-check-input" id="editAddrDefault">
+                        <label class="form-check-label" for="editAddrDefault">Đặt làm địa chỉ mặc định</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
