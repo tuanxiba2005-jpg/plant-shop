@@ -8,7 +8,7 @@
     pending: 'Chờ xác nhận', confirmed: 'Đã xác nhận',
     shipping: 'Đang giao', delivered: 'Đã giao', cancelled: 'Đã hủy'
 } %>
-<% const paymentLabels = { cod: '💵 Thanh toán khi nhận hàng', bank_transfer: '🏦 Chuyển khoản ngân hàng' } %>
+<% const paymentLabels = { cod: '💵 Thanh toán khi nhận hàng', bank_transfer: '🏦 Chuyển khoản ngân hàng', vnpay: '💳 VNPay', momo: '📱 Ví MoMo' } %>
 
 <!-- Thông báo đặt hàng thành công -->
 <% if (locals.success) { %>
@@ -72,6 +72,7 @@
                             <th>Sản phẩm</th>
                             <th>Đơn giá</th>
                             <th>SL</th>
+                            <th>Đánh giá</th>
                             <th>Thành tiền</th>
                         </tr>
                     </thead>
@@ -89,6 +90,21 @@
                             </td>
                             <td><%= parseInt(item.price).toLocaleString('vi-VN') %>đ</td>
                             <td><%= item.quantity %></td>
+                            <td>
+                                <% if (order.status === 'delivered') { %>
+                                    <% const hasReviewed = reviewStatus[item.product_id._id ? item.product_id._id.toString() : item.product_id.toString()] %>
+                                    <% if (!hasReviewed) { %>
+                                        <button class="btn btn-sm btn-outline-success btn-review" 
+                                            data-product="<%= item.product_id._id || item.product_id %>"
+                                            data-order="<%= order._id %>"
+                                            data-name="<%= item.name %>">
+                                            Đánh giá
+                                        </button>
+                                    <% } else { %>
+                                        <span class="badge bg-secondary">Đã đánh giá</span>
+                                    <% } %>
+                                <% } %>
+                            </td>
                             <td class="text-success fw-bold">
                                 <%= parseInt(item.price * item.quantity).toLocaleString('vi-VN') %>đ
                             </td>
@@ -156,6 +172,27 @@
             <i class="fas fa-arrow-left me-2"></i>Đơn hàng của tôi
         </a>
 
+        <% 
+            let canRetryPayment = false;
+            if (order.status === 'pending' && order.payment_status === 'unpaid' && ['vnpay', 'momo'].includes(order.payment_method)) {
+                const fifteenMinsAgo = new Date(Date.now() - 15 * 60 * 1000);
+                if (new Date(order.createdAt) > fifteenMinsAgo) {
+                    canRetryPayment = true;
+                }
+            }
+        %>
+
+        <% if (canRetryPayment) { %>
+        <form action="/orders/<%= order._id %>/retry-payment" method="POST" class="mb-2">
+            <button type="submit" class="btn btn-success w-100 fw-bold">
+                <i class="fas fa-credit-card me-2"></i>Tiếp tục thanh toán
+            </button>
+            <div class="text-center text-muted mt-1" style="font-size: 12px;">
+                Vui lòng thanh toán trong 15 phút.
+            </div>
+        </form>
+        <% } %>
+
         <!-- Nút hủy đơn — chỉ hiện khi pending hoặc confirmed -->
         <% if (['pending','confirmed'].includes(order.status)) { %>
         <button class="btn btn-outline-danger w-100" id="btnCancel">
@@ -164,5 +201,170 @@
         <% } %>
     </div>
 </div>
+
+<!-- Modal Đánh giá -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 12px; background-color: #F9F8F6;">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="reviewModalLabel">Đánh giá <span id="reviewProductName" class="text-success"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reviewForm">
+                    <input type="hidden" id="reviewProductId" name="product_id">
+                    <input type="hidden" id="reviewOrderId" name="order_id">
+                    
+                    <div class="text-center mb-4">
+                        <div class="fs-1" id="starRatingContainer" style="color: #FFBF00; cursor: pointer;">
+                            <i class="far fa-star" data-value="1"></i>
+                            <i class="far fa-star" data-value="2"></i>
+                            <i class="far fa-star" data-value="3"></i>
+                            <i class="far fa-star" data-value="4"></i>
+                            <i class="far fa-star" data-value="5"></i>
+                        </div>
+                        <input type="hidden" id="reviewRating" name="rating" required>
+                        <div class="text-muted mt-1" id="ratingText">Vui lòng chọn số sao</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Trải nghiệm của bạn</label>
+                        <div class="d-flex flex-wrap gap-2" id="reviewTagsContainer">
+                            <span class="badge rounded-pill border review-tag" data-tag="🌿 Cây tươi khỏe" style="cursor:pointer; color:#198754; background:#e8f5e9; border-color:#198754!important">🌿 Cây tươi khỏe</span>
+                            <span class="badge rounded-pill border review-tag" data-tag="📦 Đóng gói cẩn thận" style="cursor:pointer; color:#795548; background:#efebe9; border-color:#795548!important">📦 Đóng gói cẩn thận</span>
+                            <span class="badge rounded-pill border review-tag" data-tag="🚚 Giao hàng nhanh" style="cursor:pointer; color:#0d6efd; background:#e3f2fd; border-color:#0d6efd!important">🚚 Giao hàng nhanh</span>
+                            <span class="badge rounded-pill border review-tag" data-tag="🌟 Hình dáng đẹp" style="cursor:pointer; color:#FFBF00; background:#fff8e1; border-color:#FFBF00!important">🌟 Hình dáng đẹp</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="reviewComment" class="form-label fw-bold">Chi tiết đánh giá (không bắt buộc)</label>
+                        <textarea class="form-control" id="reviewComment" name="comment" rows="3" placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..." style="border-radius: 8px;"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 fw-bold" style="border-radius: 8px;">Gửi đánh giá</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('btnCancel')?.addEventListener('click', async () => {
+            if (!confirm('Bạn có chắc chắn muốn hủy đơn hàng này? <% if(order.payment_status==="paid") { %>\n\nLƯU Ý: Đơn hàng đã thanh toán. Vui lòng liên hệ Admin để được hoàn tiền.<% } %>')) return;
+            
+            try {
+                const res = await fetch('/orders/<%= order._id %>/cancel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Lỗi khi hủy đơn hàng');
+                }
+            } catch (err) {
+                alert('Có lỗi xảy ra, vui lòng thử lại sau.');
+            }
+        });
+
+        // Review Logic
+        const reviewModal = new bootstrap.Modal(document.getElementById('reviewModal'));
+        let selectedTags = new Set();
+        
+        document.querySelectorAll('.btn-review').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('reviewProductId').value = btn.dataset.product;
+                document.getElementById('reviewOrderId').value = btn.dataset.order;
+                document.getElementById('reviewProductName').textContent = btn.dataset.name;
+                
+                // Reset
+                document.getElementById('reviewRating').value = '';
+                document.getElementById('reviewComment').value = '';
+                updateStars(0);
+                selectedTags.clear();
+                updateTagsUI();
+                
+                reviewModal.show();
+            });
+        });
+
+        const stars = document.querySelectorAll('#starRatingContainer i');
+        const ratingTexts = ['Tệ', 'Không hài lòng', 'Bình thường', 'Hài lòng', 'Tuyệt vời'];
+        
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                const val = parseInt(star.dataset.value);
+                document.getElementById('reviewRating').value = val;
+                updateStars(val);
+                document.getElementById('ratingText').textContent = ratingTexts[val - 1];
+            });
+        });
+
+        function updateStars(val) {
+            stars.forEach(s => {
+                if (parseInt(s.dataset.value) <= val) {
+                    s.classList.remove('far');
+                    s.classList.add('fas');
+                } else {
+                    s.classList.remove('fas');
+                    s.classList.add('far');
+                }
+            });
+        }
+
+        document.querySelectorAll('.review-tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                const tagText = tag.dataset.tag;
+                if (selectedTags.has(tagText)) {
+                    selectedTags.delete(tagText);
+                    tag.style.opacity = '0.5';
+                } else {
+                    selectedTags.add(tagText);
+                    tag.style.opacity = '1';
+                }
+            });
+        });
+
+        function updateTagsUI() {
+            document.querySelectorAll('.review-tag').forEach(tag => {
+                tag.style.opacity = '0.5';
+            });
+        }
+
+        document.getElementById('reviewForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const rating = document.getElementById('reviewRating').value;
+            if (!rating) return alert('Vui lòng chọn số sao!');
+            
+            const payload = {
+                product_id: document.getElementById('reviewProductId').value,
+                order_id: document.getElementById('reviewOrderId').value,
+                rating: rating,
+                comment: document.getElementById('reviewComment').value,
+                tags: Array.from(selectedTags)
+            };
+
+            try {
+                const res = await fetch('/orders/review', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Cảm ơn bạn đã đánh giá!');
+                    location.reload();
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra');
+                }
+            } catch(err) {
+                alert('Lỗi kết nối');
+            }
+        });
+    });
+</script>
 
 <%- include('../layouts/footer') %>

@@ -240,9 +240,9 @@ if (newPwdInput) {
 //  CHECKOUT - Phương thức thanh toán
 // ==========================================
 function selectPayment(method) {
-    ['cod', 'bank_transfer'].forEach(m => {
+    ['cod', 'bank_transfer', 'vnpay', 'momo'].forEach(m => {
         const opt = document.getElementById('opt-' + m);
-        const radio = document.getElementById(m);
+        const radio = opt?.querySelector('input[type="radio"]');
         const icon = opt?.querySelector('.check-icon');
         if (opt) opt.classList.remove('selected');
         if (icon) icon.style.opacity = '0';
@@ -250,7 +250,7 @@ function selectPayment(method) {
     });
 
     const selected = document.getElementById('opt-' + method);
-    const selectedRadio = document.getElementById(method);
+    const selectedRadio = selected?.querySelector('input[type="radio"]');
     const selectedIcon = selected?.querySelector('.check-icon');
     if (selected) selected.classList.add('selected');
     if (selectedRadio) selectedRadio.checked = true;

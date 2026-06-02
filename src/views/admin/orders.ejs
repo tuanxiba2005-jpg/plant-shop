@@ -1,102 +1,105 @@
-<% extraJS = ['/js/admin/orders.js'] %>
-<%- include('../layouts/header') %>
+<% extraJS=['/js/admin/order.js'] %>
+    <%- include('../layouts/header') %>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3>📦 Quản lý đơn hàng</h3>
-    <span class="text-muted">Tổng: <strong><%= orders.length %></strong> đơn</span>
-</div>
-
-<!-- Lọc theo trạng thái -->
-<div class="mb-3 d-flex gap-2 flex-wrap">
-    <button class="btn btn-outline-secondary btn-sm filter-btn active" data-status="all">Tất cả</button>
-    <button class="btn btn-outline-warning btn-sm filter-btn" data-status="pending">Chờ xác nhận</button>
-    <button class="btn btn-outline-info btn-sm filter-btn" data-status="confirmed">Đã xác nhận</button>
-    <button class="btn btn-outline-primary btn-sm filter-btn" data-status="shipping">Đang giao</button>
-    <button class="btn btn-outline-success btn-sm filter-btn" data-status="delivered">Đã giao</button>
-    <button class="btn btn-outline-danger btn-sm filter-btn" data-status="cancelled">Đã hủy</button>
-</div>
-
-<div class="card shadow-sm">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0 align-middle" id="ordersTable">
-                <thead class="table-success">
-                    <tr>
-                        <th>#ID</th>
-                        <th>Khách hàng</th>
-                        <th>Email</th>
-                        <th>Tổng tiền</th>
-                        <th>Địa chỉ</th>
-                        <th>Trạng thái</th>
-                        <th>Ngày đặt</th>
-                        <th>Cập nhật</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% const badges = {
-                        pending: 'warning',
-                        confirmed: 'info',
-                        shipping: 'primary',
-                        delivered: 'success',
-                        cancelled: 'danger'
-                    } %>
-                    <% const labels = {
-                        pending: 'Chờ xác nhận',
-                        confirmed: 'Đã xác nhận',
-                        shipping: 'Đang giao',
-                        delivered: 'Đã giao',
-                        cancelled: 'Đã hủy'
-                    } %>
-                    <% if (orders.length === 0) { %>
-                    <tr>
-                        <td colspan="8" class="text-center py-4 text-muted">
-                            Chưa có đơn hàng nào
-                        </td>
-                    </tr>
-                    <% } else { %>
-                    <% orders.forEach(order => { %>
-                    <tr data-status="<%= order.status %>">
-                        <td>
-                            <strong>#<%= order._id.toString().slice(-8).toUpperCase() %></strong>
-                        </td>
-                        <td><%= order.user_id?.name || 'N/A' %></td>
-                        <td>
-                            <small class="text-muted"><%= order.user_id?.email || 'N/A' %></small>
-                        </td>
-                        <td class="text-success fw-bold">
-                            <%= parseInt(order.total_price).toLocaleString('vi-VN') %>đ
-                        </td>
-                        <td>
-                            <small><%= order.address.substring(0, 30) %>...</small>
-                        </td>
-                        <td>
-                            <span class="badge bg-<%= badges[order.status] %>">
-                                <%= labels[order.status] %>
-                            </span>
-                        </td>
-                        <td>
-                            <small>
-                                <%= new Date(order.createdAt).toLocaleDateString('vi-VN') %>
-                            </small>
-                        </td>
-                        <td>
-                            <select class="form-select form-select-sm status-select"
-                                    data-id="<%= order._id %>"
-                                    style="width:150px;">
-                                <option value="pending"   <%= order.status==='pending'   ? 'selected':'' %>>Chờ xác nhận</option>
-                                <option value="confirmed" <%= order.status==='confirmed' ? 'selected':'' %>>Đã xác nhận</option>
-                                <option value="shipping"  <%= order.status==='shipping'  ? 'selected':'' %>>Đang giao</option>
-                                <option value="delivered" <%= order.status==='delivered' ? 'selected':'' %>>Đã giao</option>
-                                <option value="cancelled" <%= order.status==='cancelled' ? 'selected':'' %>>Đã hủy</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <% }) %>
-                    <% } %>
-                </tbody>
-            </table>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>📦 Quản lý đơn hàng</h3>
+            <span class="text-muted">Tổng: <strong>
+                    <%= orders.length %>
+                </strong> đơn</span>
         </div>
-    </div>
-</div>
 
-<%- include('../layouts/footer') %>
+        <!-- Lọc theo trạng thái -->
+        <div class="mb-3 d-flex gap-2 flex-wrap">
+            <button class="btn btn-outline-secondary btn-sm filter-btn active" data-status="all">Tất cả</button>
+            <button class="btn btn-outline-warning btn-sm filter-btn" data-status="pending">Chờ xác nhận</button>
+            <button class="btn btn-outline-info btn-sm filter-btn" data-status="confirmed">Đã xác nhận</button>
+            <button class="btn btn-outline-primary btn-sm filter-btn" data-status="shipping">Đang giao</button>
+            <button class="btn btn-outline-success btn-sm filter-btn" data-status="delivered">Đã giao</button>
+            <button class="btn btn-outline-danger btn-sm filter-btn" data-status="cancelled">Đã hủy</button>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle" id="ordersTable">
+                        <thead class="table-success">
+                            <tr>
+                                <th>#ID</th>
+                                <th>Khách hàng</th>
+                                <th>Email</th>
+                                <th>Tổng tiền</th>
+                                <th>Địa chỉ</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày đặt</th>
+                                <th>Cập nhật</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% const badges={ pending: 'warning' , confirmed: 'info' , shipping: 'primary' ,
+                                delivered: 'success' , cancelled: 'danger' } %>
+                                <% const labels={ pending: 'Chờ xác nhận' , confirmed: 'Đã xác nhận' ,
+                                    shipping: 'Đang giao' , delivered: 'Đã giao' , cancelled: 'Đã hủy' } %>
+                                    <% if (orders.length===0) { %>
+                                        <tr>
+                                            <td colspan="8" class="text-center py-4 text-muted">
+                                                Chưa có đơn hàng nào
+                                            </td>
+                                        </tr>
+                                        <% } else { %>
+                                            <% orders.forEach(order=> { %>
+                                                <tr data-status="<%= order.status %>">
+                                                    <td>
+                                                        <strong>#<%= order._id.toString().slice(-8).toUpperCase() %>
+                                                        </strong>
+                                                    </td>
+                                                    <td>
+                                                        <%= order.user_id?.name || 'N/A' %>
+                                                    </td>
+                                                    <td>
+                                                        <small class="text-muted">
+                                                            <%= order.user_id?.email || 'N/A' %>
+                                                        </small>
+                                                    </td>
+                                                    <td class="text-success fw-bold">
+                                                        <%= parseInt(order.total_price).toLocaleString('vi-VN') %>đ
+                                                    </td>
+                                                    <td>
+                                                        <small>
+                                                            <%= order.address.substring(0, 30) %>...
+                                                        </small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-<%= badges[order.status] %>">
+                                                            <%= labels[order.status] %>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <small>
+                                                            <%= new Date(order.createdAt).toLocaleDateString('vi-VN') %>
+                                                        </small>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-select form-select-sm status-select"
+                                                            data-id="<%= order._id %>" style="width:150px;">
+                                                            <option value="pending" <%=order.status==='pending'
+                                                                ? 'selected' :'' %>>Chờ xác nhận</option>
+                                                            <option value="confirmed" <%=order.status==='confirmed'
+                                                                ? 'selected' :'' %>>Đã xác nhận</option>
+                                                            <option value="shipping" <%=order.status==='shipping'
+                                                                ? 'selected' :'' %>>Đang giao</option>
+                                                            <option value="delivered" <%=order.status==='delivered'
+                                                                ? 'selected' :'' %>>Đã giao</option>
+                                                            <option value="cancelled" <%=order.status==='cancelled'
+                                                                ? 'selected' :'' %>>Đã hủy</option>
+                                                        </select>
+                                                    </td>
+                                                </tr>
+                                                <% }) %>
+                                                    <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <%- include('../layouts/footer') %>

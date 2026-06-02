@@ -1,0 +1,64 @@
+<%- include('../layouts/header') %>
+
+    <h4 class="fw-bold mb-4">❤️ Sản phẩm yêu thích</h4>
+
+    <% if (!items.length) { %>
+        <div class="text-center py-5">
+            <i class="fas fa-heart fa-4x text-muted mb-3"></i>
+            <h5 class="text-muted">Chưa có sản phẩm yêu thích</h5>
+            <a href="/products" class="btn btn-success mt-3">Khám phá sản phẩm</a>
+        </div>
+        <% } else { %>
+            <div class="row g-3">
+                <% items.forEach(item=> { %>
+                    <% const p=item.product_id; %>
+                        <div class="col-6 col-md-3" id="wish-<%= p._id %>">
+                            <div class="card h-100 shadow-sm">
+                                <a href="/products/<%= p.slug || p._id %>">
+                                    <img src="/images/products/<%= p.image %>" class="card-img-top"
+                                        style="height:180px;object-fit:cover;" onerror="this.src='/images/default.jpg'">
+                                </a>
+                                <div class="card-body p-2">
+                                    <div class="fw-bold small mb-1">
+                                        <%= p.name %>
+                                    </div>
+                                    <div class="text-success fw-bold">
+                                        <%= parseInt(p.price).toLocaleString('vi-VN') %>đ
+                                    </div>
+                                    <% if (p.stock <=0) { %>
+                                        <span class="badge bg-secondary mt-1">Hết hàng</span>
+                                        <% } %>
+                                </div>
+                                <div class="card-footer p-2 d-flex gap-2">
+                                    <% if (p.stock> 0) { %>
+                                        <a href="/cart/add/<%= p._id %>" class="btn btn-success btn-sm flex-fill">
+                                            <i class="fas fa-cart-plus"></i> Thêm vào giỏ
+                                        </a>
+                                        <% } %>
+                                            <button class="btn btn-outline-danger btn-sm"
+                                                onclick="removeWishlist('<%= p._id %>')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                </div>
+                            </div>
+                        </div>
+                        <% }) %>
+            </div>
+            <% } %>
+
+                <script>
+                    async function removeWishlist(productId) {
+                        const res = await fetch('/wishlist/toggle', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: `product_id=${productId}`
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            const el = document.getElementById('wish-' + productId);
+                            if (el) el.remove();
+                        }
+                    }
+                </script>
+
+                <%- include('../layouts/footer') %>

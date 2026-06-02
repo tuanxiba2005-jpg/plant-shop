@@ -15,16 +15,9 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-    console.log('>>> fileFilter called:', file.originalname, file.mimetype);
     const ext = path.extname(file.originalname).toLowerCase();
-    if (!ALLOWED_EXTENSIONS.includes(ext)) {
-        console.log('>>> Extension bị chặn:', ext);
+    if (!ALLOWED_EXTENSIONS.includes(ext) || !ALLOWED_MIME_TYPES.includes(file.mimetype))
         return cb(new Error('Chỉ cho phép upload file ảnh (jpg, jpeg, png, webp, gif)'), false);
-    }
-    if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-        console.log('>>> Mime-type bị chặn:', file.mimetype);
-        return cb(new Error('File không hợp lệ. Chỉ chấp nhận ảnh jpg, png, webp, gif'), false);
-    }
     cb(null, true);
 };
 
@@ -32,34 +25,28 @@ const upload = multer({ storage, fileFilter, limits: { fileSize: MAX_FILE_SIZE }
 
 const uploadSingle = (req, res, next) => {
     upload.single('image')(req, res, (err) => {
-        if (err instanceof multer.MulterError) {
-            if (err.code === 'LIMIT_FILE_SIZE') {
-                return res.status(400).json({ success: false, message: 'File quá lớn. Tối đa 5MB.' });
-            }
-            return res.status(400).json({ success: false, message: 'Lỗi upload: ' + err.message });
-        }
-        if (err) {
-            console.log('Upload error:', err.message);
+        if (err instanceof multer.MulterError)
+            return res.status(400).json({ success: false, message: err.code === 'LIMIT_FILE_SIZE' ? 'File quá lớn. Tối đa 5MB.' : err.message });
+        if (err)
             return res.status(400).json({ success: false, message: err.message });
-        }
         next();
     });
 };
 
 router.use(authMiddleware.isAdmin);
 
+// Products
 router.get('/dashboard', adminController.dashboard);
 router.get('/products', adminController.products);
-router.post('/products/create', (req, res, next) => {
-    console.log('>>> Route create được gọi, content-type:', req.headers['content-type']);
-    next();
-}, uploadSingle, adminController.createProduct);
+router.post('/products/create', uploadSingle, adminController.createProduct);
 router.post('/products/update/:id', uploadSingle, adminController.updateProduct);
 router.delete('/products/:id', adminController.deleteProduct);
 
+// Orders
 router.get('/orders', adminController.orders);
 router.post('/orders/:id/status', adminController.updateOrderStatus);
 
+// Users
 router.get('/users', adminController.users);
 router.post('/users/create', adminController.createUser);
 router.post('/users/:id/update', adminController.updateUser);
@@ -67,6 +54,13 @@ router.delete('/users/:id', adminController.deleteUser);
 router.post('/users/:id/toggle-block', adminController.toggleBlockUser);
 router.post('/users/:id/role', adminController.updateRole);
 
+// Revenue
 router.get('/revenue', adminController.revenue);
+
+// Coupons
+router.get('/coupons', adminController.coupons);
+router.post('/coupons/create', adminController.createCoupon);
+router.post('/coupons/:id/toggle', adminController.toggleCoupon);
+router.delete('/coupons/:id', adminController.deleteCoupon);
 
 module.exports = router;

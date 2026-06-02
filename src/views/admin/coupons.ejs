@@ -1,0 +1,177 @@
+<%- include('../layouts/header') %>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0">🏷️ Quản lý mã giảm giá</h4>
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCouponModal">
+            <i class="fas fa-plus me-2"></i>Thêm mã mới
+        </button>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã</th>
+                        <th>Loại</th>
+                        <th>Giá trị</th>
+                        <th>Đơn tối thiểu</th>
+                        <th>Đã dùng</th>
+                        <th>Hết hạn</th>
+                        <th>Trạng thái</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% coupons.forEach(c=> { %>
+                        <tr>
+                            <td><span class="badge bg-dark fs-6">
+                                    <%= c.code %>
+                                </span></td>
+                            <td>
+                                <%= c.type==='percent' ? 'Phần trăm' : 'Cố định' %>
+                            </td>
+                            <td class="text-success fw-bold">
+                                <%= c.type==='percent' ? c.value + '%' : parseInt(c.value).toLocaleString('vi-VN') + 'đ'
+                                    %>
+                                    <% if (c.type==='percent' && c.maxDiscount) { %>
+                                        <small class="text-muted">(tối đa <%=
+                                                parseInt(c.maxDiscount).toLocaleString('vi-VN') %>đ)</small>
+                                        <% } %>
+                            </td>
+                            <td>
+                                <%= parseInt(c.minOrder).toLocaleString('vi-VN') %>đ
+                            </td>
+                            <td>
+                                <%= c.usedCount %>
+                                    <%= c.usageLimit ? '/' + c.usageLimit : '' %>
+                            </td>
+                            <td>
+                                <%= c.expiresAt ? new Date(c.expiresAt).toLocaleDateString('vi-VN') : 'Không giới hạn'
+                                    %>
+                            </td>
+                            <td>
+                                <% if (c.isActive) { %>
+                                    <span class="badge bg-success">Đang hoạt động</span>
+                                    <% } else { %>
+                                        <span class="badge bg-secondary">Đã tắt</span>
+                                        <% } %>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-warning me-1"
+                                    onclick="toggleCoupon('<%= c._id %>', this)">
+                                    <%= c.isActive ? 'Tắt' : 'Bật' %>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteCoupon('<%= c._id %>')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <% }) %>
+                            <% if (!coupons.length) { %>
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-4">Chưa có mã giảm giá nào</td>
+                                </tr>
+                                <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal thêm coupon -->
+    <div class="modal fade" id="addCouponModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Thêm mã giảm giá</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="couponError" class="alert alert-danger d-none"></div>
+                    <div class="mb-3">
+                        <label class="form-label">Mã <span class="text-danger">*</span></label>
+                        <input type="text" id="cCode" class="form-control text-uppercase" placeholder="VD: SUMMER20">
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Loại</label>
+                            <select id="cType" class="form-select" onchange="toggleCouponType()">
+                                <option value="percent">Phần trăm (%)</option>
+                                <option value="fixed">Cố định (đ)</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Giá trị <span class="text-danger">*</span></label>
+                            <input type="number" id="cValue" class="form-control" placeholder="VD: 20">
+                        </div>
+                    </div>
+                    <div class="mb-3" id="maxDiscountRow">
+                        <label class="form-label">Giảm tối đa (đ)</label>
+                        <input type="number" id="cMaxDiscount" class="form-control"
+                            placeholder="Để trống = không giới hạn">
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label">Đơn tối thiểu (đ)</label>
+                            <input type="number" id="cMinOrder" class="form-control" value="0">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Giới hạn lượt dùng</label>
+                            <input type="number" id="cUsageLimit" class="form-control"
+                                placeholder="Để trống = không giới hạn">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ngày hết hạn</label>
+                        <input type="datetime-local" id="cExpires" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button class="btn btn-success" onclick="createCoupon()">Tạo mã</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleCouponType() {
+            document.getElementById('maxDiscountRow').style.display =
+                document.getElementById('cType').value === 'percent' ? '' : 'none';
+        }
+
+        async function createCoupon() {
+            const body = new URLSearchParams({
+                code: document.getElementById('cCode').value,
+                type: document.getElementById('cType').value,
+                value: document.getElementById('cValue').value,
+                minOrder: document.getElementById('cMinOrder').value,
+                maxDiscount: document.getElementById('cMaxDiscount').value,
+                usageLimit: document.getElementById('cUsageLimit').value,
+                expiresAt: document.getElementById('cExpires').value,
+            });
+            const res = await fetch('/admin/coupons/create', { method: 'POST', body });
+            const data = await res.json();
+            if (data.success) location.reload();
+            else {
+                const err = document.getElementById('couponError');
+                err.textContent = data.message;
+                err.classList.remove('d-none');
+            }
+        }
+
+        async function toggleCoupon(id, btn) {
+            const res = await fetch(`/admin/coupons/${id}/toggle`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) location.reload();
+        }
+
+        async function deleteCoupon(id) {
+            if (!confirm('Xóa mã giảm giá này?')) return;
+            const res = await fetch(`/admin/coupons/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (data.success) location.reload();
+        }
+    </script>
+
+    <%- include('../layouts/footer') %>

@@ -16,13 +16,15 @@
 
             <div class="col-md-2 mb-3">
                 <div class="footer-title">Danh mục</div>
-                <% if (typeof globalCategories !== 'undefined') { %>
-                    <% globalCategories.forEach(cat => { %>
-                    <div>
-                        <a href="/products?category=<%= cat._id %>"><%= cat.name %></a>
-                    </div>
-                    <% }) %>
-                <% } %>
+                <% if (typeof globalCategories !=='undefined' ) { %>
+                    <% globalCategories.forEach(cat=> { %>
+                        <div>
+                            <a href="/products?category=<%= cat._id %>">
+                                <%= cat.name %>
+                            </a>
+                        </div>
+                        <% }) %>
+                            <% } %>
             </div>
 
             <div class="col-md-3 mb-3">
@@ -53,11 +55,15 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-<script src="/js/main.js"></script>
-<% if (typeof extraJS !== 'undefined') { %>
-    <% extraJS.forEach(src => { %>
+<script src="/js/main.js?v=2"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>const currentUser = <%- JSON.stringify(locals.user || null) %>;</script>
+<script src="/js/realtime.js"></script>
+<% if (typeof extraJS !=='undefined' ) { %>
+    <% extraJS.forEach(src=> { %>
         <script src="<%= src %>"></script>
-    <% }) %>
-<% } %>
-</body>
-</html>
+        <% }) %>
+            <% } %>
+                </body>
+
+                </html>

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Model = require('./Model');
 
 const orderSchema = new mongoose.Schema({
-    user_id:     { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     total_price: { type: Number, required: true },
     status: {
         type: String,
@@ -11,7 +11,7 @@ const orderSchema = new mongoose.Schema({
     },
     payment_method: {
         type: String,
-        enum: ['cod', 'bank_transfer'],
+        enum: ['cod', 'bank_transfer', 'vnpay', 'momo'],
         default: 'cod'
     },
     payment_status: {
@@ -20,13 +20,13 @@ const orderSchema = new mongoose.Schema({
         default: 'unpaid'
     },
     address: { type: String, required: true },
-    phone:   { type: String },
-    note:    { type: String },
+    phone: { type: String },
+    note: { type: String },
     items: [{
         product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-        name:       { type: String },
-        quantity:   { type: Number },
-        price:      { type: Number }
+        name: { type: String },
+        quantity: { type: Number },
+        price: { type: Number }
     }]
 }, { timestamps: true });
 
@@ -38,9 +38,9 @@ class Order extends Model {
     async createOrder(userId, address, phone, note, payment_method, items, totalPrice) {
         const orderItems = items.map(item => ({
             product_id: item.product_id,
-            name:       item.name,
-            quantity:   item.quantity,
-            price:      item.price
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price
         }));
         const order = await this.create({
             user_id: userId, total_price: totalPrice,
@@ -75,6 +75,7 @@ class Order extends Model {
 
     async getOrdersByUser(userId) {
         return await this.model.find({ user_id: userId })
+            .populate('items.product_id', 'image name slug')
             .sort({ createdAt: -1 }).lean();
     }
 
@@ -110,7 +111,7 @@ class Order extends Model {
                 $group: {
                     _id: { $month: '$createdAt' },
                     revenue: { $sum: '$total_price' },
-                    orders:  { $sum: 1 }
+                    orders: { $sum: 1 }
                 }
             },
             { $sort: { _id: 1 } }
@@ -138,9 +139,9 @@ class Order extends Model {
             {
                 $group: {
                     _id: '$items.product_id',
-                    name:     { $first: '$items.name' },
+                    name: { $first: '$items.name' },
                     totalQty: { $sum: '$items.quantity' },
-                    revenue:  { $sum: { $multiply: ['$items.price', '$items.quantity'] } }
+                    revenue: { $sum: { $multiply: ['$items.price', '$items.quantity'] } }
                 }
             },
             { $sort: { totalQty: -1 } },
