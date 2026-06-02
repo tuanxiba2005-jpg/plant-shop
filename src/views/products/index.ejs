@@ -22,7 +22,12 @@
 <div class="row">
     <% products.forEach(product => { %>
     <div class="col-6 col-md-3 mb-4">
-        <div class="card h-100 shadow-sm product-card">
+        <div class="card h-100 shadow-sm product-card position-relative">
+            <button class="btn btn-wishlist position-absolute top-0 start-0 m-2 border-0 bg-transparent"
+                    style="z-index: 10; color: rgba(255, 255, 255, 0.8);"
+                    data-id="<%= product._id %>" title="Thêm vào yêu thích">
+                <i class="far fa-heart fs-5" style="text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></i>
+            </button>
             <img src="/images/products/<%= product.image %>"
                  class="card-img-top"
                  alt="<%= product.name %>"

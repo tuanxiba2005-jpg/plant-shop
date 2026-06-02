@@ -1,10 +1,14 @@
 const crypto = require('crypto');
 const User = require('../models/User');
+const Order = require('../models/Order');
+const Wishlist = require('../models/wishlist');
 const { sendResetPassword } = require('../services/emailService');
 
 class UserController {
     constructor() {
         this.userModel = new User();
+        this.orderModel = new Order();
+        this.wishlistModel = new Wishlist();
         this.showLogin          = this.showLogin.bind(this);
         this.showRegister       = this.showRegister.bind(this);
         this.login              = this.login.bind(this);
@@ -91,11 +95,16 @@ class UserController {
     async profile(req, res) {
         try {
             const user = await this.userModel.findById(req.session.user.id);
+            const orders = await this.orderModel.getOrdersByUser(req.session.user.id);
+            const wishlists = await this.wishlistModel.getByUser(req.session.user.id);
             res.render('user/profile', {
-                title:    'Tài khoản',
+                title:    'Dashboard',
                 userInfo: user,
+                orders:   orders,
+                wishlists: wishlists,
                 success:  req.query.success || null,
-                error:    req.query.error   || null
+                error:    req.query.error   || null,
+                layout:   false // Indicate we don't need header/footer if we were using express-ejs-layouts
             });
         } catch (err) {
             res.redirect('/');

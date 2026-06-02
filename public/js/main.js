@@ -20,6 +20,43 @@ document.querySelectorAll('.btn-add-cart').forEach(btn => {
     });
 });
 
+// Thêm/xoá khỏi yêu thích
+document.querySelectorAll('.btn-wishlist').forEach(btn => {
+    btn.addEventListener('click', async function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const productId = this.dataset.id;
+        try {
+            const res = await fetch('/wishlist/toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id: productId })
+            });
+            const data = await res.json();
+            if(data.success) {
+                const icon = this.querySelector('i');
+                if(data.action === 'added') {
+                    showToast('Đã thêm vào yêu thích!', 'success');
+                    if(icon) {
+                        icon.classList.replace('far', 'fas');
+                        icon.style.color = '#e53935'; // Red color
+                    }
+                } else {
+                    showToast('Đã xóa khỏi yêu thích!', 'info');
+                    if(icon) {
+                        icon.classList.replace('fas', 'far');
+                        icon.style.color = 'inherit'; // Transparent
+                    }
+                }
+            } else {
+                showToast('Vui lòng đăng nhập!', 'danger');
+            }
+        } catch(err) {
+            showToast('Lỗi kết nối!', 'danger');
+        }
+    });
+});
+
 // Giỏ hàng - cập nhật số lượng
 document.querySelectorAll('.btn-qty').forEach(btn => {
     btn.addEventListener('click', async function () {
