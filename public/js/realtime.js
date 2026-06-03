@@ -27,6 +27,15 @@ if (typeof currentUser !== 'undefined' && currentUser) {
     socket.on('new_order', function (data) {
         showRealtimeToast('🛒 Đơn hàng mới', data.message, 'primary', '/admin/orders');
     });
+
+    // ── Thông báo tin nhắn mới ─────────────────────────────
+    socket.on('new_message_notification', function (data) {
+        // Show red dot on headset icon in header (if exists)
+        const badgeAdmin = document.getElementById('header-chat-badge-admin');
+        const badgeStaff = document.getElementById('header-chat-badge-staff');
+        if (badgeAdmin) badgeAdmin.style.display = 'inline-block';
+        if (badgeStaff) badgeStaff.style.display = 'inline-block';
+    });
 }
 
 // ── Toast thông báo realtime ────────────────────────────────

@@ -63,4 +63,8 @@ router.post('/coupons/create', adminController.createCoupon);
 router.post('/coupons/:id/toggle', adminController.toggleCoupon);
 router.delete('/coupons/:id', adminController.deleteCoupon);
 
+// Chat
+const chatController = require('../controllers/ChatController');
+router.get('/chat', chatController.adminChat);
+
 module.exports = router;

@@ -1,5 +1,6 @@
 </main>
 
+<% if (!locals.hideFooter) { %>
 <footer>
     <div class="container">
         <div class="row">
@@ -52,6 +53,9 @@
         </div>
     </div>
 </footer>
+<% } %>
+
+<%- include('../partials/chat_widget') %>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>

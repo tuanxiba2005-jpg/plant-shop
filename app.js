@@ -90,6 +90,7 @@ const adminRoutes = require('./src/routes/adminRoutes');
 const staffRoutes = require('./src/routes/staffRoutes');
 const addressRoutes = require('./src/routes/addressRoutes');
 const wishlistRoutes = require('./src/routes/wishlistRoutes');
+const chatRoutes = require('./src/routes/chatRoutes');
 
 app.use('/', indexRoutes);
 app.use('/products', productRoutes);
@@ -100,14 +101,75 @@ app.use('/admin', adminRoutes);
 app.use('/staff', staffRoutes);
 app.use('/user/addresses', addressRoutes);
 app.use('/wishlist', wishlistRoutes);
+app.use('/chat', chatRoutes);
 
 // ── Socket.io — thông báo realtime ─────────────────────────
 io.on('connection', (socket) => {
     const userId = socket.request.session?.user?.id;
     const role = socket.request.session?.user?.role;
+    const fullname = socket.request.session?.user?.fullname;
 
     if (userId) socket.join(`user_${userId}`);
     if (role === 'admin' || role === 'staff') socket.join('staff_room');
+
+    // Khách hàng vào phòng chat của mình
+    if (userId && role === 'user') {
+        socket.join(`chat_${userId}`);
+    }
+
+    // Gửi tin nhắn
+    socket.on('send_message', async (data) => {
+        if (!userId) return; // Phải đăng nhập
+        
+        try {
+            const Message = require('./src/models/Message');
+            
+            // Xác định room
+            // Nếu là admin/staff nhắn, room sẽ được gửi từ client. Nếu là customer nhắn, room là chat_ của chính họ
+            const room = data.room || `chat_${userId}`;
+            
+            const newMsg = await Message.model.create({
+                room: room,
+                sender: userId,
+                content: data.content
+            });
+
+            // Lấy thông tin sender để trả về
+            await newMsg.populate('sender', 'fullname role');
+
+            // Bắn tin nhắn vào phòng chat
+            io.to(room).emit('receive_message', newMsg);
+
+            // Bắn thông báo nếu người gửi là user (khách hàng)
+            if (role === 'user') {
+                io.to('staff_room').emit('new_message_notification', {
+                    room: room,
+                    senderName: fullname,
+                    content: data.content,
+                    message: newMsg
+                });
+            } else {
+                // Người gửi là admin/staff -> Bắn thông báo cho customer
+                const customerId = room.replace('chat_', '');
+                io.to(`user_${customerId}`).emit('new_message_notification', {
+                    room: room,
+                    senderName: 'Nhân viên hỗ trợ',
+                    content: data.content,
+                    message: newMsg
+                });
+            }
+        } catch (error) {
+            console.error('Lỗi send_message:', error);
+        }
+    });
+
+    // Admin join phòng chat của một khách hàng cụ thể
+    socket.on('join_chat', (data) => {
+        if (role === 'admin' || role === 'staff') {
+            const room = `chat_${data.customerId}`;
+            socket.join(room);
+        }
+    });
 });
 
 // Hàm helper để emit từ controller: req.app.get('io').notifyUser(...)

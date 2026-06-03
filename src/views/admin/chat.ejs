@@ -1,0 +1,237 @@
+<%- include('../layouts/header') %>
+
+<style>
+.chat-container {
+    height: calc(100vh - 120px);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    display: flex;
+    overflow: hidden;
+}
+.chat-sidebar {
+    width: 320px;
+    border-right: 1px solid #e9ecef;
+    display: flex;
+    flex-direction: column;
+}
+.chat-list {
+    flex: 1;
+    overflow-y: auto;
+}
+.chat-item {
+    padding: 16px;
+    border-bottom: 1px solid #e9ecef;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.chat-item:hover, .chat-item.active {
+    background-color: #f8f9fa;
+}
+.chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.chat-messages {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+}
+.message-bubble {
+    max-width: 70%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+.msg-received {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-bottom-left-radius: 4px;
+    align-self: flex-start;
+}
+.msg-sent {
+    background: #d1e7dd;
+    color: #0f5132;
+    border-bottom-right-radius: 4px;
+    align-self: flex-end;
+}
+.chat-input-area {
+    padding: 16px;
+    background: white;
+    border-top: 1px solid #e9ecef;
+}
+</style>
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0 text-success fw-bold"><i class="fas fa-headset me-2"></i>Hỗ trợ trực tuyến</h4>
+    </div>
+
+    <div class="chat-container">
+        <!-- Sidebar danh sách khách hàng -->
+        <div class="chat-sidebar">
+            <div class="p-3 border-bottom bg-light">
+                <h6 class="m-0 fw-bold">Khách hàng cần hỗ trợ</h6>
+            </div>
+            <div class="chat-list" id="customer-list">
+                <% if (chatList && chatList.length > 0) { %>
+                    <% chatList.forEach(chat => { %>
+                        <div class="chat-item d-flex align-items-center" data-room="<%= chat._id %>" onclick="openChat('<%= chat._id %>', '<%= chat.user.fullname %>')">
+                            <div class="position-relative">
+                                <img src="<%= chat.user.avatar || '/images/default-avatar.png' %>" class="rounded-circle border" width="48" height="48" style="object-fit:cover;">
+                                <% if (chat.unreadCount > 0) { %>
+                                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="width: 12px; height: 12px;" id="badge-<%= chat._id %>">
+                                        <span class="visually-hidden">New alerts</span>
+                                    </span>
+                                <% } else { %>
+                                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle d-none" style="width: 12px; height: 12px;" id="badge-<%= chat._id %>">
+                                    </span>
+                                <% } %>
+                            </div>
+                            <div class="ms-3 flex-fill overflow-hidden">
+                                <h6 class="mb-1 text-truncate"><%= chat.user.fullname %></h6>
+                                <p class="mb-0 text-muted small text-truncate" id="lastmsg-<%= chat._id %>"><%= chat.lastMessage.content %></p>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="p-4 text-center text-muted">Chưa có cuộc trò chuyện nào</div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="chat-main">
+            <div class="p-3 border-bottom bg-light d-flex align-items-center" id="chat-header" style="display: none !important;">
+                <h6 class="m-0 fw-bold" id="current-chat-name">Đang tải...</h6>
+            </div>
+            
+            <div id="no-chat-selected" class="flex-fill d-flex align-items-center justify-content-center text-muted flex-column">
+                <i class="fas fa-comments fs-1 mb-3 text-success opacity-50"></i>
+                <p>Chọn một khách hàng để bắt đầu trò chuyện</p>
+            </div>
+
+            <div class="chat-messages d-none d-flex flex-column" id="chat-messages">
+                <!-- Tin nhắn hiển thị ở đây -->
+            </div>
+
+            <div class="chat-input-area d-none" id="chat-input-area">
+                <form id="admin-chat-form" class="d-flex gap-2">
+                    <input type="text" id="admin-chat-input" class="form-control" placeholder="Nhập câu trả lời..." required autocomplete="off">
+                    <button type="submit" class="btn btn-success px-4"><i class="fas fa-paper-plane"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+    let currentRoom = null;
+    const adminId = '<%= user._id %>';
+
+    async function openChat(room, customerName) {
+        currentRoom = room;
+        
+        // Highlight active item
+        document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.chat-item[data-room="${room}"]`).classList.add('active');
+
+        // Hide badge
+        const badge = document.getElementById(`badge-${room}`);
+        if(badge) badge.classList.add('d-none');
+
+        // Show UI
+        document.getElementById('no-chat-selected').classList.add('d-none');
+        document.getElementById('chat-header').style.setProperty('display', 'flex', 'important');
+        document.getElementById('chat-messages').classList.remove('d-none');
+        document.getElementById('chat-input-area').classList.remove('d-none');
+        document.getElementById('current-chat-name').textContent = customerName;
+
+        // Fetch history
+        const customerId = room.replace('chat_', '');
+        try {
+            const res = await fetch(`/chat/admin/history/${customerId}`);
+            const data = await res.json();
+            
+            const msgContainer = document.getElementById('chat-messages');
+            msgContainer.innerHTML = '';
+            
+            if (data.success) {
+                data.history.forEach(msg => {
+                    const isSentByMe = (msg.sender._id === adminId || msg.sender.role === 'admin' || msg.sender.role === 'staff');
+                    appendMessage(msg.content, isSentByMe);
+                });
+                scrollToBottom();
+            }
+        } catch (error) {
+            console.error('Lỗi tải tin nhắn', error);
+        }
+
+        // Báo cho socket biết admin đang xem room này
+        socket.emit('join_chat', { customerId });
+    }
+
+    function appendMessage(text, isSent) {
+        const container = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className = `message-bubble ${isSent ? 'msg-sent' : 'msg-received'}`;
+        div.textContent = text;
+        container.appendChild(div);
+    }
+
+    function scrollToBottom() {
+        const c = document.getElementById('chat-messages');
+        c.scrollTop = c.scrollHeight;
+    }
+
+    document.getElementById('admin-chat-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = document.getElementById('admin-chat-input');
+        const text = input.value.trim();
+        if (!text || !currentRoom) return;
+
+        socket.emit('send_message', { room: currentRoom, content: text });
+        input.value = '';
+    });
+
+    socket.on('receive_message', (msg) => {
+        // Chỉ thêm vào cửa sổ chat nếu đang mở đúng phòng
+        if (currentRoom === msg.room) {
+            const isSentByMe = (msg.sender._id === adminId || msg.sender.role === 'admin' || msg.sender.role === 'staff');
+            appendMessage(msg.content, isSentByMe);
+            scrollToBottom();
+        }
+
+        // Cập nhật lại sidebar tin nhắn mới nhất
+        const lastMsgEl = document.getElementById(`lastmsg-${msg.room}`);
+        if(lastMsgEl) lastMsgEl.textContent = msg.content;
+
+        // Nếu admin đang không xem phòng đó, hiện chấm đỏ
+        if (currentRoom !== msg.room && msg.sender.role === 'customer') {
+            const badge = document.getElementById(`badge-${msg.room}`);
+            if(badge) badge.classList.remove('d-none');
+            
+            // Di chuyển chat item lên đầu
+            const chatItem = document.querySelector(`.chat-item[data-room="${msg.room}"]`);
+            if (chatItem) {
+                document.getElementById('customer-list').prepend(chatItem);
+            }
+        }
+    });
+
+    // Lắng nghe notification từ khách mới chưa có trong danh sách
+    socket.on('new_message_notification', (data) => {
+        // Nếu đã có item trong sidebar thì receive_message đã lo
+        if (!document.querySelector(`.chat-item[data-room="${data.room}"]`)) {
+            // Tải lại trang cho đơn giản để render lại danh sách
+            window.location.reload();
+        }
+    });
+</script>
+
+<%- include('../layouts/footer') %>

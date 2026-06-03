@@ -191,7 +191,7 @@
                                     <tr data-search="<%= searchString %>">
                                         <td>
                                             <div class="product-cell">
-                                                <img src="<%= firstItem?.product_id?.image || '/images/default.png' %>" alt="Product">
+                                                <img src="<%= firstItem?.product_id?.image ? '/images/products/' + firstItem.product_id.image : '/images/default.jpg' %>" alt="Product">
                                                 <div>
                                                     <p class="product-name"><%= firstItem?.name || 'Cây cảnh' %></p>
                                                     <p class="product-desc">Đơn: #<%= order._id.toString().slice(-6).toUpperCase() %></p>
@@ -301,7 +301,7 @@
                             <div class="col">
                                 <div class="card h-100 shadow-sm border-0" style="border-radius:12px; overflow:hidden;">
                                     <div style="height: 200px; overflow: hidden; position: relative;">
-                                        <img src="<%= p?.image || '/images/default.png' %>" class="w-100 h-100" style="object-fit:cover;" alt="<%= p?.name %>">
+                                        <img src="<%= p?.image ? '/images/products/' + p.image : '/images/default.jpg' %>" class="w-100 h-100" style="object-fit:cover;" alt="<%= p?.name %>">
                                         <button class="btn btn-light position-absolute top-0 end-0 m-2 rounded-circle text-danger" style="width:36px; height:36px; padding:0;" onclick="removeFromWishlist('<%= p?._id %>')">
                                             <i class="fas fa-heart"></i>
                                         </button>
