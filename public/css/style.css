@@ -1,6 +1,7 @@
 /* ==========================================
-   PLANT SHOP - MODERN MINIMAL STYLE
+   PLANT SHOP - LUXURY STYLE
    ========================================== */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 /* ---- Reset & Base ---- */
 *, *::before, *::after {
@@ -10,17 +11,19 @@
 }
 
 :root {
-    --primary: #2d6a4f;
-    --primary-light: #52b788;
-    --primary-dark: #1b4332;
-    --primary-bg: #f0faf5;
-    --bg: #f8fffe;
+    --primary: #2d5f3f;
+    --primary-light: #3d8055;
+    --primary-dark: #1e402a;
+    --primary-bg: #f0f7f3;
+    --secondary: #c9a961;
+    --secondary-light: #d4b87a;
+    --bg: #f8f6f3;
     --bg-secondary: #ffffff;
-    --text-primary: #1a2e23;
-    --text-secondary: #5a7a6a;
-    --text-light: #9ab5a8;
-    --border: #d8ede4;
-    --border-light: #eaf4ef;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --text-light: #999999;
+    --border: #e2e8e4;
+    --border-light: #f0f4f2;
     --danger: #e74c3c;
     --warning: #f39c12;
     --info: #3498db;
@@ -44,10 +47,15 @@ html {
 body {
     background-color: var(--bg);
     color: var(--text-primary);
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 15px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
     line-height: 1.6;
     min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6, .font-serif {
+    font-family: 'Playfair Display', 'Cormorant Garamond', serif;
+    color: var(--text-primary);
 }
 
 a {
