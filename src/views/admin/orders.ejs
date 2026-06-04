@@ -1,5 +1,5 @@
-<% extraJS=['/js/admin/order.js'] %>
-    <%- include('../layouts/header') %>
+<% locals.hideFooter = true; %>
+<%- include('../layouts/header') %>
 
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h3>📦 Quản lý đơn hàng</h3>
@@ -126,5 +126,6 @@
                         <!-- Buttons injected via JS -->
                     </div>
                 </div>
-            </div>
         </div>
+        <script src="/js/admin/order.js"></script>
+        <%- include('../layouts/footer') %>

@@ -274,7 +274,7 @@ class OrderController {
             
             const order = await this.orderModel.model.findOne({ _id: req.params.id, user_id: req.session.user.id });
             if (!order) return res.json({ success: false, message: 'Không tìm thấy đơn hàng' });
-            if (order.status !== 'delivered') return res.json({ success: false, message: 'Chỉ có thể yêu cầu hoàn hàng cho đơn hàng đã giao' });
+            if (order.status !== 'delivered') return res.json({ success: false, message: 'Chỉ có thể yêu cầu hoàn hàng cho đơn hàng đã giao. Trạng thái hiện tại: ' + order.status });
 
             await this.orderModel.update(req.params.id, {
                 status: 'return_requested',
