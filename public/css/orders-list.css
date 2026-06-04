@@ -1,0 +1,106 @@
+/* Orders List Styles */
+body {
+    background-color: #f5f5f5;
+}
+
+.order-tabs {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    background: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.order-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.order-tabs {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.order-tabs .tab-item {
+    flex: 1;
+    text-align: center;
+    padding: 15px 20px;
+    color: #555;
+    text-decoration: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.order-tabs .tab-item:hover {
+    color: var(--primary);
+}
+
+.order-tabs .tab-item.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.order-card {
+    background: #fff;
+    margin-bottom: 15px;
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.order-card-header {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-card-body {
+    padding: 15px;
+    cursor: pointer;
+}
+
+.order-card-body:hover {
+    background-color: #fafafa;
+}
+
+.product-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed #f0f0f0;
+}
+
+.product-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.product-img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border: 1px solid #e1e1e1;
+    background-color: #fff;
+}
+
+.product-info {
+    flex: 1;
+    margin-left: 15px;
+}
+
+.order-card-footer {
+    padding: 15px;
+    border-top: 1px solid #f0f0f0;
+    text-align: right;
+    background-color: #fffefb;
+}
+
+.order-total-price {
+    font-size: 22px;
+    color: #ee4d2d;
+}

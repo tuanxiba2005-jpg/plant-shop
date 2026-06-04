@@ -204,27 +204,4 @@
                         </div>
                     </div>
                 </div>
-
-                <script>
-                    function previewMultiImages(input, previewId) {
-                        const preview = document.getElementById(previewId);
-                        preview.innerHTML = '';
-                        if (input.files.length === 0) return;
-
-                        const countLabel = document.createElement('small');
-                        countLabel.className = 'text-success w-100 mb-1';
-                        countLabel.textContent = `✅ Đã chọn ${input.files.length} ảnh`;
-                        preview.appendChild(countLabel);
-
-                        Array.from(input.files).forEach(file => {
-                            const reader = new FileReader();
-                            reader.onload = (e) => {
-                                const img = document.createElement('img');
-                                img.src = e.target.result;
-                                img.style.cssText = 'width:60px; height:60px; object-fit:cover; border-radius:8px; border:2px solid #d8ede4;';
-                                preview.appendChild(img);
-                            };
-                            reader.readAsDataURL(file);
-                        });
-                    }
-                </script>
+
