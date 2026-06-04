@@ -19,8 +19,11 @@ router.get('/products', staffController.products);
 router.post('/products/create', upload.single('image'), staffController.createProduct);
 router.post('/products/update/:id', upload.single('image'), staffController.updateProduct);
 
+// Orders
 router.get('/orders', staffController.orders);
-router.post('/orders/status/:id', staffController.updateOrderStatus);
+router.post('/orders/:id/status', staffController.updateOrderStatus);
+router.get('/orders/:id/return-detail', staffController.getReturnDetail);
+router.post('/orders/:id/process-return', staffController.processReturn);
 
 router.get('/customers', staffController.customers);
 

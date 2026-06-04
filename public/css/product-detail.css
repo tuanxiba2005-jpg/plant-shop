@@ -1,0 +1,522 @@
+/* ==========================================
+   PREMIUM PRODUCT DETAIL PAGE
+   ========================================== */
+
+/* ── Gallery ─────────────────────────────── */
+.pd-gallery {
+    position: sticky;
+    top: 100px;
+}
+
+.pd-main-img-wrapper {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #f5f5f0;
+    cursor: zoom-in;
+    position: relative;
+}
+
+.pd-main-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.pd-main-img-wrapper:hover img {
+    transform: scale(1.05);
+}
+
+.pd-thumbnails {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.pd-thumb {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    background: #f5f5f0;
+}
+
+.pd-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.pd-thumb:hover {
+    border-color: var(--primary-light);
+    transform: translateY(-2px);
+}
+
+.pd-thumb:hover img {
+    transform: scale(1.08);
+}
+
+.pd-thumb.active {
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(45, 106, 79, 0.2);
+}
+
+/* ── Product Info ────────────────────────── */
+.pd-info {
+    padding-left: 32px;
+}
+
+.pd-category-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+    color: var(--primary);
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.pd-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a2e23;
+    line-height: 1.3;
+    margin-bottom: 8px;
+}
+
+.pd-scientific-name {
+    font-style: italic;
+    color: #9ab5a8;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.pd-rating {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.pd-rating .stars {
+    color: #d4af37;
+    font-size: 16px;
+    letter-spacing: 2px;
+}
+
+.pd-rating .count {
+    color: #9ab5a8;
+    font-size: 13px;
+}
+
+.pd-price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 4px;
+}
+
+.pd-price-old {
+    font-size: 1rem;
+    color: #ccc;
+    text-decoration: line-through;
+    margin-left: 12px;
+}
+
+.pd-divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, #e8ede4, transparent);
+    margin: 24px 0;
+}
+
+.pd-desc {
+    font-size: 15px;
+    line-height: 1.8;
+    color: #5a7a6a;
+    margin-bottom: 24px;
+}
+
+/* ── Specs Grid ──────────────────────────── */
+.pd-specs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.pd-spec-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #f8faf7;
+    border-radius: 12px;
+    border: 1px solid #eaf4ef;
+}
+
+.pd-spec-item i {
+    color: var(--primary);
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.pd-spec-item .label {
+    font-size: 12px;
+    color: #9ab5a8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pd-spec-item .value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a2e23;
+}
+
+/* ── Quantity + CTA ──────────────────────── */
+.pd-qty-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.pd-qty {
+    display: flex;
+    align-items: center;
+    border: 1.5px solid #d8ede4;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.pd-qty button {
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    color: var(--primary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.pd-qty button:hover {
+    background: #f0faf5;
+}
+
+.pd-qty input {
+    width: 56px;
+    text-align: center;
+    border: none;
+    border-left: 1.5px solid #d8ede4;
+    border-right: 1.5px solid #d8ede4;
+    font-weight: 600;
+    font-size: 16px;
+    color: #1a2e23;
+    outline: none;
+    -moz-appearance: textfield;
+}
+
+.pd-qty input::-webkit-outer-spin-button,
+.pd-qty input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+.pd-stock-info {
+    font-size: 13px;
+    color: #9ab5a8;
+}
+
+.pd-stock-info .stock-number {
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.pd-cta-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.pd-btn-cart {
+    flex: 1;
+    padding: 14px 24px;
+    border: 2px solid var(--primary);
+    background: transparent;
+    color: var(--primary);
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.pd-btn-cart:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(45, 106, 79, 0.25);
+}
+
+.pd-btn-buy {
+    flex: 1.2;
+    padding: 14px 24px;
+    border: none;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: white;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 16px rgba(45, 106, 79, 0.25);
+}
+
+.pd-btn-buy:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(45, 106, 79, 0.35);
+}
+
+/* ── Trust Badges ────────────────────────── */
+.pd-trust {
+    display: flex;
+    gap: 0;
+    border: 1px solid #eaf4ef;
+    border-radius: 16px;
+    overflow: hidden;
+    background: white;
+}
+
+.pd-trust-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 12px;
+    gap: 6px;
+    border-right: 1px solid #eaf4ef;
+}
+
+.pd-trust-item:last-child {
+    border-right: none;
+}
+
+.pd-trust-item i {
+    font-size: 20px;
+    color: var(--primary);
+}
+
+.pd-trust-item span {
+    font-size: 11px;
+    font-weight: 600;
+    color: #5a7a6a;
+    text-align: center;
+}
+
+/* ── Tabs Section ────────────────────────── */
+.pd-tabs-section {
+    margin-top: 64px;
+    padding-top: 48px;
+    border-top: 1px solid #eaf4ef;
+}
+
+.pd-tabs .nav-link {
+    padding: 14px 28px !important;
+    font-weight: 600;
+    font-size: 14px;
+    color: #9ab5a8 !important;
+    border: none !important;
+    border-bottom: 3px solid transparent !important;
+    border-radius: 0 !important;
+    transition: all 0.3s;
+    background: none !important;
+}
+
+.pd-tabs .nav-link:hover {
+    color: var(--primary) !important;
+    background: none !important;
+}
+
+.pd-tabs .nav-link.active {
+    color: var(--primary) !important;
+    border-bottom-color: var(--primary) !important;
+    background: none !important;
+}
+
+.pd-tab-content {
+    padding: 32px 0;
+    font-size: 15px;
+    line-height: 1.8;
+    color: #5a7a6a;
+}
+
+.pd-tab-content h5 {
+    color: #1a2e23;
+    font-weight: 700;
+    margin-bottom: 16px;
+    font-size: 18px;
+}
+
+.pd-care-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.pd-care-card {
+    padding: 24px;
+    background: #f8faf7;
+    border-radius: 16px;
+    border: 1px solid #eaf4ef;
+    text-align: center;
+}
+
+.pd-care-card i {
+    font-size: 28px;
+    color: var(--primary);
+    margin-bottom: 12px;
+}
+
+.pd-care-card h6 {
+    font-weight: 700;
+    color: #1a2e23;
+    margin-bottom: 8px;
+}
+
+.pd-care-card p {
+    font-size: 13px;
+    color: #9ab5a8;
+    margin: 0;
+}
+
+/* ── Reviews Section ─────────────────────── */
+.pd-reviews-section {
+    margin-top: 64px;
+    padding-top: 48px;
+    border-top: 1px solid #eaf4ef;
+}
+
+.pd-section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a2e23;
+    margin-bottom: 32px;
+}
+
+/* ── Related Products ────────────────────── */
+.pd-related-section {
+    margin-top: 64px;
+    padding-top: 48px;
+    border-top: 1px solid #eaf4ef;
+}
+
+/* ── Out of stock overlay ────────────────── */
+.pd-out-of-stock {
+    padding: 16px 24px;
+    background: #fff5f5;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    color: #dc2626;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+/* ── Lightbox ────────────────────────────── */
+.pd-lightbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.pd-lightbox.active {
+    display: flex;
+    opacity: 1;
+}
+
+.pd-lightbox img {
+    max-width: 85vw;
+    max-height: 85vh;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.pd-lightbox-close {
+    position: absolute;
+    top: 24px;
+    right: 32px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 32px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.pd-lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    font-size: 24px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.pd-lightbox-nav:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.pd-lightbox-prev { left: 24px; }
+.pd-lightbox-next { right: 24px; }
+
+/* ── Responsive ──────────────────────────── */
+@media (max-width: 768px) {
+    .pd-info { padding-left: 0; margin-top: 24px; }
+    .pd-title { font-size: 1.5rem; }
+    .pd-price { font-size: 1.5rem; }
+    .pd-specs { grid-template-columns: 1fr; }
+    .pd-cta-group { flex-direction: column; }
+    .pd-trust { flex-direction: column; }
+    .pd-trust-item { flex-direction: row; border-right: none; border-bottom: 1px solid #eaf4ef; }
+    .pd-trust-item:last-child { border-bottom: none; }
+    .pd-care-grid { grid-template-columns: 1fr; }
+    .pd-thumb { width: 60px; height: 60px; }
+    .pd-tabs .nav-link { padding: 10px 16px !important; font-size: 13px; }
+    .pd-gallery { position: static; }
+}

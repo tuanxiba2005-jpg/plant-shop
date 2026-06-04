@@ -6,7 +6,9 @@
         <div class="row">
 
             <div class="col-md-4 mb-3">
-                <div class="footer-title">🌿 Plant Shop</div>
+                <div class="footer-title">
+                    <img src="/images/logo.png" alt="Tuan's Green" class="mb-2" style="height: 60px; width: auto; object-fit: contain;">
+                </div>
                 <p>Mang thiên nhiên vào ngôi nhà bạn với những loài cây cảnh đẹp, chất lượng cao và giá cả hợp lý.</p>
                 <div class="mt-3">
                     <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
@@ -18,14 +20,19 @@
             <div class="col-md-2 mb-3">
                 <div class="footer-title">Danh mục</div>
                 <% if (typeof globalCategories !=='undefined' ) { %>
-                    <% globalCategories.forEach(cat=> { %>
+                    <% globalCategories.slice(0, 5).forEach(cat=> { %>
                         <div>
                             <a href="/products?category=<%= cat._id %>">
                                 <%= cat.name %>
                             </a>
                         </div>
-                        <% }) %>
-                            <% } %>
+                    <% }) %>
+                    <% if (globalCategories.length > 5) { %>
+                        <div class="mt-2">
+                            <a href="/products" style="font-weight: 500; font-size: 0.9em; opacity: 0.8;">Xem tất cả &rarr;</a>
+                        </div>
+                    <% } %>
+                <% } %>
             </div>
 
             <div class="col-md-3 mb-3">
@@ -48,9 +55,15 @@
         <hr class="footer-divider">
 
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center footer-bottom">
-            <span>© 2025 Plant Shop. All rights reserved.</span>
-            <span class="mt-2 mt-md-0">Made with 🌿 by Plant Shop Team</span>
+            <span>© 2025 Tuan's Green. All rights reserved.</span>
+            <span class="mt-2 mt-md-0">Made with 🌿 by Tuan's Green Team</span>
         </div>
+    </div>
+</footer>
+<% } else { %>
+<footer class="mt-auto py-3 bg-light border-top text-center text-muted small">
+    <div class="container">
+        <span>© 2025 Tuan's Green. Giao dịch an toàn và bảo mật.</span>
     </div>
 </footer>
 <% } %>

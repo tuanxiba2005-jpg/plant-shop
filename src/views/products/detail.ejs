@@ -1,104 +1,309 @@
-<% extraJS = ['/js/product-detail.js'] %>
+<% extraJS = ['/js/product-detail.js']; extraCSS = ['/css/product-detail.css'] %>
 <%- include('../layouts/header') %>
 
-<nav aria-label="breadcrumb" class="mb-3">
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-4">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="/" class="text-success">Trang chủ</a></li>
-        <li class="breadcrumb-item"><a href="/products" class="text-success">Cây cảnh</a></li>
+        <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a href="/products">Cây cảnh</a></li>
+        <% if (product.category_id?.name) { %>
+            <li class="breadcrumb-item"><a href="/products?category=<%= product.category_id._id %>"><%= product.category_id.name %></a></li>
+        <% } %>
         <li class="breadcrumb-item active"><%= product.name %></li>
     </ol>
 </nav>
 
+<!-- ─── Hero Section ─────────────────────────────────── -->
 <div class="row mb-5">
-    <div class="col-md-5">
-        <img src="/images/products/<%= product.image %>"
-             class="img-fluid rounded shadow"
-             alt="<%= product.name %>"
-             style="width:100%; height:400px; object-fit:cover;"
-             onerror="this.src='/images/default.jpg'">
+    <!-- Gallery -->
+    <div class="col-lg-6 col-md-6">
+        <div class="pd-gallery">
+            <div class="pd-main-img-wrapper" id="mainImageWrapper">
+                <img src="/images/products/<%= product.image %>"
+                     id="mainImage"
+                     alt="<%= product.name %>"
+                     onerror="this.src='/images/default.jpg'">
+            </div>
+            <div class="pd-thumbnails" id="thumbnailStrip">
+                <div class="pd-thumb active" data-src="/images/products/<%= product.image %>">
+                    <img src="/images/products/<%= product.image %>"
+                         alt="<%= product.name %>"
+                         onerror="this.src='/images/default.jpg'">
+                </div>
+                <% if (product.images && product.images.length > 0) { %>
+                    <% product.images.forEach((img, idx) => { %>
+                        <div class="pd-thumb" data-src="/images/products/<%= img %>">
+                            <img src="/images/products/<%= img %>"
+                                 alt="<%= product.name %> - ảnh <%= idx + 2 %>"
+                                 onerror="this.src='/images/default.jpg'">
+                        </div>
+                    <% }) %>
+                <% } %>
+            </div>
+        </div>
     </div>
 
-    <div class="col-md-7">
-        <span class="badge bg-success mb-2">
-            <%= product.category_id?.name || '' %>
-        </span>
-        <h2 class="fw-bold"><%= product.name %></h2>
-        <h3 class="text-success fw-bold mb-3">
-            <%= parseInt(product.price).toLocaleString('vi-VN') %>đ
-        </h3>
-
-        <p class="text-muted"><%= product.description %></p>
-
-        <div class="mb-3">
-            <% if (product.stock === 0) { %>
-                <span class="badge bg-danger fs-6">Hết hàng</span>
-            <% } else { %>
-                <span class="badge bg-success fs-6">
-                    Còn hàng (<%= product.stock %> sản phẩm)
+    <!-- Product Info -->
+    <div class="col-lg-6 col-md-6">
+        <div class="pd-info">
+            <% if (product.category_id?.name) { %>
+                <span class="pd-category-badge">
+                    <i class="fas fa-leaf me-1"></i> <%= product.category_id.name %>
                 </span>
             <% } %>
-        </div>
 
-        <% if (product.stock > 0) { %>
-        <div class="d-flex align-items-center gap-3 mb-4">
-            <div class="input-group" style="width:130px">
-                <button class="btn btn-outline-secondary" id="btnMinus">-</button>
-                <input type="number" id="quantity" class="form-control text-center"
-                       value="1" min="1" max="<%= product.stock %>">
-                <button class="btn btn-outline-secondary" id="btnPlus">+</button>
+            <h1 class="pd-title"><%= product.name %></h1>
+            <p class="pd-scientific-name">Cây cảnh trang trí cao cấp</p>
+
+            <!-- Rating -->
+            <div class="pd-rating">
+                <span class="stars" id="pdStars">
+                    <i class="far fa-star"></i>
+                    <i class="far fa-star"></i>
+                    <i class="far fa-star"></i>
+                    <i class="far fa-star"></i>
+                    <i class="far fa-star"></i>
+                </span>
+                <span class="count" id="pdReviewCount">(Đang tải...)</span>
             </div>
-            <button class="btn btn-success btn-lg px-4 btn-add-cart"
-                    data-id="<%= product._id %>">
-                <i class="fas fa-cart-plus me-2"></i>Thêm vào giỏ
-            </button>
-        </div>
-        <% } %>
 
-        <div class="card border-success">
-            <div class="card-body">
-                <small class="text-muted">
-                    🚚 Giao hàng toàn quốc &nbsp;|&nbsp;
-                    🔄 Đổi trả trong 7 ngày &nbsp;|&nbsp;
-                    ✅ Cây chất lượng đảm bảo
-                </small>
+            <!-- Price -->
+            <div class="mb-3">
+                <span class="pd-price"><%= parseInt(product.price).toLocaleString('vi-VN') %>đ</span>
+            </div>
+
+            <hr class="pd-divider">
+
+            <!-- Description -->
+            <p class="pd-desc"><%= product.description || 'Cây cảnh chất lượng cao, phù hợp trang trí nội thất và ngoại thất.' %></p>
+
+            <!-- Specs -->
+            <div class="pd-specs">
+                <div class="pd-spec-item">
+                    <i class="fas fa-ruler-vertical"></i>
+                    <div>
+                        <div class="label">Kho hàng</div>
+                        <div class="value"><%= product.stock %> sản phẩm</div>
+                    </div>
+                </div>
+                <div class="pd-spec-item">
+                    <i class="fas fa-tag"></i>
+                    <div>
+                        <div class="label">Danh mục</div>
+                        <div class="value"><%= product.category_id?.name || 'Chưa phân loại' %></div>
+                    </div>
+                </div>
+                <div class="pd-spec-item">
+                    <i class="fas fa-box-open"></i>
+                    <div>
+                        <div class="label">Tình trạng</div>
+                        <div class="value"><%= product.stock > 0 ? 'Còn hàng' : 'Hết hàng' %></div>
+                    </div>
+                </div>
+                <div class="pd-spec-item">
+                    <i class="fas fa-shipping-fast"></i>
+                    <div>
+                        <div class="label">Vận chuyển</div>
+                        <div class="value">Toàn quốc</div>
+                    </div>
+                </div>
+            </div>
+
+            <% if (product.stock > 0) { %>
+                <!-- Quantity -->
+                <div class="pd-qty-wrapper">
+                    <div class="pd-qty">
+                        <button type="button" id="btnMinus">−</button>
+                        <input type="number" id="quantity" value="1" min="1" max="<%= product.stock %>">
+                        <button type="button" id="btnPlus">+</button>
+                    </div>
+                    <span class="pd-stock-info">
+                        Còn <span class="stock-number"><%= product.stock %></span> sản phẩm
+                    </span>
+                </div>
+
+                <!-- CTA Buttons -->
+                <div class="pd-cta-group">
+                    <button class="pd-btn-cart btn-add-cart" data-id="<%= product._id %>">
+                        <i class="fas fa-cart-plus"></i> Thêm vào giỏ
+                    </button>
+                    <button class="pd-btn-buy" onclick="window.location.href='/cart'">
+                        <i class="fas fa-bolt"></i> Mua ngay
+                    </button>
+                </div>
+            <% } else { %>
+                <div class="pd-out-of-stock">
+                    <i class="fas fa-exclamation-circle me-2"></i> Sản phẩm tạm hết hàng
+                </div>
+            <% } %>
+
+            <!-- Trust Badges -->
+            <div class="pd-trust">
+                <div class="pd-trust-item">
+                    <i class="fas fa-truck"></i>
+                    <span>Giao hàng<br>miễn phí</span>
+                </div>
+                <div class="pd-trust-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Bảo hành<br>30 ngày</span>
+                </div>
+                <div class="pd-trust-item">
+                    <i class="fas fa-sync-alt"></i>
+                    <span>Đổi trả<br>1 đổi 1</span>
+                </div>
+                <div class="pd-trust-item">
+                    <i class="fas fa-leaf"></i>
+                    <span>Cây tươi<br>100%</span>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Vùng hiển thị Đánh giá -->
-<div class="mt-5 mb-5" id="reviewsContainer">
-    <h4 class="fw-bold mb-4">⭐ Khách hàng đánh giá</h4>
+<!-- ─── Tabs Section ─────────────────────────────────── -->
+<div class="pd-tabs-section">
+    <ul class="nav pd-tabs" id="productTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#tabDesc">
+                <i class="fas fa-info-circle me-2"></i>Mô tả chi tiết
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#tabCare">
+                <i class="fas fa-hand-holding-water me-2"></i>Hướng dẫn chăm sóc
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#tabFengshui">
+                <i class="fas fa-yin-yang me-2"></i>Ý nghĩa phong thủy
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="tab" href="#tabPolicy">
+                <i class="fas fa-file-contract me-2"></i>Chính sách
+            </a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <!-- Mô tả -->
+        <div class="tab-pane fade show active pd-tab-content" id="tabDesc">
+            <h5>Mô tả sản phẩm</h5>
+            <p><%= product.description || 'Cây cảnh trang trí cao cấp, phù hợp mọi không gian sống. Được chăm sóc kỹ lưỡng trước khi đến tay khách hàng.' %></p>
+            <p>Sản phẩm thuộc danh mục <strong><%= product.category_id?.name || 'Cây cảnh' %></strong>, phù hợp để trang trí phòng khách, phòng ngủ, bàn làm việc hoặc sân vườn.</p>
+        </div>
+
+        <!-- Chăm sóc -->
+        <div class="tab-pane fade pd-tab-content" id="tabCare">
+            <h5>Hướng dẫn chăm sóc</h5>
+            <div class="pd-care-grid">
+                <div class="pd-care-card">
+                    <i class="fas fa-sun"></i>
+                    <h6>Ánh sáng</h6>
+                    <p>Đặt nơi có ánh sáng gián tiếp, tránh ánh nắng trực tiếp gay gắt.</p>
+                </div>
+                <div class="pd-care-card">
+                    <i class="fas fa-tint"></i>
+                    <h6>Tưới nước</h6>
+                    <p>Tưới 2-3 lần/tuần, giữ đất ẩm nhưng không úng nước.</p>
+                </div>
+                <div class="pd-care-card">
+                    <i class="fas fa-thermometer-half"></i>
+                    <h6>Nhiệt độ</h6>
+                    <p>Nhiệt độ lý tưởng: 18 - 30°C, tránh gió lạnh trực tiếp.</p>
+                </div>
+                <div class="pd-care-card">
+                    <i class="fas fa-seedling"></i>
+                    <h6>Phân bón</h6>
+                    <p>Bón phân hữu cơ 1 lần/tháng trong mùa xuân – hè.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phong thủy -->
+        <div class="tab-pane fade pd-tab-content" id="tabFengshui">
+            <h5>Ý nghĩa phong thủy</h5>
+            <p>Cây cảnh không chỉ mang vẻ đẹp thiên nhiên vào không gian sống mà còn có ý nghĩa phong thủy sâu sắc.</p>
+            <ul style="list-style: none; padding: 0;">
+                <li style="padding: 8px 0;"><i class="fas fa-check-circle text-success me-2"></i> <strong>Thu hút tài lộc:</strong> Cây xanh tươi tốt là biểu tượng của sự phát triển, thịnh vượng.</li>
+                <li style="padding: 8px 0;"><i class="fas fa-check-circle text-success me-2"></i> <strong>Thanh lọc không khí:</strong> Hấp thụ khí độc, tỏa ra khí sạch, cải thiện sức khỏe.</li>
+                <li style="padding: 8px 0;"><i class="fas fa-check-circle text-success me-2"></i> <strong>Giảm stress:</strong> Màu xanh lá cây giúp thư giãn, giảm căng thẳng hiệu quả.</li>
+                <li style="padding: 8px 0;"><i class="fas fa-check-circle text-success me-2"></i> <strong>Mang lại may mắn:</strong> Nhiều loại cây có ý nghĩa tốt lành theo phong thủy phương Đông.</li>
+            </ul>
+        </div>
+
+        <!-- Chính sách -->
+        <div class="tab-pane fade pd-tab-content" id="tabPolicy">
+            <h5>Chính sách vận chuyển & Đổi trả</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <h6><i class="fas fa-truck text-success me-2"></i>Vận chuyển</h6>
+                    <ul style="list-style: disc; padding-left: 20px;">
+                        <li>Miễn phí giao hàng cho đơn từ 500.000đ</li>
+                        <li>Giao hàng toàn quốc trong 2-5 ngày</li>
+                        <li>Đóng gói cẩn thận, đảm bảo cây không bị hỏng</li>
+                        <li>Hỗ trợ theo dõi đơn hàng 24/7</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6><i class="fas fa-exchange-alt text-success me-2"></i>Đổi trả</h6>
+                    <ul style="list-style: disc; padding-left: 20px;">
+                        <li>Đổi trả miễn phí trong 7 ngày</li>
+                        <li>Hoàn tiền 100% nếu cây bị hỏng khi nhận</li>
+                        <li>Bảo hành cây sống 30 ngày</li>
+                        <li>Hỗ trợ tư vấn chăm sóc miễn phí</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ─── Reviews Section ──────────────────────────────── -->
+<div class="pd-reviews-section" id="reviewsContainer">
+    <h3 class="pd-section-title"><i class="fas fa-star text-warning me-2"></i>Đánh giá từ khách hàng</h3>
     <div id="reviewsContent">
-        <div class="text-center text-muted py-4"><i class="fas fa-spinner fa-spin"></i> Đang tải đánh giá...</div>
+        <div class="text-center text-muted py-4">
+            <i class="fas fa-spinner fa-spin"></i> Đang tải đánh giá...
+        </div>
     </div>
 </div>
 
+<!-- ─── Related Products ─────────────────────────────── -->
 <% if (related.length > 0) { %>
-<h4 class="fw-bold mb-3">🌱 Sản phẩm liên quan</h4>
-<div class="row">
-    <% related.forEach(p => { %>
-    <div class="col-6 col-md-3 mb-4">
-        <div class="card h-100 shadow-sm product-card">
-            <img src="/images/products/<%= p.image %>"
-                 class="card-img-top"
-                 alt="<%= p.name %>"
-                 style="height:160px; object-fit:cover;"
-                 onerror="this.src='/images/default.jpg'">
-            <div class="card-body d-flex flex-column">
-                <h6><%= p.name %></h6>
-                <p class="text-success fw-bold mt-auto mb-2">
-                    <%= parseInt(p.price).toLocaleString('vi-VN') %>đ
-                </p>
-                <a href="/products/<%= p._id %>"
-                   class="btn btn-outline-success btn-sm">
-                   Xem chi tiết
-                </a>
+<div class="pd-related-section">
+    <h3 class="pd-section-title"><i class="fas fa-seedling text-success me-2"></i>Sản phẩm tương tự</h3>
+    <div class="row g-4">
+        <% related.forEach(p => { %>
+        <div class="col-6 col-md-3">
+            <div class="card h-100 shadow-sm product-card">
+                <div class="product-img-wrapper">
+                    <img src="/images/products/<%= p.image %>"
+                         alt="<%= p.name %>"
+                         onerror="this.src='/images/default.jpg'">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h6 class="fw-bold"><%= p.name %></h6>
+                    <p class="text-success fw-bold mt-auto mb-2">
+                        <%= parseInt(p.price).toLocaleString('vi-VN') %>đ
+                    </p>
+                    <a href="/products/<%= p._id %>"
+                       class="btn btn-outline-success btn-sm">
+                       <i class="fas fa-eye me-1"></i> Xem chi tiết
+                    </a>
+                </div>
             </div>
         </div>
+        <% }) %>
     </div>
-    <% }) %>
 </div>
 <% } %>
+
+<!-- Lightbox -->
+<div class="pd-lightbox" id="lightbox">
+    <button class="pd-lightbox-close" onclick="closeLightbox()">&times;</button>
+    <button class="pd-lightbox-nav pd-lightbox-prev" onclick="lightboxNav(-1)"><i class="fas fa-chevron-left"></i></button>
+    <img src="" id="lightboxImg" alt="Product Image">
+    <button class="pd-lightbox-nav pd-lightbox-next" onclick="lightboxNav(1)"><i class="fas fa-chevron-right"></i></button>
+</div>
 
 <%- include('../layouts/footer') %>

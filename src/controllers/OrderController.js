@@ -3,6 +3,7 @@ const Cart = require('../models/Cart');
 const User = require('../models/User');
 const Coupon = require('../models/Coupon');
 const Review = require('../models/Review');
+const Notification = require('../models/Notification');
 const { createVNPayUrl, verifyVNPay, createMoMoUrl, verifyMoMo } = require('../services/paymentService');
 const { sendOrderConfirmation } = require('../services/emailService');
 
@@ -22,6 +23,8 @@ class OrderController {
         this.applyCoupon = this.applyCoupon.bind(this);
         this.vnpayReturn = this.vnpayReturn.bind(this);
         this.momoReturn = this.momoReturn.bind(this);
+        this.myOrders = this.myOrders.bind(this);
+        this.returnOrder = this.returnOrder.bind(this);
         this.submitReview = this.submitReview.bind(this);
         this.retryPayment = this.retryPayment.bind(this);
         this.getReviews = this.getReviews.bind(this);
@@ -116,6 +119,28 @@ class OrderController {
                 });
             } catch (emailErr) {
                 console.error('Email error (non-fatal):', emailErr.message);
+            }
+
+            // Create Notification & emit real-time event
+            try {
+                const staffUsers = await this.userModel.model.find({ role: { $in: ['admin', 'staff'] } });
+                const notifications = staffUsers.map(u => ({
+                    user_id: u._id,
+                    title: 'Đơn hàng mới',
+                    message: `Khách hàng ${req.session.user.fullname || req.session.user.name} vừa đặt đơn hàng #${orderId.toString().slice(-6).toUpperCase()}.`,
+                    link: `/admin/orders`,
+                    type: 'order_new'
+                }));
+                await Notification.insertMany(notifications);
+
+                if (req.app.get('io')) {
+                    req.app.get('io').notifyStaff('new_order', {
+                        message: `Khách hàng ${req.session.user.fullname || req.session.user.name} vừa đặt đơn hàng #${orderId.toString().slice(-6).toUpperCase()}.`,
+                        orderId: orderId
+                    });
+                }
+            } catch (notifErr) {
+                console.error('Notification error (non-fatal):', notifErr.message);
             }
 
             // Redirect đến cổng thanh toán nếu không phải COD / bank_transfer
@@ -215,8 +240,9 @@ class OrderController {
             const reviewStatus = {};
             if (order.status === 'delivered') {
                 for (const item of order.items) {
-                    reviewStatus[item.product_id.toString()] = await this.reviewModel.hasReviewed(
-                        req.session.user.id, item.product_id, order._id
+                    const pid = item.product_id && item.product_id._id ? item.product_id._id.toString() : item.product_id.toString();
+                    reviewStatus[pid] = await this.reviewModel.hasReviewed(
+                        req.session.user.id, pid, order._id
                     );
                 }
             }
@@ -237,6 +263,41 @@ class OrderController {
             const result = await this.orderModel.cancelOrder(req.params.id, req.session.user.id);
             res.json(result);
         } catch (err) {
+            res.json({ success: false, message: err.message });
+        }
+    }
+
+    async returnOrder(req, res) {
+        try {
+            const { reason } = req.body;
+            const images = req.files ? req.files.map(f => f.filename) : [];
+            
+            const order = await this.orderModel.model.findOne({ _id: req.params.id, user_id: req.session.user.id });
+            if (!order) return res.json({ success: false, message: 'Không tìm thấy đơn hàng' });
+            if (order.status !== 'delivered') return res.json({ success: false, message: 'Chỉ có thể yêu cầu hoàn hàng cho đơn hàng đã giao' });
+
+            await this.orderModel.update(req.params.id, {
+                status: 'return_requested',
+                return_request: {
+                    reason,
+                    images,
+                    requested_at: new Date()
+                }
+            });
+            
+            // Notify admin
+            const io = req.app.get('io');
+            if (io) {
+                io.notifyAdmin('return_request', {
+                    orderId: order._id,
+                    customer: req.session.user.name,
+                    message: `Khách hàng yêu cầu hoàn đơn #${order._id.toString().slice(-6).toUpperCase()}`
+                });
+            }
+
+            res.json({ success: true });
+        } catch (err) {
+            console.error('Return order error:', err);
             res.json({ success: false, message: err.message });
         }
     }

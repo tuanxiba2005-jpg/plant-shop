@@ -16,6 +16,9 @@
             <button class="btn btn-outline-primary btn-sm filter-btn" data-status="shipping">Đang giao</button>
             <button class="btn btn-outline-success btn-sm filter-btn" data-status="delivered">Đã giao</button>
             <button class="btn btn-outline-danger btn-sm filter-btn" data-status="cancelled">Đã hủy</button>
+            <button class="btn btn-outline-warning btn-sm filter-btn fw-bold border-2" data-status="return_requested">Y/C Hoàn hàng</button>
+            <button class="btn btn-outline-secondary btn-sm filter-btn" data-status="returned">Đã hoàn hàng</button>
+            <button class="btn btn-outline-dark btn-sm filter-btn" data-status="return_rejected">Từ chối hoàn</button>
         </div>
 
         <div class="card shadow-sm">
@@ -36,9 +39,9 @@
                         </thead>
                         <tbody>
                             <% const badges={ pending: 'warning' , confirmed: 'info' , shipping: 'primary' ,
-                                delivered: 'success' , cancelled: 'danger' } %>
+                                delivered: 'success' , cancelled: 'danger', return_requested: 'warning', returned: 'secondary', return_rejected: 'dark' } %>
                                 <% const labels={ pending: 'Chờ xác nhận' , confirmed: 'Đã xác nhận' ,
-                                    shipping: 'Đang giao' , delivered: 'Đã giao' , cancelled: 'Đã hủy' } %>
+                                    shipping: 'Đang giao' , delivered: 'Đã giao' , cancelled: 'Đã hủy', return_requested: 'Y/C Hoàn hàng', returned: 'Đã hoàn hàng', return_rejected: 'Từ chối hoàn' } %>
                                     <% if (orders.length===0) { %>
                                         <tr>
                                             <td colspan="8" class="text-center py-4 text-muted">
@@ -79,19 +82,25 @@
                                                         </small>
                                                     </td>
                                                     <td>
+                                                        <% if (['return_requested', 'returned', 'return_rejected'].includes(order.status)) { %>
+                                                            <button class="btn btn-sm btn-outline-danger w-100" onclick="viewReturnRequest('<%= order._id %>')">Xem Y/C Hoàn</button>
+                                                        <% } else if (order.status === 'cancelled') { %>
+                                                            <span class="text-muted">Không thể cập nhật</span>
+                                                        <% } else { %>
+                                                        <% 
+                                                            const flow = ['pending', 'confirmed', 'shipping', 'delivered'];
+                                                            const currentIndex = flow.indexOf(order.status);
+                                                        %>
                                                         <select class="form-select form-select-sm status-select"
                                                             data-id="<%= order._id %>" style="width:150px;">
-                                                            <option value="pending" <%=order.status==='pending'
-                                                                ? 'selected' :'' %>>Chờ xác nhận</option>
-                                                            <option value="confirmed" <%=order.status==='confirmed'
-                                                                ? 'selected' :'' %>>Đã xác nhận</option>
-                                                            <option value="shipping" <%=order.status==='shipping'
-                                                                ? 'selected' :'' %>>Đang giao</option>
-                                                            <option value="delivered" <%=order.status==='delivered'
-                                                                ? 'selected' :'' %>>Đã giao</option>
-                                                            <option value="cancelled" <%=order.status==='cancelled'
-                                                                ? 'selected' :'' %>>Đã hủy</option>
+                                                            <% flow.forEach((st, idx) => { %>
+                                                                <option value="<%= st %>" <%= order.status === st ? 'selected' : '' %> <%= idx < currentIndex ? 'disabled' : '' %>><%= labels[st] %></option>
+                                                            <% }) %>
+                                                            <% if (order.status === 'pending' || order.status === 'confirmed') { %>
+                                                                <option value="cancelled">Đã hủy</option>
+                                                            <% } %>
                                                         </select>
+                                                        <% } %>
                                                     </td>
                                                 </tr>
                                                 <% }) %>
@@ -102,4 +111,20 @@
             </div>
         </div>
 
-        <%- include('../layouts/footer') %>
+        <!-- Return Request Admin Modal -->
+        <div class="modal fade" id="adminReturnModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Chi tiết yêu cầu hoàn hàng</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body" id="adminReturnContent">
+                        <div class="text-center py-4"><span class="spinner-border text-success"></span></div>
+                    </div>
+                    <div class="modal-footer" id="adminReturnFooter">
+                        <!-- Buttons injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>

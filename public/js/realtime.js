@@ -7,6 +7,9 @@
 if (typeof currentUser !== 'undefined' && currentUser) {
     const socket = io();
 
+    // Lấy thông báo ban đầu
+    fetchNotifications();
+
     // ── Thông báo trạng thái đơn hàng ──────────────────────
     socket.on('order_status_update', function (data) {
         showRealtimeToast(
@@ -15,17 +18,25 @@ if (typeof currentUser !== 'undefined' && currentUser) {
             'success',
             `/orders/${data.orderId}`
         );
-        // Cập nhật badge thông báo nếu có
-        const badge = document.getElementById('notificationBadge');
-        if (badge) {
-            badge.style.display = 'inline';
-            badge.textContent = parseInt(badge.textContent || 0) + 1;
-        }
+        addNotificationToDropdown({
+            title: 'Cập nhật đơn hàng',
+            message: data.message,
+            link: `/orders/${data.orderId}`,
+            created_at: new Date().toISOString()
+        });
+        incrementBadge();
     });
 
     // ── Thông báo đơn hàng mới (cho staff/admin) ───────────
     socket.on('new_order', function (data) {
         showRealtimeToast('🛒 Đơn hàng mới', data.message, 'primary', '/admin/orders');
+        addNotificationToDropdown({
+            title: 'Đơn hàng mới',
+            message: data.message,
+            link: `/admin/orders`,
+            created_at: new Date().toISOString()
+        });
+        incrementBadge();
     });
 
     // ── Thông báo tin nhắn mới ─────────────────────────────
@@ -37,6 +48,86 @@ if (typeof currentUser !== 'undefined' && currentUser) {
         if (badgeStaff) badgeStaff.style.display = 'inline-block';
     });
 }
+
+function incrementBadge() {
+    const badge = document.getElementById('notificationBadge');
+    if (badge) {
+        badge.style.display = 'inline';
+        badge.textContent = parseInt(badge.textContent || 0) + 1;
+    }
+}
+
+async function fetchNotifications() {
+    try {
+        const res = await fetch('/api/notifications');
+        const data = await res.json();
+        if (data.success) {
+            const badge = document.getElementById('notificationBadge');
+            if (badge && data.unreadCount > 0) {
+                badge.style.display = 'inline';
+                badge.textContent = data.unreadCount;
+            }
+            
+            const list = document.getElementById('notificationList');
+            if (list) {
+                list.innerHTML = '';
+                if (data.notifications.length === 0) {
+                    list.innerHTML = '<li><div class="dropdown-item text-center text-muted small py-4">Không có thông báo nào.</div></li>';
+                } else {
+                    data.notifications.forEach(n => addNotificationToDropdown(n, true));
+                }
+            }
+        }
+    } catch (err) {
+        console.error('Error fetching notifications:', err);
+    }
+}
+
+function addNotificationToDropdown(n, append = false) {
+    const list = document.getElementById('notificationList');
+    if (!list) return;
+
+    // Remove empty state if exists
+    const emptyState = list.querySelector('.text-muted.small');
+    if (emptyState && list.children.length === 1 && emptyState.textContent.includes('Không có thông báo nào')) {
+        list.innerHTML = '';
+    }
+
+    const time = new Date(n.createdAt || n.created_at).toLocaleString('vi-VN');
+    const li = document.createElement('li');
+    li.innerHTML = `
+        <a class="dropdown-item py-3 border-bottom text-wrap flex-column align-items-start ${n.is_read ? '' : 'bg-light'}" href="${n.link || '#'}" style="min-width: 300px;">
+            <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                <h6 class="mb-0 text-dark fw-bold" style="font-size: 14px;"><i class="fas ${n.type === 'order_new' ? 'fa-shopping-cart text-primary' : 'fa-box text-success'} me-2"></i>${n.title}</h6>
+                <small class="text-muted" style="font-size: 11px;">${time}</small>
+            </div>
+            <p class="mb-0 text-secondary mt-1" style="font-size: 13px; line-height: 1.4; padding-left: 24px;">${n.message}</p>
+        </a>
+    `;
+
+    if (append) {
+        list.appendChild(li);
+    } else {
+        list.insertBefore(li, list.firstChild);
+    }
+}
+
+window.markNotificationsAsRead = async function() {
+    const badge = document.getElementById('notificationBadge');
+    if (badge && badge.style.display !== 'none') {
+        badge.style.display = 'none';
+        badge.textContent = '0';
+        
+        // Remove bg-light from items visually
+        document.querySelectorAll('#notificationList .bg-light').forEach(el => el.classList.remove('bg-light'));
+
+        try {
+            await fetch('/api/notifications/mark-read/all', { method: 'POST' });
+        } catch (err) {
+            console.error('Error marking as read:', err);
+        }
+    }
+};
 
 // ── Toast thông báo realtime ────────────────────────────────
 function showRealtimeToast(title, message, type = 'success', link = null) {

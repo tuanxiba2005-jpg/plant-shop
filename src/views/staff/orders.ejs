@@ -6,6 +6,15 @@
 
 <div class="card shadow-sm">
     <div class="card-body p-0">
+        <div class="mb-3 d-flex gap-2 flex-wrap">
+            <a href="?status=all" class="btn btn-outline-secondary btn-sm">Tất cả</a>
+            <a href="?status=pending" class="btn btn-outline-warning btn-sm">Chờ xác nhận</a>
+            <a href="?status=confirmed" class="btn btn-outline-info btn-sm">Đã xác nhận</a>
+            <a href="?status=shipping" class="btn btn-outline-primary btn-sm">Đang giao</a>
+            <a href="?status=delivered" class="btn btn-outline-success btn-sm">Đã giao</a>
+            <a href="?status=cancelled" class="btn btn-outline-danger btn-sm">Đã hủy</a>
+            <a href="?status=return_requested" class="btn btn-outline-warning btn-sm fw-bold border-2">Y/C Hoàn hàng</a>
+        </div>
         <div class="table-responsive">
             <table class="table table-hover mb-0">
                 <thead class="table-success">
@@ -15,10 +24,12 @@
                         <th>Tổng tiền</th>
                         <th>Trạng thái</th>
                         <th>Ngày đặt</th>
-                        <th>Thao tác</th>
+                        <th>Cập nhật</th>
                     </tr>
                 </thead>
                 <tbody>
+                    <% const labels={ pending: 'Chờ xác nhận' , confirmed: 'Đã xác nhận' ,
+                        shipping: 'Đang giao' , delivered: 'Đã giao' , cancelled: 'Đã hủy', return_requested: 'Y/C Hoàn hàng', returned: 'Đã hoàn hàng', return_rejected: 'Từ chối hoàn' } %>
                     <% orders.forEach(order => { %>
                     <tr>
                         <td><small class="text-muted">#<%= order._id.toString().slice(-6).toUpperCase() %></small></td>
@@ -27,20 +38,29 @@
                             <%= parseInt(order.total_price).toLocaleString('vi-VN') %>đ
                         </td>
                         <td>
-                            <select class="form-select form-select-sm status-select"
-                                    data-id="<%= order._id %>"
-                                    style="width: auto;">
-                                <option value="pending"    <%= order.status === 'pending'    ? 'selected' : '' %>>Chờ xử lý</option>
-                                <option value="processing" <%= order.status === 'processing' ? 'selected' : '' %>>Đang xử lý</option>
-                                <option value="shipped"    <%= order.status === 'shipped'    ? 'selected' : '' %>>Đang giao</option>
-                                <option value="delivered"  <%= order.status === 'delivered'  ? 'selected' : '' %>>Đã giao</option>
-                                <option value="cancelled"  <%= order.status === 'cancelled'  ? 'selected' : '' %>>Đã hủy</option>
-                            </select>
+                            <span class="badge bg-secondary"><%= labels[order.status] %></span>
                         </td>
                         <td><%= new Date(order.createdAt).toLocaleDateString('vi-VN') %></td>
                         <td>
-                            <% if (order.items && order.items.length > 0) { %>
-                                <small class="text-muted"><%= order.items.length %> sản phẩm</small>
+                            <% if (['return_requested', 'returned', 'return_rejected'].includes(order.status)) { %>
+                                <button class="btn btn-sm btn-outline-danger" onclick="viewReturnRequest('<%= order._id %>')">Xem Y/C Hoàn</button>
+                            <% } else if (order.status === 'cancelled') { %>
+                                <span class="text-muted">Không thể cập nhật</span>
+                            <% } else { %>
+                            <% 
+                                const flow = ['pending', 'confirmed', 'shipping', 'delivered'];
+                                const currentIndex = flow.indexOf(order.status);
+                            %>
+                            <select class="form-select form-select-sm status-select"
+                                    data-id="<%= order._id %>"
+                                    style="width: 130px;">
+                                <% flow.forEach((st, idx) => { %>
+                                    <option value="<%= st %>" <%= order.status === st ? 'selected' : '' %> <%= idx < currentIndex ? 'disabled' : '' %>><%= labels[st] %></option>
+                                <% }) %>
+                                <% if (order.status === 'pending' || order.status === 'confirmed') { %>
+                                    <option value="cancelled">Đã hủy</option>
+                                <% } %>
+                            </select>
                             <% } %>
                         </td>
                     </tr>
@@ -51,20 +71,114 @@
     </div>
 </div>
 
+<!-- Return Request Modal -->
+<div class="modal fade" id="adminReturnModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chi tiết yêu cầu hoàn hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="adminReturnContent">
+                <div class="text-center py-4"><span class="spinner-border text-success"></span></div>
+            </div>
+            <div class="modal-footer" id="adminReturnFooter"></div>
+        </div>
+    </div>
+</div>
+
 <script>
 document.querySelectorAll('.status-select').forEach(select => {
     select.addEventListener('change', async function () {
         const id = this.dataset.id;
         const status = this.value;
-        const res = await fetch(`/staff/orders/status/${id}`, {
+        const res = await fetch(`/staff/orders/${id}/status`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status })
         });
         const data = await res.json();
-        if (!data.success) alert('Cập nhật thất bại!');
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Cập nhật thất bại!');
+            location.reload();
+        }
     });
 });
+
+let adminReturnModal;
+if (document.getElementById('adminReturnModal')) {
+    adminReturnModal = new bootstrap.Modal(document.getElementById('adminReturnModal'));
+}
+
+async function viewReturnRequest(orderId) {
+    if (!adminReturnModal) return;
+    const content = document.getElementById('adminReturnContent');
+    const footer = document.getElementById('adminReturnFooter');
+    content.innerHTML = '<div class="text-center py-4"><span class="spinner-border text-success"></span></div>';
+    footer.innerHTML = '';
+    adminReturnModal.show();
+
+    try {
+        const res = await fetch(`/staff/orders/${orderId}/return-detail`);
+        const data = await res.json();
+        
+        if (data.success && data.order) {
+            const req = data.order.return_request || {};
+            let imagesHtml = '';
+            if (req.images && req.images.length > 0) {
+                imagesHtml = `<div class="d-flex gap-2 flex-wrap mt-2">
+                    ${req.images.map(img => `<img src="/images/returns/${img}" style="width:100px; height:100px; object-fit:cover; border-radius:8px; border:1px solid #ddd; cursor:pointer;" onclick="window.open('/images/returns/${img}', '_blank')">`).join('')}
+                </div>`;
+            }
+            content.innerHTML = `
+                <div class="mb-3">
+                    <strong>Khách hàng:</strong> ${data.order.user_id?.name || 'N/A'}<br>
+                    <strong>Ngày yêu cầu:</strong> ${req.requested_at ? new Date(req.requested_at).toLocaleString('vi-VN') : 'N/A'}
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">Lý do hoàn hàng:</label>
+                    <div class="p-3 bg-light rounded">${req.reason || 'Không có lý do'}</div>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">Hình ảnh chứng minh:</label>
+                    ${imagesHtml || '<p class="text-muted">Không có hình ảnh</p>'}
+                </div>
+            `;
+            if (data.order.status === 'return_requested') {
+                footer.innerHTML = `
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-danger" onclick="processReturn('${orderId}', 'reject')">Từ chối</button>
+                    <button type="button" class="btn btn-success" onclick="processReturn('${orderId}', 'approve')">Chấp nhận hoàn</button>
+                `;
+            } else {
+                footer.innerHTML = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>`;
+            }
+        }
+    } catch (err) {
+        content.innerHTML = '<div class="text-danger">Lỗi kết nối.</div>';
+    }
+}
+
+async function processReturn(orderId, action) {
+    if (!confirm(`Bạn có chắc chắn muốn ${action === 'approve' ? 'chấp nhận' : 'từ chối'} yêu cầu hoàn hàng này?`)) return;
+    try {
+        const res = await fetch(`/staff/orders/${orderId}/process-return`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action })
+        });
+        const data = await res.json();
+        if (data.success) {
+            location.reload();
+        } else {
+            alert(data.message || 'Lỗi xử lý');
+        }
+    } catch (err) {
+        alert('Lỗi kết nối!');
+    }
+}
 </script>
 
 <%- include('../layouts/footer') %>

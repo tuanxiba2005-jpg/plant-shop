@@ -101,7 +101,7 @@
                                             Đánh giá
                                         </button>
                                     <% } else { %>
-                                        <span class="badge bg-secondary">Đã đánh giá</span>
+                                        <a href="/products/<%= item.product_id._id || item.product_id %>#reviews" class="badge bg-secondary text-decoration-none" title="Xem lại đánh giá của bạn">Đã đánh giá</a>
                                     <% } %>
                                 <% } %>
                             </td>

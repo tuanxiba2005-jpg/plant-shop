@@ -23,8 +23,8 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({ storage, fileFilter, limits: { fileSize: MAX_FILE_SIZE } });
 
-const uploadSingle = (req, res, next) => {
-    upload.single('image')(req, res, (err) => {
+const uploadFields = (req, res, next) => {
+    upload.fields([{ name: 'image', maxCount: 1 }, { name: 'images', maxCount: 5 }])(req, res, (err) => {
         if (err instanceof multer.MulterError)
             return res.status(400).json({ success: false, message: err.code === 'LIMIT_FILE_SIZE' ? 'File quá lớn. Tối đa 5MB.' : err.message });
         if (err)
@@ -38,13 +38,15 @@ router.use(authMiddleware.isAdmin);
 // Products
 router.get('/dashboard', adminController.dashboard);
 router.get('/products', adminController.products);
-router.post('/products/create', uploadSingle, adminController.createProduct);
-router.post('/products/update/:id', uploadSingle, adminController.updateProduct);
+router.post('/products/create', uploadFields, adminController.createProduct);
+router.post('/products/update/:id', uploadFields, adminController.updateProduct);
 router.delete('/products/:id', adminController.deleteProduct);
 
-// Orders
+// Quản lý đơn hàng
 router.get('/orders', adminController.orders);
 router.post('/orders/:id/status', adminController.updateOrderStatus);
+router.get('/orders/:id/return-detail', adminController.getReturnDetail);
+router.post('/orders/:id/process-return', adminController.processReturn);
 
 // Users
 router.get('/users', adminController.users);

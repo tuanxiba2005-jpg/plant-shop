@@ -91,6 +91,7 @@ const staffRoutes = require('./src/routes/staffRoutes');
 const addressRoutes = require('./src/routes/addressRoutes');
 const wishlistRoutes = require('./src/routes/wishlistRoutes');
 const chatRoutes = require('./src/routes/chatRoutes');
+const notificationRoutes = require('./src/routes/notificationRoutes');
 
 app.use('/', indexRoutes);
 app.use('/products', productRoutes);
@@ -102,6 +103,7 @@ app.use('/staff', staffRoutes);
 app.use('/user/addresses', addressRoutes);
 app.use('/wishlist', wishlistRoutes);
 app.use('/chat', chatRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // ── Socket.io — thông báo realtime ─────────────────────────
 io.on('connection', (socket) => {
@@ -120,14 +122,14 @@ io.on('connection', (socket) => {
     // Gửi tin nhắn
     socket.on('send_message', async (data) => {
         if (!userId) return; // Phải đăng nhập
-        
+
         try {
             const Message = require('./src/models/Message');
-            
+
             // Xác định room
             // Nếu là admin/staff nhắn, room sẽ được gửi từ client. Nếu là customer nhắn, room là chat_ của chính họ
             const room = data.room || `chat_${userId}`;
-            
+
             const newMsg = await Message.model.create({
                 room: room,
                 sender: userId,
@@ -179,6 +181,7 @@ io.notifyUser = (userId, event, data) => {
 io.notifyStaff = (event, data) => {
     io.to('staff_room').emit(event, data);
 };
+app.set('io', io);
 
 // ── Error handlers ──────────────────────────────────────────
 const errorMiddleware = require('./src/middlewares/errorMiddleware');

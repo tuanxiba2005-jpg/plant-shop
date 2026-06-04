@@ -22,6 +22,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if(targetElement) {
                 targetElement.style.display = 'block';
             }
+            
+            // Nếu là tab địa chỉ thì tải danh sách địa chỉ
+            if(targetId === 'address' && typeof loadAddresses === 'function') {
+                loadAddresses('addressList');
+            }
         });
     });
 
@@ -53,6 +58,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     row.style.display = 'none';
                 }
+            });
+        });
+    }
+
+    // Filter orders by tabs
+    const historyTabs = document.querySelectorAll('.history-tabs span[data-filter]');
+    if (historyTabs.length > 0) {
+        historyTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Update active class
+                historyTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                // Filter table rows
+                const filter = this.getAttribute('data-filter');
+                tableRows.forEach(row => {
+                    const status = row.getAttribute('data-status');
+                    // Skip the "Chưa có lịch sử giao dịch" empty row if it exists (it won't have data-status)
+                    if (!status) return;
+
+                    if (filter === 'all' || status === filter) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
             });
         });
     }

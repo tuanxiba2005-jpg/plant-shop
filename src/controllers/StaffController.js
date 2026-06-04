@@ -2,6 +2,15 @@ const Product = require('../models/Product');
 const Category = require('../models/Category');
 const Order = require('../models/Order');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
+
+const STATUS_LABELS = {
+    pending: 'Chờ xác nhận',
+    confirmed: 'Chờ lấy hàng',
+    shipping: 'Đang giao',
+    delivered: 'Giao hàng thành công',
+    cancelled: 'Đã hủy'
+};
 
 class StaffController {
     constructor() {
@@ -16,6 +25,8 @@ class StaffController {
         this.updateProduct = this.updateProduct.bind(this);
         this.orders = this.orders.bind(this);
         this.updateOrderStatus = this.updateOrderStatus.bind(this);
+        this.getReturnDetail = this.getReturnDetail.bind(this);
+        this.processReturn = this.processReturn.bind(this);
         this.customers = this.customers.bind(this);
     }
 
@@ -89,10 +100,88 @@ class StaffController {
 
     async updateOrderStatus(req, res) {
         try {
-            await this.orderModel.updateStatus(req.params.id, req.body.status);
+            const { status } = req.body;
+            await this.orderModel.updateStatus(req.params.id, status);
+
+            // Lấy user_id từ đơn hàng để emit thông báo
+            const order = await this.orderModel.model.findById(req.params.id).lean();
+            if (order && STATUS_LABELS[status]) {
+                const messageText = `Đơn hàng #${order._id.toString().slice(-6).toUpperCase()} của bạn đã được cập nhật: ${STATUS_LABELS[status]}`;
+                
+                await Notification.create({
+                    user_id: order.user_id,
+                    title: 'Cập nhật đơn hàng',
+                    message: messageText,
+                    link: `/orders/my-orders`,
+                    type: 'order_status'
+                });
+
+                const io = req.app.get('io');
+                if (io) {
+                    io.notifyUser(order.user_id.toString(), 'order_status_update', {
+                        orderId: order._id,
+                        status,
+                        statusLabel: STATUS_LABELS[status],
+                        message: messageText
+                    });
+                }
+            }
+
             res.json({ success: true });
         } catch (err) {
             console.error('Staff update order status error:', err.message);
+            res.json({ success: false, message: err.message });
+        }
+    }
+
+    async getReturnDetail(req, res) {
+        try {
+            const order = await this.orderModel.model.findById(req.params.id)
+                .populate('user_id', 'name email')
+                .lean();
+            if (!order) return res.json({ success: false, message: 'Không tìm thấy đơn hàng' });
+            res.json({ success: true, order });
+        } catch (err) {
+            res.json({ success: false, message: err.message });
+        }
+    }
+
+    async processReturn(req, res) {
+        try {
+            const { action } = req.body;
+            const newStatus = action === 'approve' ? 'returned' : 'return_rejected';
+            
+            const order = await this.orderModel.model.findById(req.params.id).lean();
+            if (!order || order.status !== 'return_requested') {
+                return res.json({ success: false, message: 'Đơn hàng không ở trạng thái yêu cầu hoàn' });
+            }
+
+            await this.orderModel.update(req.params.id, { status: newStatus });
+
+            const messageText = action === 'approve' 
+                ? `Yêu cầu hoàn hàng cho đơn #${order._id.toString().slice(-6).toUpperCase()} đã được CHẤP NHẬN.`
+                : `Yêu cầu hoàn hàng cho đơn #${order._id.toString().slice(-6).toUpperCase()} đã bị TỪ CHỐI.`;
+            
+            await Notification.create({
+                user_id: order.user_id,
+                title: 'Kết quả yêu cầu hoàn hàng',
+                message: messageText,
+                link: `/orders/my-orders`,
+                type: 'order_status'
+            });
+
+            const io = req.app.get('io');
+            if (io) {
+                io.notifyUser(order.user_id.toString(), 'order_status_update', {
+                    orderId: order._id,
+                    status: newStatus,
+                    message: messageText
+                });
+            }
+
+            res.json({ success: true });
+        } catch (err) {
+            console.error('Staff process return error:', err);
             res.json({ success: false, message: err.message });
         }
     }

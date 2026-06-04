@@ -1,218 +1,231 @@
-<% extraJS = [] %>
-<%- include('../layouts/header') %>
+<% extraJS=['/js/admin/dashboard.js']; extraCSS=['/css/admin-dashboard.css'] %>
+    <%- include('../layouts/header') %>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3>📊 Admin Dashboard</h3>
-    <span class="text-muted">Xin chào, <strong><%= user.name %></strong></span>
-</div>
-
-<!-- Thống kê tổng quan -->
-<div class="row mb-4">
-    <div class="col-md-3 mb-3">
-        <div class="card border-0 shadow-sm text-center p-3">
-            <div class="fs-1">🌿</div>
-            <h2 class="text-success fw-bold"><%= totalProducts %></h2>
-            <p class="text-muted mb-2">Sản phẩm</p>
-            <a href="/admin/products" class="btn btn-outline-success btn-sm">Quản lý</a>
-        </div>
-    </div>
-    <div class="col-md-3 mb-3">
-        <div class="card border-0 shadow-sm text-center p-3">
-            <div class="fs-1">📦</div>
-            <h2 class="text-warning fw-bold"><%= totalOrders %></h2>
-            <p class="text-muted mb-2">Đơn hàng</p>
-            <a href="/admin/orders" class="btn btn-outline-warning btn-sm">Quản lý</a>
-        </div>
-    </div>
-    <div class="col-md-3 mb-3">
-        <div class="card border-0 shadow-sm text-center p-3">
-            <div class="fs-1">👥</div>
-            <h2 class="text-info fw-bold"><%= totalUsers %></h2>
-            <p class="text-muted mb-2">Người dùng</p>
-            <a href="/admin/users" class="btn btn-outline-info btn-sm">Quản lý</a>
-        </div>
-    </div>
-    <div class="col-md-3 mb-3">
-        <div class="card border-0 shadow-sm text-center p-3">
-            <div class="fs-1">💰</div>
-            <h2 class="text-danger fw-bold">
-                <%= parseInt(totalRevenue).toLocaleString('vi-VN') %>đ
-            </h2>
-            <p class="text-muted mb-2">Doanh thu</p>
-            <a href="/admin/revenue" class="btn btn-outline-danger btn-sm">Xem báo cáo</a>
-        </div>
-    </div>
-</div>
-
-<!-- Thống kê trạng thái đơn hàng -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card shadow-sm">
-            <div class="card-header bg-success text-white fw-bold">
-                📋 Thống kê trạng thái đơn hàng
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <% const statusLabels = {
-                        pending: 'Chờ xác nhận',
-                        confirmed: 'Đã xác nhận',
-                        shipping: 'Đang giao',
-                        delivered: 'Đã giao',
-                        cancelled: 'Đã hủy'
-                    } %>
-                    <% const statusColors = {
-                        pending: 'warning',
-                        confirmed: 'info',
-                        shipping: 'primary',
-                        delivered: 'success',
-                        cancelled: 'danger'
-                    } %>
-                    <% const allStatuses = ['pending', 'confirmed', 'shipping', 'delivered', 'cancelled'] %>
-                    <% allStatuses.forEach(status => { %>
-                        <% const found = statusStats.find(s => s._id === status) %>
-                        <div class="col">
-                            <div class="border rounded p-3">
-                                <h4 class="text-<%= statusColors[status] %> fw-bold mb-1">
-                                    <%= found ? found.count : 0 %>
-                                </h4>
-                                <small class="text-muted"><%= statusLabels[status] %></small>
-                            </div>
-                        </div>
-                    <% }) %>
+        <div class="admin-layout">
+            <!-- Dark Sidebar -->
+            <aside class="admin-sidebar shadow-lg">
+                <a href="/" class="brand d-flex align-items-center">
+                    <i class="fas fa-leaf me-2"></i> Plant Shop
+                </a>
+                <div class="nav-menu">
+                    <a href="/admin/dashboard" class="nav-item active">
+                        <i class="fas fa-tachometer-alt"></i> Tổng quan
+                    </a>
+                    <a href="/admin/products" class="nav-item">
+                        <i class="fas fa-box-open"></i> Sản phẩm
+                    </a>
+                    <a href="/admin/orders" class="nav-item">
+                        <i class="fas fa-shopping-bag"></i> Đơn hàng
+                    </a>
+                    <a href="/admin/users" class="nav-item">
+                        <i class="fas fa-users"></i> Người dùng
+                    </a>
+                    <a href="/admin/revenue" class="nav-item">
+                        <i class="fas fa-chart-line"></i> Doanh thu
+                    </a>
+                    <a href="/admin/coupons" class="nav-item">
+                        <i class="fas fa-tags"></i> Mã giảm giá
+                    </a>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
+                <div class="bottom-menu">
+                    <a href="/admin/chat" class="nav-item">
+                        <i class="fas fa-headset text-success"></i> Hỗ trợ Chat
+                    </a>
+                    <a href="/user/logout" class="nav-item text-danger">
+                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                    </a>
+                </div>
+            </aside>
 
-<!-- Biểu đồ doanh thu + Đơn hàng gần đây -->
-<div class="row mb-4">
-    <!-- Biểu đồ doanh thu -->
-    <div class="col-md-7 mb-3">
-        <div class="card shadow-sm h-100">
-            <div class="card-header bg-success text-white fw-bold d-flex justify-content-between">
-                <span>📈 Doanh thu năm <%= new Date().getFullYear() %></span>
-                <a href="/admin/revenue" class="text-white text-decoration-none small">
-                    Xem chi tiết →
-                </a>
-            </div>
-            <div class="card-body">
-                <canvas id="dashboardChart" height="200"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Đơn hàng gần đây -->
-    <div class="col-md-5 mb-3">
-        <div class="card shadow-sm h-100">
-            <div class="card-header bg-success text-white fw-bold d-flex justify-content-between">
-                <span>🕐 Đơn hàng gần đây</span>
-                <a href="/admin/orders" class="text-white text-decoration-none small">
-                    Xem tất cả →
-                </a>
-            </div>
-            <div class="card-body p-0">
-                <div class="list-group list-group-flush">
-                    <% if (recentOrders.length === 0) { %>
-                    <div class="text-center py-4 text-muted">
-                        Chưa có đơn hàng nào
+            <!-- Main Content -->
+            <main class="admin-main">
+                <!-- Topbar -->
+                <header class="admin-topbar">
+                    <div class="d-flex align-items-center">
+                        <h4 class="mb-0 fw-bold text-dark">Dashboard</h4>
                     </div>
-                    <% } else { %>
-                    <% const badges = {
-                        pending: 'warning', confirmed: 'info',
-                        shipping: 'primary', delivered: 'success', cancelled: 'danger'
-                    } %>
-                    <% const labels = {
-                        pending: 'Chờ xác nhận', confirmed: 'Đã xác nhận',
-                        shipping: 'Đang giao', delivered: 'Đã giao', cancelled: 'Đã hủy'
-                    } %>
-                    <% recentOrders.forEach(order => { %>
-                    <div class="list-group-item px-3 py-2">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong class="small">
-                                    #<%= order._id.toString().slice(-6).toUpperCase() %>
-                                </strong>
-                                <br>
-                                <small class="text-muted">
-                                    <%= order.user_id?.name || 'N/A' %>
-                                </small>
-                            </div>
-                            <div class="text-end">
-                                <span class="badge bg-<%= badges[order.status] %> d-block mb-1">
-                                    <%= labels[order.status] %>
-                                </span>
-                                <small class="text-success fw-bold">
-                                    <%= parseInt(order.total_price).toLocaleString('vi-VN') %>đ
-                                </small>
+                    <div class="d-flex align-items-center">
+                        <div class="position-relative me-4">
+                            <input type="text"
+                                class="form-control form-control-sm bg-light border-0 rounded-pill px-4 py-2"
+                                placeholder="Tìm kiếm...">
+                            <i class="fas fa-search position-absolute text-muted" style="top: 10px; left: 14px;"></i>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="<%= user.avatar || '/images/default-avatar.png' %>"
+                                    class="rounded-circle border" width="40" height="40" alt="Admin">
+                                <div class="d-none d-md-block">
+                                    <p class="mb-0 fw-bold small">
+                                        <%= user.name %>
+                                    </p>
+                                    <p class="mb-0 text-muted" style="font-size: 0.75rem;">Administrator</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <% }) %>
-                    <% } %>
+                </header>
+
+                <!-- Content Area -->
+                <div class="admin-content">
+
+                    <!-- Plant Image Cards (Top Products) -->
+                    <div class="row mb-4 g-3">
+                        <% if (typeof topProducts !=='undefined' && topProducts.length> 0) { %>
+                            <% topProducts.forEach((product, index)=> { %>
+                                <div class="col-md-3">
+                                    <div class="plant-card">
+                                        <img src="/images/products/<%= product.image %>" alt="<%= product.name %>">
+                                        <div class="overlay">
+                                            <h5 class="fw-bold mb-1 text-truncate">
+                                                <%= product.name %>
+                                            </h5>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="small"><i class="fas fa-box me-1"></i>Kho: <%=
+                                                        product.stock %></span>
+                                                <span class="badge bg-success bg-opacity-75">
+                                                    <%= parseInt(product.price).toLocaleString('vi-VN') %>đ
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }) %>
+                                    <% } else { %>
+                                        <div class="col-12 text-muted">Chưa có sản phẩm nào.</div>
+                                        <% } %>
+                    </div>
+
+                    <!-- Stats & Charts -->
+                    <div class="row mb-4 g-3">
+                        <div class="col-md-3">
+                            <div class="d-flex flex-column gap-3 h-100">
+                                <div class="stat-card p-4">
+                                    <div class="icon-box icon-box-success">
+                                        <i class="fas fa-wallet"></i>
+                                    </div>
+                                    <h3 class="fw-bold mb-1">
+                                        <%= parseInt(totalRevenue).toLocaleString('vi-VN') %>đ
+                                    </h3>
+                                    <p class="text-muted small mb-0">Tổng doanh thu</p>
+                                </div>
+                                <div class="stat-card p-4">
+                                    <div class="icon-box icon-box-warning">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </div>
+                                    <h3 class="fw-bold mb-1">
+                                        <%= totalOrders %>
+                                    </h3>
+                                    <p class="text-muted small mb-0">Tổng đơn hàng</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-9">
+                            <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h5 class="fw-bold mb-0">Biểu đồ doanh thu <%= new Date().getFullYear() %>
+                                    </h5>
+                                    <a href="/admin/revenue" class="btn btn-sm btn-light border">Báo cáo chi tiết <i
+                                            class="fas fa-chevron-right ms-1"></i></a>
+                                </div>
+                                <div style="position: relative; height: 300px; width: 100%;">
+                                    <canvas id="dashboardChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Orders Table -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold mb-0">Đơn hàng gần đây</h5>
+                                <a href="/admin/orders" class="text-success text-decoration-none small fw-bold">Xem tất
+                                    cả →</a>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="modern-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Khách hàng</th>
+                                            <th>Mã đơn</th>
+                                            <th>Ngày đặt</th>
+                                            <th>Tổng tiền</th>
+                                            <th>Trạng thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% if (recentOrders.length===0) { %>
+                                            <tr>
+                                                <td colspan="5" class="text-center text-muted">Chưa có đơn hàng nào</td>
+                                            </tr>
+                                            <% } else { %>
+                                                <% const badges={ pending: 'warning' , confirmed: 'info' ,
+                                                    shipping: 'primary' , delivered: 'success' , cancelled: 'danger' }
+                                                    %>
+                                                    <% const labels={ pending: 'Chờ xác nhận' , confirmed: 'Đã xác nhận'
+                                                        , shipping: 'Đang giao' , delivered: 'Đã giao' ,
+                                                        cancelled: 'Đã hủy' } %>
+                                                        <% recentOrders.forEach(order=> { %>
+                                                            <tr>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div
+                                                                            class="bg-light rounded-circle p-2 me-3 text-success">
+                                                                            <i class="fas fa-user"></i>
+                                                                        </div>
+                                                                        <div>
+                                                                            <h6 class="mb-0 fw-bold">
+                                                                                <%= order.user_id?.name
+                                                                                    || 'Khách vãng lai' %>
+                                                                            </h6>
+                                                                            <small class="text-muted">
+                                                                                <%= order.user_id?.email || '' %>
+                                                                            </small>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td class="fw-bold text-muted">#<%=
+                                                                        order._id.toString().slice(-6).toUpperCase() %>
+                                                                </td>
+                                                                <td>
+                                                                    <%= new
+                                                                        Date(order.createdAt).toLocaleDateString('vi-VN')
+                                                                        %>
+                                                                </td>
+                                                                <td class="fw-bold text-success">
+                                                                    <%= parseInt(order.total_price).toLocaleString('vi-VN')
+                                                                        %>đ
+                                                                </td>
+                                                                <td>
+                                                                    <span
+                                                                        class="badge rounded-pill badge-soft-<%= badges[order.status] %> px-3 py-2">
+                                                                        <%= labels[order.status] %>
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                            <% }) %>
+                                                                <% } %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-            </div>
+            </main>
         </div>
-    </div>
-</div>
 
-<!-- Quản lý nhanh -->
-<div class="row">
-    <div class="col-12">
-        <div class="card shadow-sm">
-            <div class="card-header bg-success text-white fw-bold">
-                ⚡ Truy cập nhanh
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-6 col-md-3 mb-3">
-                        <a href="/admin/products" class="text-decoration-none">
-                            <div class="card border-success h-100 p-3">
-                                <div class="fs-2">🌿</div>
-                                <p class="text-success fw-bold mb-0 mt-2">Sản phẩm</p>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-6 col-md-3 mb-3">
-                        <a href="/admin/orders" class="text-decoration-none">
-                            <div class="card border-warning h-100 p-3">
-                                <div class="fs-2">📦</div>
-                                <p class="text-warning fw-bold mb-0 mt-2">Đơn hàng</p>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-6 col-md-3 mb-3">
-                        <a href="/admin/users" class="text-decoration-none">
-                            <div class="card border-info h-100 p-3">
-                                <div class="fs-2">👥</div>
-                                <p class="text-info fw-bold mb-0 mt-2">Người dùng</p>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-6 col-md-3 mb-3">
-                        <a href="/admin/revenue" class="text-decoration-none">
-                            <div class="card border-danger h-100 p-3">
-                                <div class="fs-2">📊</div>
-                                <p class="text-danger fw-bold mb-0 mt-2">Doanh thu</p>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+        <!-- Data cho biểu đồ -->
+        <% if (typeof months !=='undefined' && months) { %>
+            <script>
+                window.dashboardData = <%- JSON.stringify(months) %>;
+            </script>
+            <% } else { %>
+                <script>
+                    window.dashboardData = [];
+                </script>
+                <% } %>
 
-<!-- Data cho biểu đồ -->
-<!-- Data cho biểu đồ -->
-<% if (typeof months !== 'undefined' && months) { %>
-<script>
-    window.dashboardData = <%- JSON.stringify(months) %>;
-</script>
-<% } else { %>
-<script>
-    window.dashboardData = [];
-</script>
-<% } %>
-
-<%- include('../layouts/footer') %>
+                    <%- include('../layouts/footer') %>

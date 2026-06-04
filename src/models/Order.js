@@ -6,7 +6,7 @@ const orderSchema = new mongoose.Schema({
     total_price: { type: Number, required: true },
     status: {
         type: String,
-        enum: ['pending', 'confirmed', 'shipping', 'delivered', 'cancelled'],
+        enum: ['pending', 'confirmed', 'shipping', 'delivered', 'cancelled', 'return_requested', 'returned', 'return_rejected'],
         default: 'pending'
     },
     payment_method: {
@@ -27,7 +27,12 @@ const orderSchema = new mongoose.Schema({
         name: { type: String },
         quantity: { type: Number },
         price: { type: Number }
-    }]
+    }],
+    return_request: {
+        reason: { type: String },
+        images: [{ type: String }],
+        requested_at: { type: Date }
+    }
 }, { timestamps: true });
 
 class Order extends Model {
