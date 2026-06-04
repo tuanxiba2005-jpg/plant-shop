@@ -23,6 +23,7 @@ document.querySelectorAll('.btn-delete').forEach(btn => {
             this.closest('tr').remove();
             showToast('Đã xóa sản phẩm!', 'success');
         }
+    });
 });
 
 function previewMultiImages(input, previewId) {

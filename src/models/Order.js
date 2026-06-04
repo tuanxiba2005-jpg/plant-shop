@@ -98,7 +98,11 @@ class Order extends Model {
     }
 
     async updateStatus(id, status) {
-        return await this.update(id, { status });
+        const updateData = { status };
+        if (status === 'delivered') {
+            updateData.payment_status = 'paid';
+        }
+        return await this.update(id, updateData);
     }
 
     async revenueByMonth(year) {

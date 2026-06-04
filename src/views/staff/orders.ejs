@@ -1,4 +1,7 @@
-<% locals.hideFooter = true; %>
+<% 
+    locals.hideFooter = true; 
+    extraJS=['/js/staff/orders.js'] 
+%>
 <%- include('../layouts/header') %>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -87,7 +90,5 @@
         </div>
     </div>
 </div>
-
-<script src="/js/staff/orders.js"></script>
 
 <%- include('../layouts/footer') %>
