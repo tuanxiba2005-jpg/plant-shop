@@ -104,9 +104,7 @@ class AdminController {
             const data = { name, description, price, stock, category_id };
             if (req.files?.image?.[0]) data.image = req.files.image[0].filename;
             if (req.files?.images?.length) {
-                const existing = await this.productModel.findById(req.params.id);
-                const oldImages = existing?.images || [];
-                data.images = [...oldImages, ...req.files.images.map(f => f.filename)];
+                data.images = req.files.images.map(f => f.filename);
             }
             await this.productModel.update(req.params.id, data);
             res.redirect('/admin/products');

@@ -38,6 +38,37 @@ document.querySelector('.btn-add-cart')?.addEventListener('click', async functio
     }
 });
 
+// ── Buy Now ─────────────────────────────────────────────
+document.querySelector('.pd-btn-buy')?.addEventListener('click', async function (e) {
+    e.preventDefault();
+    const btn = this;
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+    btn.disabled = true;
+
+    const productId = document.querySelector('.btn-add-cart').dataset.id;
+    const quantity = parseInt(document.getElementById('quantity').value);
+    try {
+        const res = await fetch('/cart/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, quantity })
+        });
+        const data = await res.json();
+        if (data.success) {
+            window.location.href = '/orders/checkout';
+        } else {
+            showToast('Vui lòng đăng nhập để mua hàng!', 'danger');
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+        }
+    } catch (e) {
+        showToast('Vui lòng đăng nhập!', 'danger');
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+    }
+});
+
 // ── Gallery Thumbnails ──────────────────────────────────────
 document.querySelectorAll('.pd-thumb').forEach(thumb => {
     thumb.addEventListener('click', function () {

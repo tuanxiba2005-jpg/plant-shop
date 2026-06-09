@@ -35,7 +35,7 @@
         .cat-card img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             transition: transform 0.5s;
         }
 
@@ -76,7 +76,7 @@
         .lux-product-image img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
         }
 
         .lux-quick-actions {
@@ -322,9 +322,9 @@
                         mã <strong>WELCOME30</strong> khi thanh toán.</p>
                     <a href="/products" class="btn btn-success btn-lg px-5 rounded-pill shadow">Mua Ngay</a>
                 </div>
-                <div class="col-md-6 order-1 order-md-2">
-                    <img src="/images/products/hoa-hong.jpg" class="img-fluid w-100 object-fit-cover"
-                        style="min-height: 450px;" alt="Promo">
+                <div class="col-md-6 order-md-1">
+                    <img src="/images/products/hoa-hong.jpg" class="img-fluid w-100 object-fit-contain"
+                        style="height: 500px; border-radius: var(--radius-lg); box-shadow: var(--shadow-md);">
                 </div>
             </div>
         </div>
@@ -403,13 +403,13 @@
                 <% const instaImgs=['hoa-do-quyen.jpg', 'mon-rong-bac.jpg' , 'kimtien1.jpg' , 'lan-y.jpg'
                     , 'hoa-tu-dang.jpg' , 'cau-tieu-tram.jpg' ]; %>
                     <% instaImgs.forEach(img=> { %>
-                        <div class="col-6 col-md-4 col-lg-2 position-relative overflow-hidden" style="height: 300px;">
-                            <img src="/images/products/<%= img %>" class="w-100 h-100 object-fit-cover" alt="Instagram">
+                        <a href="#" class="d-block position-relative overflow-hidden" style="height: 250px;">
+                            <img src="/images/products/<%= img %>" class="w-100 h-100 object-fit-contain" alt="Instagram">
                             <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center hover-opacity-100"
                                 style="background: rgba(45,95,63,0.7); transition: 0.3s; cursor: pointer;">
                                 <i class="fab fa-instagram text-white display-4"></i>
                             </div>
-                        </div>
+                        </a>
                         <% }) %>
             </div>
         </div>

@@ -1,0 +1,421 @@
+<%- include('../layouts/header') %>
+
+<!-- CSS riêng cho trang Bí quyết chăm sóc -->
+<style>
+    :root {
+        --care-primary: #2d5f3f;
+        --care-accent: #f4f7f5;
+        --care-gold: #c5a365;
+    }
+
+    .care-hero {
+        position: relative;
+        background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/images/care-hero-bg.jpg') center/cover no-repeat;
+        height: 450px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: white;
+        margin-bottom: 5rem;
+    }
+
+    .care-hero h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .care-hero p {
+        font-size: 1.2rem;
+        max-width: 600px;
+        margin: 0 auto;
+        opacity: 0.9;
+    }
+
+    /* Các nguyên tắc cơ bản */
+    .principle-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem;
+        height: 100%;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        border: 1px solid rgba(45, 95, 63, 0.08);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .principle-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: var(--care-primary);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.4s ease;
+    }
+
+    .principle-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(45, 95, 63, 0.08);
+    }
+
+    .principle-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .principle-icon {
+        width: 64px;
+        height: 64px;
+        background: var(--care-accent);
+        color: var(--care-primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .principle-card:hover .principle-icon {
+        background: var(--care-primary);
+        color: white;
+        transform: rotateY(180deg);
+    }
+
+    .principle-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #222;
+        margin-bottom: 1rem;
+    }
+
+    /* Phân loại chăm sóc */
+    .care-category-section {
+        background-color: var(--care-accent);
+        padding: 6rem 0;
+        margin: 5rem 0;
+    }
+
+    .care-tab-btn {
+        background: transparent;
+        border: 2px solid transparent;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        color: #555;
+        border-radius: 30px;
+        transition: all 0.3s ease;
+        margin: 0 0.5rem 1rem;
+    }
+
+    .care-tab-btn.active {
+        background: var(--care-primary);
+        color: white;
+        box-shadow: 0 8px 20px rgba(45, 95, 63, 0.2);
+    }
+
+    .care-tab-btn:hover:not(.active) {
+        border-color: var(--care-primary);
+        color: var(--care-primary);
+    }
+
+    .care-content-box {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.05);
+    }
+
+    .care-checklist {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .care-checklist li {
+        position: relative;
+        padding-left: 2rem;
+        margin-bottom: 1rem;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .care-checklist li::before {
+        content: '\f00c';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        position: absolute;
+        left: 0;
+        top: 2px;
+        color: var(--care-primary);
+    }
+
+    /* Bệnh thường gặp */
+    .disease-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        border-radius: 12px;
+        background: white;
+        border-left: 4px solid #e53935;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+        margin-bottom: 1.5rem;
+        transition: transform 0.3s ease;
+    }
+
+    .disease-card:hover {
+        transform: translateX(5px);
+    }
+
+    .disease-icon {
+        font-size: 2rem;
+        color: #e53935;
+    }
+
+    /* Call to Action */
+    .care-cta {
+        background: var(--care-primary);
+        border-radius: 24px;
+        padding: 4rem;
+        text-align: center;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .care-cta::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+    }
+
+    .section-title {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        color: #222;
+        position: relative;
+        display: inline-block;
+        padding-bottom: 1rem;
+        margin-bottom: 3rem;
+    }
+
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background: var(--care-gold);
+        border-radius: 2px;
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="care-hero">
+    <div class="container">
+        <span class="badge bg-white text-dark mb-3 py-2 px-3 fw-medium" style="letter-spacing: 2px; text-transform: uppercase; font-size: 0.75rem;">Plant Care Guide</span>
+        <h1>Nghệ Thuật Chăm Sóc Cây Cảnh</h1>
+        <p>Bí quyết để duy trì không gian xanh luôn tươi tốt, khoẻ mạnh và tràn đầy sức sống. Khám phá cẩm nang chăm sóc từ các chuyên gia của Tuan's Green.</p>
+    </div>
+</section>
+
+<div class="container">
+    <!-- 4 Nguyên Tắc Cơ Bản -->
+    <div class="text-center">
+        <h2 class="section-title">4 Yếu Tố Cốt Lõi</h2>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Ánh sáng -->
+        <div class="col-md-6 col-lg-3">
+            <div class="principle-card">
+                <div class="principle-icon">
+                    <i class="fas fa-sun"></i>
+                </div>
+                <h3 class="principle-title">Ánh sáng</h3>
+                <p class="text-muted small mb-0">Mỗi loại cây cần lượng ánh sáng khác nhau. Cây ưa bóng râm cần tránh nắng gắt, trong khi cây sen đá cần ánh nắng trực tiếp ít nhất 4h/ngày.</p>
+            </div>
+        </div>
+        <!-- Nước -->
+        <div class="col-md-6 col-lg-3">
+            <div class="principle-card">
+                <div class="principle-icon">
+                    <i class="fas fa-tint"></i>
+                </div>
+                <h3 class="principle-title">Tưới nước</h3>
+                <p class="text-muted small mb-0">Tưới nước đúng cách là chìa khóa. Quy tắc vàng: Hãy đợi lớp đất trên cùng khô hẳn (khoảng 2-3cm) rồi mới tưới tiếp để tránh úng rễ.</p>
+            </div>
+        </div>
+        <!-- Đất & Dinh dưỡng -->
+        <div class="col-md-6 col-lg-3">
+            <div class="principle-card">
+                <div class="principle-icon">
+                    <i class="fas fa-seedling"></i>
+                </div>
+                <h3 class="principle-title">Dinh dưỡng</h3>
+                <p class="text-muted small mb-0">Đất cần tơi xốp, thoát nước tốt. Bổ sung phân bón hữu cơ định kỳ 1-2 tháng/lần vào mùa sinh trưởng để cây phát triển khỏe mạnh.</p>
+            </div>
+        </div>
+        <!-- Không khí & Nhiệt độ -->
+        <div class="col-md-6 col-lg-3">
+            <div class="principle-card">
+                <div class="principle-icon">
+                    <i class="fas fa-wind"></i>
+                </div>
+                <h3 class="principle-title">Môi trường</h3>
+                <p class="text-muted small mb-0">Đa số cây nội thất ưa thích nhiệt độ từ 18-28°C và độ ẩm khoảng 50-60%. Tránh đặt cây trước luồng gió lạnh của máy lạnh.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Phân loại chăm sóc -->
+<section class="care-category-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Chăm Sóc Theo Từng Dòng Cây</h2>
+            <p class="text-muted">Chọn loại cây bạn đang trồng để xem hướng dẫn chi tiết</p>
+            
+            <div class="d-flex justify-content-center flex-wrap mt-4 nav nav-pills" role="tablist">
+                <button class="care-tab-btn active" data-bs-toggle="pill" data-bs-target="#tab-indoor" type="button" role="tab">Cây Nội Thất</button>
+                <button class="care-tab-btn" data-bs-toggle="pill" data-bs-target="#tab-succulent" type="button" role="tab">Sen Đá & Xương Rồng</button>
+                <button class="care-tab-btn" data-bs-toggle="pill" data-bs-target="#tab-flowering" type="button" role="tab">Cây Có Hoa</button>
+            </div>
+        </div>
+
+        <div class="tab-content">
+            <!-- Cây nội thất -->
+            <div class="tab-pane fade show active" id="tab-indoor" role="tabpanel">
+                <div class="care-content-box row align-items-center g-5">
+                    <div class="col-lg-5 text-center">
+                        <img src="/images/products/monstera.jpg" alt="Cây nội thất" class="img-fluid rounded-4 shadow" onerror="this.src='https://images.unsplash.com/photo-1598880940080-c977d0799732?q=80&w=800&auto=format&fit=crop'">
+                    </div>
+                    <div class="col-lg-7">
+                        <h3 class="font-serif fw-bold mb-4" style="color: var(--care-primary);">Chăm Sóc Cây Nội Thất (Bàng Singapore, Monstera, Kim Tiền...)</h3>
+                        <p class="text-muted mb-4">Cây nội thất thường dễ chăm sóc nhưng lại rất nhạy cảm với việc tưới dư nước và thiếu ánh sáng tự nhiên.</p>
+                        
+                        <ul class="care-checklist">
+                            <li><strong>Ánh sáng:</strong> Đặt gần cửa sổ có rèm che, ánh sáng tán xạ là tốt nhất. Tránh nắng gắt trực tiếp làm cháy lá.</li>
+                            <li><strong>Tưới nước:</strong> 1-2 lần/tuần tùy độ ẩm phòng. Luôn kiểm tra đất khô mới tưới.</li>
+                            <li><strong>Làm sạch lá:</strong> Dùng khăn ẩm lau nhẹ hai mặt lá mỗi 2 tuần để lỗ khí khổng thông thoáng, cây quang hợp tốt hơn.</li>
+                            <li><strong>Phân bón:</strong> Dùng phân bón lỏng pha loãng (NPK 20-20-20) định kỳ 1 tháng/lần vào mùa Xuân - Hè.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sen đá -->
+            <div class="tab-pane fade" id="tab-succulent" role="tabpanel">
+                <div class="care-content-box row align-items-center g-5">
+                    <div class="col-lg-5 text-center">
+                        <img src="/images/products/succulent.jpg" alt="Sen đá" class="img-fluid rounded-4 shadow" onerror="this.src='https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?q=80&w=800&auto=format&fit=crop'">
+                    </div>
+                    <div class="col-lg-7">
+                        <h3 class="font-serif fw-bold mb-4" style="color: var(--care-primary);">Chăm Sóc Sen Đá & Xương Rồng</h3>
+                        <p class="text-muted mb-4">Loài cây mang vẻ đẹp cứng cáp, chịu hạn tốt nhưng rất dễ chết nếu bị úng nước hoặc thiếu nắng trầm trọng.</p>
+                        
+                        <ul class="care-checklist">
+                            <li><strong>Ánh sáng:</strong> Cần rất nhiều ánh sáng, 4-6 tiếng nắng trực tiếp mỗi ngày (nắng sáng là lý tưởng nhất).</li>
+                            <li><strong>Tưới nước:</strong> "Tưới đẫm - Đợi khô kiệt". Tưới thật đẫm đến khi nước chảy ra đáy chậu, sau đó ngưng tưới hoàn toàn 1-2 tuần cho đến khi đất khô rang.</li>
+                            <li><strong>Đất trồng:</strong> Bắt buộc phải cực kỳ xốp, trộn nhiều đá Perlite, Pumice, xỉ than. Không dùng đất thịt 100%.</li>
+                            <li><strong>Lưu ý:</strong> Hạn chế để nước đọng trên lá để tránh thối nhũn.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cây có hoa -->
+            <div class="tab-pane fade" id="tab-flowering" role="tabpanel">
+                <div class="care-content-box row align-items-center g-5">
+                    <div class="col-lg-5 text-center">
+                        <img src="/images/products/orchid.jpg" alt="Lan hồ điệp" class="img-fluid rounded-4 shadow" onerror="this.src='https://images.unsplash.com/photo-1565502690940-058df53b8118?q=80&w=800&auto=format&fit=crop'">
+                    </div>
+                    <div class="col-lg-7">
+                        <h3 class="font-serif fw-bold mb-4" style="color: var(--care-primary);">Chăm Sóc Cây Có Hoa (Lan Hồ Điệp, Hồng Môn...)</h3>
+                        <p class="text-muted mb-4">Để cây ra hoa đều và bền màu đòi hỏi chế độ dinh dưỡng và ánh sáng khắt khe hơn so với cây lá.</p>
+                        
+                        <ul class="care-checklist">
+                            <li><strong>Ánh sáng:</strong> Cần ánh sáng tán xạ mạnh để kích thích ra hoa. Hoa Lan tuyệt đối tránh nắng gắt trực tiếp.</li>
+                            <li><strong>Nhiệt độ & Độ ẩm:</strong> Rất quan trọng. Nhiệt độ mát (20-25°C) giúp hoa lâu tàn. Độ ẩm quanh cây nên đạt 60-70%.</li>
+                            <li><strong>Dinh dưỡng:</strong> Bổ sung phân bón có hàm lượng Lân (P) và Kali (K) cao hơn để dưỡng hoa. Bón phân định kỳ 2 tuần/lần.</li>
+                            <li><strong>Cắt tỉa:</strong> Khi hoa tàn, cắt bỏ cành hoa kịp thời để cây tập trung dinh dưỡng nuôi mầm mới.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Các vấn đề thường gặp -->
+<div class="container mb-5 pb-5">
+    <div class="text-center mb-5">
+        <h2 class="section-title">Bắt Bệnh Cho Cây</h2>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="disease-card">
+                <div class="disease-icon"><i class="fas fa-leaf text-warning"></i></div>
+                <div>
+                    <h5 class="fw-bold mb-2">Lá Vàng & Mềm Nhũn</h5>
+                    <p class="text-muted small mb-0"><strong>Nguyên nhân:</strong> Thường do tưới quá dư nước gây úng rễ.<br><strong>Cách khắc phục:</strong> Ngừng tưới ngay, đưa cây ra nơi thoáng gió. Kiểm tra đáy chậu xem có bị bít lỗ thoát nước không. Có thể cần thay đất mới nếu rễ đã bị đen.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="disease-card">
+                <div class="disease-icon"><i class="fas fa-leaf" style="color: #c5a365;"></i></div>
+                <div>
+                    <h5 class="fw-bold mb-2">Lá Khô Giòn, Cháy Mép</h5>
+                    <p class="text-muted small mb-0"><strong>Nguyên nhân:</strong> Thiếu ẩm trầm trọng, nắng gắt hoặc bón lố phân.<br><strong>Cách khắc phục:</strong> Chuyển cây vào chỗ mát hơn, phun sương lá hoặc đặt khay nước tạo ẩm cạnh cây. Nếu do phân bón, tưới xả nhiều nước để rửa trôi phân.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="disease-card" style="border-left-color: #6c757d;">
+                <div class="disease-icon"><i class="fas fa-bug text-secondary"></i></div>
+                <div>
+                    <h5 class="fw-bold mb-2">Rệp Sáp, Nhện Đỏ</h5>
+                    <p class="text-muted small mb-0"><strong>Dấu hiệu:</strong> Đốm trắng bông ở kẽ lá, màng nhện liti.<br><strong>Cách khắc phục:</strong> Cách ly cây bệnh. Dùng cồn pha loãng lau sạch rệp sáp, hoặc sử dụng dầu Neem (Neem oil) xịt đều lên lá 2-3 ngày/lần.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="disease-card" style="border-left-color: #4caf50;">
+                <div class="disease-icon"><i class="fas fa-arrow-down text-success"></i></div>
+                <div>
+                    <h5 class="fw-bold mb-2">Cây Còi Cọc, Rụng Lá Dưới</h5>
+                    <p class="text-muted small mb-0"><strong>Nguyên nhân:</strong> Thiếu ánh sáng hoặc cây đã bị "chật chậu".<br><strong>Cách khắc phục:</strong> Đưa dần cây ra nơi sáng hơn. Kiểm tra bộ rễ, nếu rễ đâm tủa ra ngoài lỗ thoát nước, hãy thay sang chậu lớn hơn 1 size.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA -->
+<div class="container mb-5 pb-4">
+    <div class="care-cta">
+        <h2 class="font-serif fw-bold mb-3">Cây Của Bạn Đang Gặp Vấn Đề?</h2>
+        <p class="mb-4 fs-5" style="opacity: 0.9;">Đừng quá lo lắng! Đội ngũ chuyên gia của Tuan's Green luôn sẵn sàng hỗ trợ bạn bắt bệnh và đưa ra giải pháp chăm sóc miễn phí.</p>
+        <a href="/products" class="btn btn-light btn-lg rounded-pill px-5 fw-bold text-success me-3">Mua Cây Thêm</a>
+        <a href="mailto:support@tuansgreen.com" class="btn btn-outline-light btn-lg rounded-pill px-5 fw-bold">Liên Hệ Tư Vấn</a>
+    </div>
+</div>
+
+<%- include('../layouts/footer') %>

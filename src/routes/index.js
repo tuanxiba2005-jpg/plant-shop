@@ -31,4 +31,11 @@ router.get('/', async (req, res) => {
     }
 });
 
+// Trang Bí quyết chăm sóc cây
+router.get('/plant-care', (req, res) => {
+    res.render('pages/plant-care', {
+        title: 'Bí quyết chăm sóc cây - Cẩm nang'
+    });
+});
+
 module.exports = router;

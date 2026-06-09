@@ -28,7 +28,7 @@ app.use(helmet({
             styleSrc: ["'self'", "'unsafe-inline'", "cdnjs.cloudflare.com"],
             fontSrc: ["'self'", "cdnjs.cloudflare.com"],
             imgSrc: ["'self'", "data:"],
-            connectSrc: ["'self'", "cdnjs.cloudflare.com", "ws:", "wss:"],
+            connectSrc: ["'self'", "cdnjs.cloudflare.com", "ws:", "wss:", "https://provinces.open-api.vn", "https://esgoo.net"],
             formAction: ["'self'", "https://sandbox.vnpayment.vn", "https://test-payment.momo.vn"],
         },
     },

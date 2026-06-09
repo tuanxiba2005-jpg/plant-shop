@@ -79,7 +79,7 @@
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
                 <script src="/js/main.js?v=5"></script>
                 <script src="/socket.io/socket.io.js"></script>
-                <script>const currentUser = <% - JSON.stringify(locals.user || null) %>;</script>
+                <script>const currentUser = <%- JSON.stringify(locals.user || null) %>;</script>
                 <script src="/js/realtime.js"></script>
                 <% if (typeof extraJS !=='undefined' ) { %>
                     <% extraJS.forEach(src=> { %>
