@@ -9,10 +9,7 @@ const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'
 const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, 'public/images/products/'),
-    filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname).toLowerCase())
-});
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
@@ -22,6 +19,37 @@ const fileFilter = (req, file, cb) => {
 };
 
 const upload = multer({ storage, fileFilter, limits: { fileSize: MAX_FILE_SIZE } });
+
+const sharp = require('sharp');
+const processImages = async (req, res, next) => {
+    try {
+        if (req.file) {
+            const filename = Date.now() + '-' + Math.round(Math.random() * 1E9) + '.webp';
+            await sharp(req.file.buffer)
+                .resize({ width: 800, withoutEnlargement: true })
+                .webp({ quality: 80 })
+                .toFile(path.join('public/images/products/', filename));
+            req.file.filename = filename;
+        }
+
+        if (req.files) {
+            for (let fieldName in req.files) {
+                const files = req.files[fieldName];
+                for (let file of files) {
+                    const filename = Date.now() + '-' + Math.round(Math.random() * 1E9) + '.webp';
+                    await sharp(file.buffer)
+                        .resize({ width: 800, withoutEnlargement: true })
+                        .webp({ quality: 80 })
+                        .toFile(path.join('public/images/products/', filename));
+                    file.filename = filename;
+                }
+            }
+        }
+        next();
+    } catch (err) {
+        next(err);
+    }
+};
 
 const uploadFields = (req, res, next) => {
     upload.fields([{ name: 'image', maxCount: 1 }, { name: 'images', maxCount: 5 }])(req, res, (err) => {
@@ -38,8 +66,8 @@ router.use(authMiddleware.isAdmin);
 // Products
 router.get('/dashboard', adminController.dashboard);
 router.get('/products', adminController.products);
-router.post('/products/create', uploadFields, adminController.createProduct);
-router.post('/products/update/:id', uploadFields, adminController.updateProduct);
+router.post('/products/create', uploadFields, processImages, adminController.createProduct);
+router.post('/products/update/:id', uploadFields, processImages, adminController.updateProduct);
 router.delete('/products/:id', adminController.deleteProduct);
 
 // Quản lý đơn hàng
@@ -73,9 +101,9 @@ router.get('/chat', chatController.adminChat);
 const adminArticleController = require('../controllers/AdminArticleController');
 router.get('/articles', adminArticleController.index);
 router.get('/articles/create', adminArticleController.createForm);
-router.post('/articles/create', upload.single('image'), adminArticleController.create);
+router.post('/articles/create', upload.single('image'), processImages, adminArticleController.create);
 router.get('/articles/:id/edit', adminArticleController.editForm);
-router.post('/articles/:id/edit', upload.single('image'), adminArticleController.update);
+router.post('/articles/:id/edit', upload.single('image'), processImages, adminArticleController.update);
 router.delete('/articles/:id', adminArticleController.delete);
 
 module.exports = router;

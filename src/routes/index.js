@@ -12,16 +12,24 @@ router.get('/', async (req, res) => {
 
         const categories = await categoryModel.findAll();
 
-        // Với mỗi danh mục, lấy tối đa 8 sản phẩm
-        const categoriesWithProducts = await Promise.all(
-            categories.map(async (cat) => {
-                const products = await productModel.findByCategory(cat._id);
-                return {
-                    ...cat.toObject ? cat.toObject() : cat,
-                    products: products.slice(0, 8)
-                };
-            })
-        );
+        // Lấy tất cả sản phẩm thuộc các danh mục này trong 1 lần query duy nhất
+        const categoryIds = categories.map(cat => cat._id);
+        const allProducts = await productModel.model.find({ category_id: { $in: categoryIds } }).lean();
+        
+        // Nhóm sản phẩm theo danh mục
+        const productsByCategory = {};
+        for (const product of allProducts) {
+            const catId = product.category_id.toString();
+            if (!productsByCategory[catId]) productsByCategory[catId] = [];
+            if (productsByCategory[catId].length < 8) {
+                productsByCategory[catId].push(product);
+            }
+        }
+
+        const categoriesWithProducts = categories.map(cat => ({
+            ...cat.toObject ? cat.toObject() : cat,
+            products: productsByCategory[cat._id.toString()] || []
+        }));
 
         // Lấy 3 bài viết mới nhất
         const latestArticles = await articleModel.model.find({ status: 'published' })

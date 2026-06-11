@@ -7,6 +7,8 @@ const MongoStore = require('connect-mongo').default;
 const path = require('path');
 const Database = require('./src/config/Database');
 const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
 
 const app = express();
 const server = http.createServer(app);
@@ -23,11 +25,12 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "cdnjs.cloudflare.com"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "cdnjs.cloudflare.com", "cdn.jsdelivr.net"],
             scriptSrcAttr: ["'unsafe-inline'"],
-            styleSrc: ["'self'", "'unsafe-inline'", "cdnjs.cloudflare.com"],
-            fontSrc: ["'self'", "cdnjs.cloudflare.com"],
-            imgSrc: ["'self'", "data:"],
+            styleSrc: ["'self'", "'unsafe-inline'", "cdnjs.cloudflare.com", "cdn.jsdelivr.net"],
+            fontSrc: ["'self'", "cdnjs.cloudflare.com", "cdn.jsdelivr.net"],
+            imgSrc: ["'self'", "data:", "res.cloudinary.com"],
+            mediaSrc: ["'self'", "https://assets.mixkit.co"],
             connectSrc: ["'self'", "cdnjs.cloudflare.com", "ws:", "wss:", "https://provinces.open-api.vn", "https://esgoo.net"],
             formAction: ["'self'", "https://sandbox.vnpayment.vn", "https://test-payment.momo.vn"],
         },
@@ -37,6 +40,13 @@ app.use(helmet({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize());
+
+// Data sanitization against XSS
+app.use(xss());
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 const sessionMiddleware = session({
@@ -69,11 +79,19 @@ app.set('views', path.join(__dirname, 'src/views'));
 const Category = require('./src/models/Category');
 const categoryModel = new Category();
 
+let cachedCategories = null;
+let lastCacheTime = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 app.use(async (req, res, next) => {
     res.locals.user = req.session.user || null;
     res.locals.cartCount = req.session.cartCount || 0;
     try {
-        res.locals.globalCategories = await categoryModel.findAll();
+        if (!cachedCategories || Date.now() - lastCacheTime > CACHE_TTL) {
+            cachedCategories = await categoryModel.findAll();
+            lastCacheTime = Date.now();
+        }
+        res.locals.globalCategories = cachedCategories;
     } catch {
         res.locals.globalCategories = [];
     }

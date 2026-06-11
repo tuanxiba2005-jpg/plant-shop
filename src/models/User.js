@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema({
     password:           { type: String, required: true },
     role:               { type: String, enum: ['admin', 'staff', 'user'], default: 'user' },
     isBlocked:          { type: Boolean, default: false },
+    isVerified:         { type: Boolean, default: true },
+    verificationToken:  { type: String, default: null },
     resetToken:         { type: String, default: null },        // token đặt lại mật khẩu
     resetTokenExpiry:   { type: Date, default: null }           // hết hạn sau 15 phút
 }, { timestamps: true });
@@ -21,9 +23,9 @@ class User extends Model {
         return await this.model.findOne({ email }).lean();
     }
 
-    async register(name, email, password) {
+    async register(name, email, password, verificationToken = null) {
         const hashed = await bcrypt.hash(password, 10);
-        return await this.create({ name, email, password: hashed });
+        return await this.create({ name, email, password: hashed, verificationToken });
     }
 
     async verifyPassword(password, hashed) {

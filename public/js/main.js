@@ -2,6 +2,10 @@
 document.querySelectorAll('.btn-add-cart').forEach(btn => {
     btn.addEventListener('click', async function () {
         const productId = this.dataset.id;
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang thêm...';
+        this.disabled = true;
+        
         try {
             const res = await fetch('/cart/add', {
                 method: 'POST',
@@ -16,6 +20,9 @@ document.querySelectorAll('.btn-add-cart').forEach(btn => {
             }
         } catch (e) {
             showToast('Vui lòng đăng nhập!', 'danger');
+        } finally {
+            this.innerHTML = originalText;
+            this.disabled = false;
         }
     });
 });
@@ -112,12 +119,27 @@ function updateTotal() {
 }
 
 function showToast(message, type = 'success') {
-    const toast = document.createElement('div');
-    toast.className = `alert alert-${type} position-fixed bottom-0 end-0 m-3`;
-    toast.style.zIndex = 9999;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2500);
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'bottom-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
+        }
+    });
+    
+    let swalType = 'success';
+    if(type === 'danger') swalType = 'error';
+    if(type === 'info') swalType = 'info';
+    if(type === 'warning') swalType = 'warning';
+
+    Toast.fire({
+        icon: swalType,
+        title: message
+    });
 }
 
 
@@ -303,7 +325,22 @@ function selectPayment(method) {
 const btnCancel = document.getElementById('btnCancel');
 if (btnCancel) {
     btnCancel.addEventListener('click', async function () {
-        if (!confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?')) return;
+        const result = await Swal.fire({
+            title: 'Hủy đơn hàng?',
+            text: "Bạn có chắc chắn muốn hủy đơn hàng này không?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Có, Hủy ngay!',
+            cancelButtonText: 'Không, giữ lại'
+        });
+        
+        if (!result.isConfirmed) return;
+
+        const originalText = this.innerHTML;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+        this.disabled = true;
 
         const orderId = window.location.pathname.split('/').pop();
         const res = await fetch(`/orders/${orderId}/cancel`, { method: 'POST' });
@@ -311,9 +348,11 @@ if (btnCancel) {
 
         if (data.success) {
             showToast('Đã hủy đơn hàng!', 'success');
-            setTimeout(() => location.reload(), 800);
+            setTimeout(() => location.reload(), 1500);
         } else {
             showToast(data.message || 'Không thể hủy đơn hàng!', 'danger');
+            this.innerHTML = originalText;
+            this.disabled = false;
         }
     });
 }

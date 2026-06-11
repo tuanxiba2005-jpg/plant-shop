@@ -28,15 +28,17 @@ class Cart extends Model {
             .lean();
         if (!cart) return [];
 
-        return cart.items.map(item => ({
-            product_id: item.product_id._id,
-            name:       item.product_id.name,
-            price:      item.product_id.price,
-            image:      item.product_id.image,
-            stock:      item.product_id.stock,
-            quantity:   item.quantity,
-            subtotal:   item.product_id.price * item.quantity
-        }));
+        return cart.items
+            .filter(item => item.product_id != null)
+            .map(item => ({
+                product_id: item.product_id._id,
+                name:       item.product_id.name,
+                price:      item.product_id.price,
+                image:      item.product_id.image,
+                stock:      item.product_id.stock,
+                quantity:   item.quantity,
+                subtotal:   item.product_id.price * item.quantity
+            }));
     }
 
     async addItem(userId, productId, quantity = 1) {

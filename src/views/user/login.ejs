@@ -9,12 +9,14 @@
                 <h4 class="mb-0">🌿 Đăng nhập</h4>
             </div>
             <div class="card-body p-4">
-                <% if (error) { %>
+                <% if (typeof error !== 'undefined' && error) { %>
                 <div class="alert alert-danger"><%= error %></div>
                 <% } %>
 
                 <% if (typeof query !== 'undefined' && query.success) { %>
                 <div class="alert alert-success"><%= query.success %></div>
+                <% } else if (typeof success !== 'undefined' && success) { %>
+                <div class="alert alert-success"><%= success %></div>
                 <% } %>
 
                 <form action="/user/login" method="POST">

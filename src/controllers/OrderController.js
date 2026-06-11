@@ -134,7 +134,7 @@ class OrderController {
                 await Notification.insertMany(notifications);
 
                 if (req.app.get('io')) {
-                    req.app.get('io').notifyStaff('new_order', {
+                    req.app.get('io').to('staff_room').emit('new_order', {
                         message: `Khách hàng ${req.session.user.fullname || req.session.user.name} vừa đặt đơn hàng #${orderId.toString().slice(-6).toUpperCase()}.`,
                         orderId: orderId
                     });

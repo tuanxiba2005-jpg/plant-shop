@@ -101,4 +101,36 @@ async function sendResetPassword(toEmail, resetToken) {
     });
 }
 
-module.exports = { sendOrderConfirmation, sendResetPassword };
+// Gửi email xác thực tài khoản
+async function sendVerificationEmail(toEmail, name, token) {
+    const verifyUrl = `${process.env.APP_URL || 'http://localhost:3000'}/user/verify/${token}`;
+
+    await transporter.sendMail({
+        from: process.env.EMAIL_FROM,
+        to: toEmail,
+        subject: 'Plant Shop - Xác thực tài khoản của bạn',
+        html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+            <div style="background:#2d6a4f;padding:20px;text-align:center">
+                <h1 style="color:white;margin:0">🌿 Plant Shop</h1>
+            </div>
+            <div style="padding:24px">
+                <h2 style="color:#2d6a4f">Chào mừng ${name} đến với Plant Shop!</h2>
+                <p>Cảm ơn bạn đã đăng ký tài khoản. Để bắt đầu mua sắm, vui lòng nhấn vào nút bên dưới để xác thực địa chỉ email của bạn:</p>
+                <div style="text-align:center;margin:24px 0">
+                    <a href="${verifyUrl}"
+                       style="background:#2d6a4f;color:white;padding:12px 32px;border-radius:6px;text-decoration:none;font-weight:bold">
+                        Xác thực Email
+                    </a>
+                </div>
+                <p style="color:#999;font-size:13px">Nếu bạn không tạo tài khoản này, vui lòng bỏ qua email.</p>
+            </div>
+            <div style="background:#f0f7f4;padding:16px;text-align:center;color:#666;font-size:13px">
+                Plant Shop - Mang thiên nhiên vào ngôi nhà bạn
+            </div>
+        </div>
+        `
+    });
+}
+
+module.exports = { sendOrderConfirmation, sendResetPassword, sendVerificationEmail };

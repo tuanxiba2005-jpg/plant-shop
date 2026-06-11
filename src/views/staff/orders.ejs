@@ -11,13 +11,13 @@
 <div class="card shadow-sm">
     <div class="card-body p-0">
         <div class="mb-3 d-flex gap-2 flex-wrap">
-            <a href="?status=all" class="btn btn-outline-secondary btn-sm">Tất cả</a>
-            <a href="?status=pending" class="btn btn-outline-warning btn-sm">Chờ xác nhận</a>
-            <a href="?status=confirmed" class="btn btn-outline-info btn-sm">Đã xác nhận</a>
-            <a href="?status=shipping" class="btn btn-outline-primary btn-sm">Đang giao</a>
-            <a href="?status=delivered" class="btn btn-outline-success btn-sm">Đã giao</a>
-            <a href="?status=cancelled" class="btn btn-outline-danger btn-sm">Đã hủy</a>
-            <a href="?status=return_requested" class="btn btn-outline-warning btn-sm fw-bold border-2">Y/C Hoàn hàng</a>
+            <a href="?status=all" class="btn btn-outline-secondary btn-sm <%= currentStatus === 'all' ? 'active' : '' %>">Tất cả</a>
+            <a href="?status=pending" class="btn btn-outline-warning btn-sm <%= currentStatus === 'pending' ? 'active' : '' %>">Chờ xác nhận</a>
+            <a href="?status=confirmed" class="btn btn-outline-info btn-sm <%= currentStatus === 'confirmed' ? 'active' : '' %>">Đã xác nhận</a>
+            <a href="?status=shipping" class="btn btn-outline-primary btn-sm <%= currentStatus === 'shipping' ? 'active' : '' %>">Đang giao</a>
+            <a href="?status=delivered" class="btn btn-outline-success btn-sm <%= currentStatus === 'delivered' ? 'active' : '' %>">Đã giao</a>
+            <a href="?status=cancelled" class="btn btn-outline-danger btn-sm <%= currentStatus === 'cancelled' ? 'active' : '' %>">Đã hủy</a>
+            <a href="?status=return_requested" class="btn btn-outline-warning btn-sm fw-bold border-2 <%= currentStatus === 'return_requested' ? 'active' : '' %>">Y/C Hoàn hàng</a>
         </div>
         <div class="table-responsive">
             <table class="table table-hover mb-0">
@@ -32,6 +32,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <% const badges={ pending: 'warning', confirmed: 'info', shipping: 'primary', delivered: 'success', cancelled: 'danger', return_requested: 'warning', returned: 'secondary', return_rejected: 'dark' } %>
                     <% const labels={ pending: 'Chờ xác nhận' , confirmed: 'Đã xác nhận' ,
                         shipping: 'Đang giao' , delivered: 'Đã giao' , cancelled: 'Đã hủy', return_requested: 'Y/C Hoàn hàng', returned: 'Đã hoàn hàng', return_rejected: 'Từ chối hoàn' } %>
                     <% orders.forEach(order => { %>
@@ -42,7 +43,7 @@
                             <%= parseInt(order.total_price).toLocaleString('vi-VN') %>đ
                         </td>
                         <td>
-                            <span class="badge bg-secondary"><%= labels[order.status] %></span>
+                            <span class="badge bg-<%= badges[order.status] %>"><%= labels[order.status] %></span>
                         </td>
                         <td><%= new Date(order.createdAt).toLocaleDateString('vi-VN') %></td>
                         <td>

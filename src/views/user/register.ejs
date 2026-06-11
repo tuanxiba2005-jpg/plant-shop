@@ -9,8 +9,12 @@
                 <h4 class="mb-0">🌿 Đăng ký tài khoản</h4>
             </div>
             <div class="card-body p-4">
-                <% if (error) { %>
+                <% if (typeof error !== 'undefined' && error) { %>
                 <div class="alert alert-danger"><%= error %></div>
+                <% } %>
+                
+                <% if (typeof success !== 'undefined' && success) { %>
+                <div class="alert alert-success"><%= success %></div>
                 <% } %>
 
                 <form action="/user/register" method="POST">

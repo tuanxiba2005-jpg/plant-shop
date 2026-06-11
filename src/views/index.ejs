@@ -380,14 +380,16 @@
                 <% const instaImgs=['hoa-do-quyen.jpg', 'mon-rong-bac.jpg' , 'kimtien1.jpg' , 'lan-y.jpg'
                     , 'hoa-tu-dang.jpg' , 'cau-tieu-tram.jpg' ]; %>
                     <% instaImgs.forEach(img=> { %>
-                        <a href="#" class="d-block position-relative overflow-hidden" style="height: 250px;">
-                            <img src="/images/products/<%= img %>" class="w-100 h-100 object-fit-cover" alt="Instagram">
-                            <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center hover-opacity-100"
-                                style="background: rgba(45,95,63,0.7); transition: 0.3s; cursor: pointer;">
-                                <i class="fab fa-instagram text-white display-4"></i>
-                            </div>
-                        </a>
-                        <% }) %>
+                        <div class="col-4 col-md-2">
+                            <a href="#" class="d-block position-relative overflow-hidden" style="height: 250px;">
+                                <img src="/images/products/<%= img %>" class="w-100 h-100 object-fit-cover" alt="Instagram">
+                                <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center hover-opacity-100"
+                                    style="background: rgba(45,95,63,0.7); transition: 0.3s; cursor: pointer;">
+                                    <i class="fab fa-instagram text-white display-4"></i>
+                                </div>
+                            </a>
+                        </div>
+                    <% }) %>
             </div>
         </div>
     </section>

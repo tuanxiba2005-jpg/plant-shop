@@ -91,17 +91,34 @@ class Order extends Model {
             .lean();
     }
 
-    async getAllOrders() {
-        return await this.model.find()
+    async getAllOrders(filter = {}) {
+        return await this.model.find(filter)
             .populate('user_id', 'name email')
             .sort({ createdAt: -1 }).lean();
     }
 
     async updateStatus(id, status) {
+        const order = await this.model.findById(id);
+        if (!order) throw new Error('Không tìm thấy đơn hàng');
+
+        const oldStatus = order.status;
         const updateData = { status };
         if (status === 'delivered') {
             updateData.payment_status = 'paid';
         }
+
+        // Hoàn lại kho nếu chuyển trạng thái sang cancelled (và trước đó chưa bị cancelled)
+        if (status === 'cancelled' && oldStatus !== 'cancelled') {
+            const ProductModel = mongoose.model('Product');
+            for (const item of order.items) {
+                if (item.product_id) {
+                    await ProductModel.findByIdAndUpdate(
+                        item.product_id, { $inc: { stock: item.quantity } }
+                    );
+                }
+            }
+        }
+
         return await this.update(id, updateData);
     }
 

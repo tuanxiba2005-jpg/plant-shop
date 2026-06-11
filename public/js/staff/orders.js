@@ -10,10 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const data = await res.json();
             if (data.success) {
-                location.reload();
+                showToast('Cập nhật thành công!', 'success');
+                setTimeout(() => location.reload(), 800);
             } else {
-                alert('Cập nhật thất bại!');
-                location.reload();
+                showToast('Cập nhật thất bại!', 'danger');
+                setTimeout(() => location.reload(), 1500);
             }
         });
     });
@@ -82,12 +83,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const data = await res.json();
             if (data.success) {
-                location.reload();
+                showToast('Đã xử lý yêu cầu hoàn hàng', 'success');
+                setTimeout(() => location.reload(), 1000);
             } else {
-                alert(data.message || 'Lỗi xử lý');
+                showToast(data.message || 'Lỗi xử lý', 'danger');
             }
         } catch (err) {
-            alert('Lỗi kết nối!');
+            showToast('Lỗi kết nối!', 'danger');
         }
     };
 });

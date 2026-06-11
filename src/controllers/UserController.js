@@ -72,20 +72,56 @@ class UserController {
 
     async register(req, res) {
         try {
-            const { name, email, password, confirmPassword } = req.body;
-            if (password !== confirmPassword) {
-                return res.render('user/register', { title: 'Đăng ký', error: 'Mật khẩu không khớp' });
+            const Joi = require('joi');
+            const schema = Joi.object({
+                name: Joi.string().min(2).max(50).required().messages({
+                    'string.empty': 'Vui lòng nhập họ tên',
+                    'string.min': 'Họ tên tối thiểu 2 ký tự'
+                }),
+                email: Joi.string().email().required().messages({
+                    'string.empty': 'Vui lòng nhập email',
+                    'string.email': 'Email không hợp lệ'
+                }),
+                password: Joi.string()
+                    .min(8)
+                    .pattern(new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])'))
+                    .required()
+                    .messages({
+                        'string.empty': 'Vui lòng nhập mật khẩu',
+                        'string.min': 'Mật khẩu tối thiểu 8 ký tự',
+                        'string.pattern.base': 'Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt (!@#$%^&*)'
+                    }),
+                confirmPassword: Joi.string().valid(Joi.ref('password')).required().messages({
+                    'any.only': 'Mật khẩu xác nhận không khớp'
+                })
+            });
+
+            const { error, value } = schema.validate(req.body);
+            if (error) {
+                return res.render('user/register', { title: 'Đăng ký', error: error.details[0].message });
             }
+
+            const { name, email, password } = value;
+            
             const existing = await this.userModel.findByEmail(email);
             if (existing) {
                 return res.render('user/register', { title: 'Đăng ký', error: 'Email đã tồn tại' });
             }
-            await this.userModel.register(name, email, password);
-            res.redirect('/user/login');
+            
+            // Tạm thời bỏ qua xác thực email, đăng ký xong là isVerified = true
+            await this.userModel.register(name, email, password, null);
+            
+            res.render('user/login', { 
+                title: 'Đăng nhập', 
+                error: null,
+                success: 'Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.' 
+            });
         } catch (err) {
+            console.error('Register error:', err);
             res.render('user/register', { title: 'Đăng ký', error: 'Lỗi server' });
         }
     }
+
 
     logout(req, res) {
         req.session.destroy();
@@ -144,9 +180,12 @@ class UserController {
             if (!currentPassword || !newPassword || !confirmPassword) {
                 return res.redirect('/user/profile?error=Vui lòng điền đầy đủ thông tin&tab=password');
             }
-            if (newPassword.length < 6) {
-                return res.redirect('/user/profile?error=Mật khẩu mới tối thiểu 6 ký tự&tab=password');
+            
+            const regex = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])');
+            if (newPassword.length < 8 || !regex.test(newPassword)) {
+                return res.redirect('/user/profile?error=Mật khẩu mới tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt&tab=password');
             }
+            
             if (newPassword !== confirmPassword) {
                 return res.redirect('/user/profile?error=Mật khẩu mới không khớp&tab=password');
             }
@@ -247,11 +286,12 @@ class UserController {
                     error: 'Vui lòng điền đầy đủ thông tin'
                 });
             }
-            if (password.length < 6) {
+            const regex = new RegExp('^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*])');
+            if (password.length < 8 || !regex.test(password)) {
                 return res.render('user/reset-password', {
                     title: 'Đặt lại mật khẩu',
                     token,
-                    error: 'Mật khẩu tối thiểu 6 ký tự'
+                    error: 'Mật khẩu mới tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt'
                 });
             }
             if (password !== confirmPassword) {

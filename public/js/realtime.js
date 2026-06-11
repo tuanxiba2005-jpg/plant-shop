@@ -25,6 +25,7 @@ if (typeof currentUser !== 'undefined' && currentUser) {
             created_at: new Date().toISOString()
         });
         incrementBadge();
+        playNotificationSound();
     });
 
     // ── Thông báo đơn hàng mới (cho staff/admin) ───────────
@@ -38,6 +39,7 @@ if (typeof currentUser !== 'undefined' && currentUser) {
             created_at: new Date().toISOString()
         });
         incrementBadge();
+        playNotificationSound();
     });
 
     // ── Thông báo tin nhắn mới ─────────────────────────────
@@ -47,6 +49,7 @@ if (typeof currentUser !== 'undefined' && currentUser) {
         const badgeStaff = document.getElementById('header-chat-badge-staff');
         if (badgeAdmin) badgeAdmin.style.display = 'inline-block';
         if (badgeStaff) badgeStaff.style.display = 'inline-block';
+        playNotificationSound();
     });
 }
 
@@ -56,6 +59,15 @@ function incrementBadge() {
         badge.style.display = 'inline';
         badge.textContent = parseInt(badge.textContent || 0) + 1;
     }
+}
+
+function playNotificationSound() {
+    try {
+        // Tiếng Ting nhẹ nhàng
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        audio.volume = 0.6;
+        audio.play().catch(e => console.log('Autoplay blocked by browser'));
+    } catch (e) {}
 }
 
 async function fetchNotifications() {

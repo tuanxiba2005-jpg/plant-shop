@@ -90,8 +90,13 @@ class StaffController {
 
     async orders(req, res) {
         try {
-            const orders = await this.orderModel.getAllOrders();
-            res.render('staff/orders', { title: 'Quản lý đơn hàng', orders });
+            const statusFilter = req.query.status && req.query.status !== 'all' ? { status: req.query.status } : {};
+            const orders = await this.orderModel.getAllOrders(statusFilter);
+            res.render('staff/orders', { 
+                title: 'Quản lý đơn hàng', 
+                orders,
+                currentStatus: req.query.status || 'all'
+            });
         } catch (err) {
             console.error('Staff orders error:', err.message);
             res.status(500).render('error', { title: 'Lỗi', status: 500, message: err.message });
@@ -118,7 +123,7 @@ class StaffController {
 
                 const io = req.app.get('io');
                 if (io) {
-                    io.notifyUser(order.user_id.toString(), 'order_status_update', {
+                    io.to('user_' + order.user_id.toString()).emit('order_status_update', {
                         orderId: order._id,
                         status,
                         statusLabel: STATUS_LABELS[status],
@@ -172,7 +177,7 @@ class StaffController {
 
             const io = req.app.get('io');
             if (io) {
-                io.notifyUser(order.user_id.toString(), 'order_status_update', {
+                io.to('user_' + order.user_id.toString()).emit('order_status_update', {
                     orderId: order._id,
                     status: newStatus,
                     message: messageText
