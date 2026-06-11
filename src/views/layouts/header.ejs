@@ -26,6 +26,24 @@
             <link rel="stylesheet" href="<%= href %>">
         <% }) %>
     <% } %>
+
+    <!-- PWA Setup -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2d5f3f">
+    <link rel="apple-touch-icon" href="/images/icons/icon-192x192.png">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
 </head>
 
 <body>
