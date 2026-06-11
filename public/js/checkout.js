@@ -1,5 +1,5 @@
 // Initialize Checkout logic
-(function() {
+(function () {
     // ── Payment Methods UI ──────────────────────────────────────
     const radios = document.querySelectorAll('input[name="payment_method"]');
     const bankInfo = document.getElementById('bankInfoPanel');
@@ -12,11 +12,11 @@
                 if (r.checked) {
                     card.style.borderColor = 'var(--primary)';
                     card.style.backgroundColor = 'rgba(45, 95, 63, 0.03)';
-                    if(icon) icon.classList.remove('d-none');
+                    if (icon) icon.classList.remove('d-none');
                 } else {
                     card.style.borderColor = '#ced4da';
                     card.style.backgroundColor = '#fff';
-                    if(icon) icon.classList.add('d-none');
+                    if (icon) icon.classList.add('d-none');
                 }
             }
         });
@@ -40,7 +40,7 @@
     const provinceSelect = document.getElementById('provinceSelect');
     const districtSelect = document.getElementById('districtSelect');
     const wardSelect = document.getElementById('wardSelect');
-    
+
     // Fetch Provinces
     fetch('https://esgoo.net/api-tinhthanh/1/0.htm')
         .then(res => res.json())
@@ -56,7 +56,7 @@
             }
         }).catch(err => console.error('Lỗi tải tỉnh thành:', err));
 
-    provinceSelect.addEventListener('change', function() {
+    provinceSelect.addEventListener('change', function () {
         const selectedOption = this.options[this.selectedIndex];
         districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
         wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
@@ -82,10 +82,10 @@
         }
     });
 
-    districtSelect.addEventListener('change', function() {
+    districtSelect.addEventListener('change', function () {
         const selectedOption = this.options[this.selectedIndex];
         wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
-        
+
         if (this.value && selectedOption.dataset.code) {
             wardSelect.disabled = false;
             fetch(`https://esgoo.net/api-tinhthanh/3/${selectedOption.dataset.code}.htm`)
@@ -111,7 +111,7 @@
     const finalAddress = document.getElementById('checkoutAddressFinal');
     const streetInput = document.getElementById('streetInput');
 
-    checkoutForm.addEventListener('submit', function(e) {
+    checkoutForm.addEventListener('submit', function (e) {
         if (!provinceSelect.value || !districtSelect.value || !wardSelect.value || !streetInput.value) {
             e.preventDefault();
             // Simple validation feedback
@@ -125,7 +125,7 @@
             alert('Vui lòng điền đầy đủ thông tin địa chỉ!');
             return;
         }
-        
+
         // Remove invalid classes just in case
         [provinceSelect, districtSelect, wardSelect, streetInput].forEach(el => el.classList.remove('is-invalid'));
 
@@ -177,7 +177,7 @@
             const msg = document.getElementById('couponMsg');
             const orderTotal = document.getElementById('checkoutTotalData') ? parseFloat(document.getElementById('checkoutTotalData').value) : 0;
             if (!code) { msg.innerHTML = '<span class="text-danger small"><i class="fas fa-exclamation-circle me-1"></i>Vui lòng nhập mã</span>'; return; }
-            
+
             // UI state loading
             btnApplyCoupon.disabled = true;
             btnApplyCoupon.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
@@ -188,7 +188,7 @@
                 body: `code=${encodeURIComponent(code)}&total=${orderTotal}`
             });
             const data = await res.json();
-            
+
             btnApplyCoupon.disabled = false;
             btnApplyCoupon.innerHTML = 'Áp dụng';
 
@@ -209,10 +209,10 @@
 })();
 
 // Hàm apply địa chỉ khi chọn từ Modal (Vì địa chỉ lưu là string nên sẽ tự fill vào ô Số nhà, người dùng tự chọn lại tỉnh/huyện)
-window.applyAddress = function(phone, address) {
+window.applyAddress = function (phone, address) {
     document.getElementById('checkoutPhone').value = phone;
     document.getElementById('streetInput').value = address;
-    
+
     // Gợi ý người dùng chọn lại tỉnh thành
     const msg = document.createElement('div');
     msg.className = 'text-primary small mt-1';

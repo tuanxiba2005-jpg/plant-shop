@@ -36,7 +36,13 @@ class OrderController {
             if (items.length === 0) return res.redirect('/cart');
             const total = items.reduce((sum, i) => sum + parseFloat(i.subtotal), 0);
             const user = await this.userModel.findById(req.session.user.id);
-            res.render('orders/checkout', { title: 'Đặt hàng', items, total, user, error: null });
+            
+            const errorType = req.query.error;
+            let errorMsg = null;
+            if (errorType === 'payment_not_configured') errorMsg = 'Hệ thống đang bảo trì cổng thanh toán. Vui lòng chọn Thanh toán khi nhận hàng (COD)!';
+            else if (errorType === 'momo_failed') errorMsg = 'Thanh toán MoMo thất bại hoặc bị hủy.';
+
+            res.render('orders/checkout', { title: 'Đặt hàng', items, total, user, error: errorMsg });
         } catch (err) {
             res.status(500).render('error', { title: 'Lỗi', status: 500, message: err.message });
         }
@@ -148,6 +154,9 @@ class OrderController {
             const appUrl = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
 
             if (payment_method === 'vnpay') {
+                if (!process.env.VNPAY_TMN_CODE || !process.env.VNPAY_HASH_SECRET) {
+                    return res.redirect('/orders/checkout?error=payment_not_configured');
+                }
                 console.log('>>> REDIRECTING TO VNPAY...');
                 const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || '127.0.0.1';
                 const url = createVNPayUrl(
@@ -158,6 +167,9 @@ class OrderController {
             }
 
             if (payment_method === 'momo') {
+                if (!process.env.MOMO_PARTNER_CODE || !process.env.MOMO_ACCESS_KEY) {
+                    return res.redirect('/orders/checkout?error=payment_not_configured');
+                }
                 try {
                     const url = await createMoMoUrl(
                         orderId, finalTotal,

@@ -103,9 +103,13 @@ async function createMoMoUrl(orderId, amount, returnUrl, notifyUrl) {
             let data = '';
             res.on('data', chunk => data += chunk);
             res.on('end', () => {
-                const parsed = JSON.parse(data);
-                if (parsed.resultCode === 0) resolve(parsed.payUrl);
-                else reject(new Error(parsed.message || 'MoMo error'));
+                try {
+                    const parsed = JSON.parse(data);
+                    if (parsed.resultCode === 0) resolve(parsed.payUrl);
+                    else reject(new Error(parsed.message || 'MoMo error'));
+                } catch (e) {
+                    reject(new Error('Phản hồi từ MoMo không hợp lệ (sai cấu hình API Key)'));
+                }
             });
         });
         req.on('error', reject);
