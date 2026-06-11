@@ -21,7 +21,8 @@ passport.deserializeUser(async (id, done) => {
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID || 'placeholder_client_id',
     clientSecret: process.env.GOOGLE_CLIENT_SECRET || 'placeholder_client_secret',
-    callbackURL: '/auth/google/callback'
+    callbackURL: '/auth/google/callback',
+    proxy: true
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         const userModel = new User();
@@ -60,7 +61,8 @@ passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID || 'placeholder_app_id',
     clientSecret: process.env.FACEBOOK_APP_SECRET || 'placeholder_app_secret',
     callbackURL: '/auth/facebook/callback',
-    profileFields: ['id', 'displayName', 'emails', 'photos']
+    profileFields: ['id', 'displayName', 'emails', 'photos'],
+    proxy: true
 }, async (accessToken, refreshToken, profile, done) => {
     try {
         const userModel = new User();
