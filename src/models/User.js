@@ -5,7 +5,10 @@ const Model = require('./Model');
 const userSchema = new mongoose.Schema({
     name:               { type: String, required: true },
     email:              { type: String, required: true, unique: true },
-    password:           { type: String, required: true },
+    password:           { type: String }, // Không bắt buộc vì Social Login không có password
+    googleId:           { type: String, default: null },
+    facebookId:         { type: String, default: null },
+    avatar:             { type: String, default: null }, // Lưu avatar từ Google/FB
     role:               { type: String, enum: ['admin', 'staff', 'user'], default: 'user' },
     isBlocked:          { type: Boolean, default: false },
     isVerified:         { type: Boolean, default: true },
