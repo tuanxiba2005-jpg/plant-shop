@@ -18,261 +18,228 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light">
-        <div class="container">
-            <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
-                <img src="/images/logo.png" alt="Tuan's Green" style="height: 65px; width: auto; object-fit: contain;">
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navMenu">
-
-                <!-- Menu trái -->
-                <ul class="navbar-nav me-3">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Trang chủ</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/products">Cây cảnh</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/plant-care">Bí quyết chăm sóc</a>
-                    </li>
-
-                    <!-- Dropdown danh mục -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                            🌱 Danh mục
+    <!-- Tier 1: Top Bar -->
+    <div class="border-bottom d-none d-lg-block position-relative z-3 top-bar-custom">
+        <div class="container d-flex justify-content-end py-2 align-items-center">
+            <ul class="nav text-muted">
+                <% if (user && (user.role === 'admin' || user.role === 'staff')) { %>
+                    <li class="nav-item border-end px-3">
+                        <a class="nav-link text-muted p-0 hover-success position-relative" href="<%= user.role === 'admin' ? '/admin/chat' : '/staff/chat' %>">
+                            <i class="fas fa-headset me-1"></i>Hỗ trợ
+                            <span id="header-chat-badge-<%= user.role %>" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="display: none;"></span>
                         </a>
-                        <ul class="dropdown-menu">
-                            <li>
-                                <a class="dropdown-item" href="/products">Tất cả</a>
-                            </li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <% globalCategories.forEach(cat=> { %>
-                                <li>
-                                    <a class="dropdown-item" href="/products?category=<%= cat._id %>">
-                                        <%= cat.name %>
-                                    </a>
-                                </li>
-                                <% }) %>
-                        </ul>
                     </li>
-                </ul>
-
-                <!-- Thanh tìm kiếm ở giữa -->
-                <form action="/products" method="GET" class="d-flex me-auto" style="width: 280px;">
-                    <input type="text" name="search" class="form-control form-control-sm"
-                        placeholder="🔍 Tìm cây cảnh..." value="<%= typeof keyword !== 'undefined' ? keyword : '' %>">
-                    <button class="btn btn-success btn-sm ms-1" type="submit">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </form>
-
-                <!-- Menu phải -->
-                <ul class="navbar-nav">
-                    <% if (user) { %>
-                        <!-- Notification Bell -->
-                        <li class="nav-item dropdown me-2">
-                            <a class="nav-link position-relative" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" onclick="markNotificationsAsRead()">
-                                <i class="fas fa-bell fs-5 text-muted hover-text-success"></i>
-                                <span id="notificationBadge" class="position-absolute top-10 start-100 translate-middle badge rounded-pill bg-danger" style="display: none; font-size: 0.65rem; padding: 0.25em 0.4em;">
-                                    0
-                                </span>
+                <% } else { %>
+                    <li class="nav-item border-end px-3">
+                        <a class="nav-link text-muted p-0 hover-success" href="/support">
+                            <i class="fas fa-headset me-1"></i>Hỗ trợ
+                        </a>
+                    </li>
+                <% } %>
+                <li class="nav-item px-3 border-end">
+                    <a class="nav-link text-muted p-0 hover-success" href="https://maps.google.com/?q=123+Hoàng+Hoa+Thám,+Ba+Đình,+Hà+Nội" target="_blank" title="Xem trên Google Maps">
+                        <i class="fas fa-map-marker-alt me-1 text-danger"></i>Cửa hàng
+                    </a>
+                </li>
+                <% if (user) { %>
+                    <% if (user.role === 'admin') { %>
+                        <li class="nav-item ps-3 ms-2 border-start d-flex align-items-center">
+                            <div class="d-flex align-items-center bg-white rounded-pill px-3 py-1 shadow-sm border border-success-subtle">
+                                <a href="/admin/dashboard" class="text-success text-decoration-none fw-medium me-2" style="font-size: 0.85rem;">
+                                    <i class="fas fa-cog"></i> Quản trị
+                                </a>
+                                <span class="text-muted opacity-25 mx-1">|</span>
+                                <div class="dropdown ms-2">
+                                    <a class="text-dark text-decoration-none fw-medium dropdown-toggle" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false" style="font-size: 0.85rem;">
+                                        <i class="far fa-user-circle me-1 text-success"></i><%= user.name %>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-modern" style="font-size: 0.9rem; margin-top: 10px;">
+                                        <li>
+                                            <div class="px-3 py-2 border-bottom mb-1 bg-light rounded-top">
+                                                <span class="d-block fw-bold text-dark"><%= user.name %></span>
+                                                <small class="text-muted"><%= user.email %></small>
+                                            </div>
+                                        </li>
+                                        <li><a class="dropdown-item" href="/admin/dashboard"><i class="fas fa-tachometer-alt me-2 text-muted"></i>Dashboard</a></li>
+                                        <li><a class="dropdown-item" href="/admin/products"><i class="fas fa-leaf me-2 text-muted"></i>Quản lý sản phẩm</a></li>
+                                        <li><a class="dropdown-item" href="/admin/articles"><i class="fas fa-newspaper me-2 text-muted"></i>Quản lý bài viết</a></li>
+                                        <li><a class="dropdown-item" href="/admin/orders"><i class="fas fa-boxes me-2 text-muted"></i>Quản lý đơn hàng</a></li>
+                                        <li><a class="dropdown-item" href="/admin/users"><i class="fas fa-users me-2 text-muted"></i>Quản lý người dùng</a></li>
+                                        <li><a class="dropdown-item" href="/admin/revenue"><i class="fas fa-chart-bar me-2 text-muted"></i>Báo cáo doanh thu</a></li>
+                                        <li><a class="dropdown-item" href="/admin/coupons"><i class="fas fa-tags me-2 text-muted"></i>Mã giảm giá</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="/user/logout"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+                    <% } else if (user.role === 'staff') { %>
+                        <li class="nav-item ps-3 ms-2 border-start d-flex align-items-center">
+                            <div class="d-flex align-items-center bg-white rounded-pill px-3 py-1 shadow-sm border border-success-subtle">
+                                <a href="/staff/dashboard" class="text-success text-decoration-none fw-medium me-2" style="font-size: 0.85rem;">
+                                    <i class="fas fa-cog"></i> Quản trị
+                                </a>
+                                <span class="text-muted opacity-25 mx-1">|</span>
+                                <div class="dropdown ms-2">
+                                    <a class="text-dark text-decoration-none fw-medium dropdown-toggle" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false" style="font-size: 0.85rem;">
+                                        <i class="far fa-user-circle me-1 text-success"></i><%= user.name %>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-modern" style="font-size: 0.9rem; margin-top: 10px;">
+                                        <li>
+                                            <div class="px-3 py-2 border-bottom mb-1 bg-light rounded-top">
+                                                <span class="d-block fw-bold text-dark"><%= user.name %></span>
+                                                <small class="text-muted"><%= user.email %></small>
+                                            </div>
+                                        </li>
+                                        <li><a class="dropdown-item" href="/staff/dashboard"><i class="fas fa-tachometer-alt me-2 text-muted"></i>Dashboard</a></li>
+                                        <li><a class="dropdown-item" href="/staff/products"><i class="fas fa-leaf me-2 text-muted"></i>Quản lý sản phẩm</a></li>
+                                        <li><a class="dropdown-item" href="/staff/orders"><i class="fas fa-boxes me-2 text-muted"></i>Quản lý đơn hàng</a></li>
+                                        <li><a class="dropdown-item" href="/staff/customers"><i class="fas fa-users me-2 text-muted"></i>Danh sách khách hàng</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="/user/logout"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+                    <% } else { %>
+                        <li class="nav-item px-3 dropdown">
+                            <a class="nav-link text-muted p-0 fw-medium dropdown-toggle hover-success" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false">
+                                <i class="fas fa-user me-1 text-success"></i><%= user.name %>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm p-0" aria-labelledby="notificationDropdown" id="notificationList" style="width: 350px; max-height: 400px; overflow-y: auto; border-radius: 12px; border: none;">
-                                <li><div class="dropdown-item text-center text-muted small py-4"><i class="fas fa-spinner fa-spin me-2"></i> Đang tải thông báo...</div></li>
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-modern" style="font-size: 0.9rem;">
+                                <li>
+                                    <div class="px-3 py-2 border-bottom mb-1 bg-light rounded-top">
+                                        <span class="d-block fw-bold text-dark"><%= user.name %></span>
+                                        <small class="text-muted"><%= user.email %></small>
+                                    </div>
+                                </li>
+                                <li><a class="dropdown-item" href="/user/profile"><i class="fas fa-user-edit me-2 text-muted"></i>Hồ sơ cá nhân</a></li>
+                                <li><a class="dropdown-item" href="/orders/my-orders"><i class="fas fa-box-open me-2 text-muted"></i>Đơn hàng của tôi</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="/user/logout"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
                             </ul>
                         </li>
-                        <% if (user.role==='admin' ) { %>
-                            <li class="nav-item">
-                                <a class="nav-link position-relative" href="/admin/chat">
-                                    <i class="fas fa-headset me-1 text-success"></i>Hỗ trợ
-                                    <span id="header-chat-badge-admin" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="display: none;"></span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/admin/dashboard">
-                                    <i class="fas fa-cog me-1"></i>Quản trị
-                                </a>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                    <i class="fas fa-user-shield me-1"></i>
-                                    <%= user.name %>
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li>
-                                        <span class="dropdown-item-text text-muted small">
-                                            <%= user.email %>
-                                        </span>
-                                    </li>
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="/admin/dashboard">
-                                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="/admin/products">
-                                            <i class="fas fa-leaf me-2"></i>Quản lý sản phẩm
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="/admin/orders">
-                                            <i class="fas fa-boxes me-2"></i>Quản lý đơn hàng
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="/admin/users">
-                                            <i class="fas fa-users me-2"></i>Quản lý người dùng
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="/admin/revenue">
-                                            <i class="fas fa-chart-bar me-2"></i>Báo cáo doanh thu
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="/admin/coupons">
-                                            <i class="fas fa-tags me-2"></i>Mã giảm giá
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" href="/admin/chat">
-                                            <i class="fas fa-headset me-2"></i>Hỗ trợ khách hàng
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item text-danger" href="/user/logout">
-                                            <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
-                                        </a>
-                                    </li>
-                                </ul>
-                            </li>
+                    <% } %>
+                <% } else { %>
+                    <li class="nav-item px-3 dropdown">
+                        <a class="nav-link text-muted p-0 dropdown-toggle hover-success" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false">
+                            <i class="fas fa-user-circle me-1"></i>Khách
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="font-size: 0.9rem;">
+                            <li><a class="dropdown-item fw-medium text-success" href="/user/login"><i class="fas fa-sign-in-alt me-2"></i>Đăng nhập</a></li>
+                            <li><a class="dropdown-item" href="/user/register"><i class="fas fa-user-plus me-2 text-muted"></i>Tạo tài khoản</a></li>
+                        </ul>
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
 
-                            <% } else if (user.role==='staff' ) { %>
-                                <li class="nav-item">
-                                    <a class="nav-link position-relative" href="/admin/chat">
-                                        <i class="fas fa-headset me-1 text-success"></i>Hỗ trợ
-                                        <span id="header-chat-badge-staff" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="display: none;"></span>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/staff/dashboard">
-                                        <i class="fas fa-clipboard-list me-1"></i>Nhân viên
-                                    </a>
-                                </li>
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                        <i class="fas fa-user-tie me-1"></i>
-                                        <%= user.name %>
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-menu-end">
-                                        <li>
-                                            <span class="dropdown-item-text text-muted small">
-                                                <%= user.email %>
-                                            </span>
-                                        </li>
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="/staff/dashboard">
-                                                <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="/staff/products">
-                                                <i class="fas fa-leaf me-2"></i>Quản lý sản phẩm
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="/staff/orders">
-                                                <i class="fas fa-boxes me-2"></i>Quản lý đơn hàng
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" href="/staff/customers">
-                                                <i class="fas fa-users me-2"></i>Danh sách khách hàng
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item text-danger" href="/user/logout">
-                                                <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </li>
+    <!-- Tier 2: Main Bar -->
+    <div class="bg-white py-3 border-bottom position-relative z-2">
+        <div class="container d-flex align-items-center justify-content-between">
+            <!-- Logo -->
+            <a class="navbar-brand fw-bold d-flex align-items-center m-0" href="/">
+                <img src="/images/logo.png" alt="Tuan's Green" style="height: 55px; width: auto; object-fit: contain;">
+            </a>
 
-                                <% } else { %>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="/cart">
-                                            <i class="fas fa-shopping-cart"></i>
-                                            <span class="badge bg-danger" id="cartBadge">
-                                                <%= cartCount %>
-                                            </span>
-                                        </a>
-                                    </li>
-                                    <li class="nav-item dropdown">
-                                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                                            <i class="fas fa-user me-1"></i>
-                                            <%= user.name %>
-                                        </a>
-                                        <ul class="dropdown-menu dropdown-menu-end">
-                                            <li>
-                                                <span class="dropdown-item-text text-muted small">
-                                                    <%= user.email %>
-                                                </span>
-                                            </li>
-                                            <li>
-                                                <hr class="dropdown-divider">
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item" href="/user/profile">
-                                                    <i class="fas fa-user me-2"></i>Tài khoản
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item" href="/orders/my-orders">
-                                                    <i class="fas fa-box me-2"></i>Đơn hàng của tôi
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <hr class="dropdown-divider">
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item text-danger" href="/user/logout">
-                                                    <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </li>
-                                    <% } %>
-                                        <% } else { %>
-                                            <li class="nav-item">
-                                                <a class="nav-link" href="/user/login">
-                                                    <i class="fas fa-sign-in-alt me-1"></i>Đăng nhập
-                                                </a>
-                                            </li>
-                                            <li class="nav-item ms-2">
-                                                <a class="nav-link btn btn-success text-white px-3"
-                                                    href="/user/register">
-                                                    Đăng ký
-                                                </a>
-                                            </li>
-                                            <% } %>
+            <!-- Search Bar -->
+            <div class="mx-4 flex-grow-1 d-none d-md-block search-container-custom">
+                <form action="/products" method="GET">
+                    <div class="d-flex align-items-center rounded-pill px-2 py-1 border border-success-subtle search-wrapper-pill">
+                        <i class="fas fa-search text-success ms-3 me-2"></i>
+                        <input type="text" name="search" class="form-control border-0 px-3 py-2 rounded-pill shadow-sm search-input-pill"
+                            placeholder="Tìm cây cảnh, kinh nghiệm..." value="<%= typeof keyword !== 'undefined' ? keyword : '' %>">
+                        <button type="submit" class="btn btn-success rounded-pill px-4 ms-2 me-1 fw-medium d-none d-md-block" style="font-size: 0.9rem; padding-top: 0.4rem; padding-bottom: 0.4rem;">
+                            Tìm
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex align-items-center gap-2 gap-md-3">
+                <!-- Notifications -->
+                <% if (user) { %>
+                    <div class="dropdown">
+                        <button class="btn btn-action btn-action-modern rounded-4 border p-2 d-flex align-items-center justify-content-center action-btn-custom" type="button" id="notificationDropdown" data-bs-toggle="dropdown" onclick="markNotificationsAsRead()">
+                            <i class="far fa-bell text-dark fs-5"></i>
+                            <span id="notificationBadge" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="display: none;">
+                                <span class="visually-hidden">New alerts</span>
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-modern p-0" aria-labelledby="notificationDropdown" id="notificationList" style="width: 350px; max-height: 400px; overflow-y: auto; margin-top: 10px;">
+                            <li><h6 class="dropdown-header fw-bold text-dark border-bottom py-3 bg-light rounded-top">Thông báo mới</h6></li>
+                            <li><div class="dropdown-item text-center text-muted small py-4"><i class="fas fa-spinner fa-spin me-2"></i> Đang tải thông báo...</div></li>
+                        </ul>
+                    </div>
+                <% } else { %>
+                    <a href="/user/login" class="btn btn-action btn-action-modern rounded-4 border p-2 d-flex align-items-center justify-content-center action-btn-custom">
+                        <i class="far fa-bell text-dark fs-5"></i>
+                    </a>
+                <% } %>
+
+                <% if (!user || (user.role !== 'admin' && user.role !== 'staff')) { %>
+                    <!-- Cart -->
+                    <a href="/cart" class="btn btn-action btn-action-modern rounded-4 border position-relative p-2 d-flex align-items-center justify-content-center action-btn-custom text-decoration-none">
+                        <i class="fas fa-shopping-bag text-dark"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm" id="cartBadge">
+                            <%= typeof cartCount !== 'undefined' ? cartCount : 0 %>
+                        </span>
+                    </a>
+
+                    <!-- User Profile -->
+                    <a href="<%= user ? '/user/profile' : '/user/login' %>" class="btn btn-action btn-action-modern rounded-4 border p-2 d-flex align-items-center justify-content-center action-btn-custom text-decoration-none">
+                        <i class="far fa-user-circle text-dark fs-5"></i>
+                    </a>
+                <% } %>
+
+                <!-- Dashboard Button for Admin/Staff -->
+                <% if (user && (user.role === 'admin' || user.role === 'staff')) { %>
+                    <a href="/<%= user.role %>/dashboard" class="btn btn-action btn-action-modern rounded-4 border px-3 d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="height: 44px;">
+                        <i class="fas fa-th-large text-dark"></i>
+                        <span class="fw-medium text-dark">Dashboard</span>
+                    </a>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tier 3: Nav Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark p-0 position-relative z-1 nav-tier-3">
+        <div class="container">
+            <button class="navbar-toggler my-2 border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav me-auto fw-medium">
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-animated text-white py-3 px-3 <%= typeof title !== 'undefined' && title === 'Trang chủ' ? 'fw-bold active' : '' %>" href="/">Trang chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-animated text-white-50 py-3 px-3 hover-text-white" href="/products">Cây cảnh</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-animated text-white-50 py-3 px-3 hover-text-white" href="/plant-care">Bí quyết chăm sóc</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-animated text-white-50 py-3 px-3 hover-text-white" href="/blogs">Góc chia sẻ</a>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white-50 py-3 px-3 hover-text-white d-flex align-items-center gap-1" href="#" data-bs-toggle="dropdown">
+                            <i class="fas fa-leaf" style="color: #a3d9a5;"></i> Danh mục
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-modern shadow-sm mt-0" style="border-radius: 0 0 12px 12px; border: none;">
+                            <li><a class="dropdown-item py-2" href="/products">Tất cả sản phẩm</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <% if (typeof globalCategories !== 'undefined') { %>
+                                <% globalCategories.forEach(cat => { %>
+                                    <li><a class="dropdown-item py-2" href="/products?category=<%= cat._id %>"><%= cat.name %></a></li>
+                                <% }) %>
+                            <% } %>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>

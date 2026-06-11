@@ -14,14 +14,21 @@ class ProductController {
             const page = parseInt(req.query.page)  || 1;
             const categoryId = req.query.category || null;
             const keyword = req.query.search || '';
+            const minPrice = req.query.minPrice || '';
+            const maxPrice = req.query.maxPrice || '';
+            const sort = req.query.sort || 'newest';
+            
             const categories = await this.categoryModel.findAll();
-            const data =await this.productModel.findWithPagination(page, 8, categoryId, keyword);
+            const data = await this.productModel.findWithPagination(page, 9, categoryId, keyword, minPrice, maxPrice, sort); // Changed limit to 9 for 3-column grid
             res.render('products/index', {
                 title: 'Danh sách cây cảnh',
                 ...data,
                 categories,
                 selectedCategory: categoryId,
-                keyword
+                keyword,
+                minPrice,
+                maxPrice,
+                sort
             });
         } catch (err) {
             console.error(err);

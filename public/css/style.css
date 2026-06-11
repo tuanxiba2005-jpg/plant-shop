@@ -361,8 +361,8 @@ a:hover { color: var(--primary-light); }
 .product-card .card-img-top,
 .product-card img {
     width: 100%;
-    height: 220px;
-    object-fit: contain;
+    height: 250px;
+    object-fit: cover;
     object-position: center;
     display: block;
     border-radius: 0;
@@ -391,7 +391,7 @@ a:hover { color: var(--primary-light); }
 .product-img-wrapper img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     object-position: center;
     transition: transform 0.4s ease;
 }
@@ -404,7 +404,7 @@ a:hover { color: var(--primary-light); }
 .product-detail-img {
     width: 100%;
     height: 420px;
-    object-fit: contain;
+    object-fit: cover;
     object-position: center;
     border-radius: var(--radius-lg);
     display: block;
@@ -416,7 +416,7 @@ a:hover { color: var(--primary-light); }
 .order-img {
     width: 65px;
     height: 65px;
-    object-fit: contain;
+    object-fit: cover;
     object-position: center;
     border-radius: var(--radius-sm);
     display: block;
@@ -428,7 +428,7 @@ a:hover { color: var(--primary-light); }
 .admin-product-img {
     width: 60px;
     height: 60px;
-    object-fit: contain;
+    object-fit: cover;
     object-position: center;
     border-radius: var(--radius-sm);
     display: block;
@@ -1234,3 +1234,248 @@ footer .social-icon:hover {
 }
 
 .timeline-line.active { background: var(--primary); }
+
+/* ---- Blog & Articles ---- */
+.image-upload-box:hover {
+    border-color: var(--bs-success) !important;
+    background-color: #f8fff9 !important;
+}
+
+/* Summernote Editor - Active toolbar button highlight (like Word) */
+.note-toolbar .note-btn.active,
+.note-toolbar .note-btn:active,
+.note-toolbar .note-btn.note-btn-primary {
+    background-color: var(--primary) !important;
+    color: #fff !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 2px 6px rgba(45, 95, 63, 0.35) !important;
+    border-radius: 4px !important;
+}
+.note-toolbar .note-btn:hover {
+    background-color: #e8f5e9 !important;
+    border-color: var(--primary-light) !important;
+    border-radius: 4px !important;
+}
+.note-toolbar .note-btn.active:hover {
+    background-color: var(--primary-dark) !important;
+    color: #fff !important;
+}
+.note-editor.note-frame {
+    border-radius: 12px !important;
+    border: 1px solid #dee2e6 !important;
+    overflow: hidden;
+}
+.note-editor .note-toolbar {
+    background-color: #f8f9fa !important;
+    border-bottom: 1px solid #e9ecef !important;
+    padding: 8px 12px !important;
+}
+.note-editor .note-editing-area .note-editable {
+    padding: 20px !important;
+    font-size: 16px !important;
+    line-height: 1.8 !important;
+}
+
+.blog-card:hover img {
+    transform: scale(1.05);
+}
+.article-title-link:hover {
+    color: var(--secondary) !important;
+}
+
+.article-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+}
+.related-article:hover h6 {
+    color: var(--secondary);
+}
+
+/* ==========================================
+   NEW HEADER 3-TIER STYLES
+   ========================================== */
+.hover-success:hover {
+    color: var(--primary) !important;
+}
+.hover-bg-light:hover {
+    background-color: #f8f9fa !important;
+}
+.hover-opacity:hover {
+    opacity: 0.8;
+}
+.hover-text-white:hover {
+    color: #fff !important;
+}
+
+/* ==========================================
+   MODERN HEADER CSS ENHANCEMENTS
+   ========================================== */
+
+/* Search Bar */
+.search-input-custom {
+    padding-left: 2.8rem !important;
+    background-color: #f8f9fa !important;
+    border: 1px solid #e9ecef !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.search-input-custom:focus {
+    background-color: #ffffff !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 4px rgba(45, 95, 63, 0.1) !important;
+}
+
+/* Action Buttons (Tier 2) */
+.btn-action-modern {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-action-modern:hover {
+    background-color: #f9fafb;
+    border-color: var(--primary-light) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    color: var(--primary) !important;
+}
+
+/* Nav Links Animated Underline (Tier 3) */
+.nav-link-animated {
+    position: relative;
+    transition: color 0.3s ease;
+}
+.nav-link-animated::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0px;
+    left: 50%;
+    background-color: #a3d9a5; /* Light green */
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(-50%);
+}
+.nav-link-animated:hover::after,
+.nav-link-animated.active::after {
+    width: 80%;
+}
+
+/* Modern Dropdown Menus */
+.dropdown-menu-modern {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    padding: 0.5rem;
+    animation: dropdownFadeIn 0.2s ease-out;
+}
+.dropdown-menu-modern .dropdown-item {
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s ease;
+}
+.dropdown-menu-modern .dropdown-item:hover {
+    background-color: rgba(45, 95, 63, 0.05);
+    color: var(--primary);
+    transform: translateX(4px);
+}
+@keyframes dropdownFadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Glassmorphism Tier 3 Background */
+.bg-nav-glass {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Fix Number Input Spinners (Cart Quantity) */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Enhance Quantity Input */
+.qty-input {
+    padding-left: 0.25rem !important;
+    padding-right: 0.25rem !important;
+    max-width: 50px;
+}
+
+/* ==========================================
+   HEADER LAYOUT EXTENSIONS (Extracted from EJS)
+   ========================================== */
+.top-bar-custom {
+    font-size: 0.85rem;
+    background-color: #f4fbf7;
+}
+
+.search-container-custom {
+    max-width: 550px;
+}
+
+.search-wrapper-pill {
+    background-color: #f4fbf7;
+}
+
+.search-input-pill {
+    background-color: white !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.search-kbd-custom {
+    font-size: 0.85rem;
+    padding: 4px 10px;
+    background-color: rgba(45, 95, 63, 0.05);
+}
+
+.nav-tier-3 {
+    background-color: #1a4331 !important;
+}
+
+/* Override global navbar-nav hover for Tier 3 */
+.nav-tier-3 .navbar-nav .nav-link:hover,
+.nav-tier-3 .navbar-nav .nav-link.active {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.nav-tier-3 .nav-link-animated,
+.nav-tier-3 .navbar-nav .dropdown-toggle {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.nav-tier-3 .nav-link-animated:hover,
+.nav-tier-3 .nav-link-animated.active,
+.nav-tier-3 .navbar-nav .dropdown-toggle:hover,
+.nav-tier-3 .navbar-nav .dropdown-toggle[aria-expanded="true"] {
+    color: #ffffff !important;
+}
+
+.btn-promo-custom {
+    border: 1px solid rgba(255,255,255,0.3) !important;
+    color: #fff !important;
+    padding: 6px 16px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+.btn-promo-custom:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+.action-btn-custom {
+    width: 44px;
+    height: 44px;
+}
+.btn-action:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd !important;
+}
+.text-success-light {
+    color: #a3d9a5;
+}

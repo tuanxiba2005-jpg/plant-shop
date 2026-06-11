@@ -1,0 +1,130 @@
+<%- include('../layouts/header') %>
+
+<div class="container py-5 mt-4">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8 mb-5">
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/" class="text-success text-decoration-none">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a href="/blogs" class="text-success text-decoration-none">Góc chia sẻ</a></li>
+                    <li class="breadcrumb-item active" aria-current="page"><%= article.title %></li>
+                </ol>
+            </nav>
+
+            <h1 class="display-5 fw-bold font-serif mb-4" style="color: var(--primary-dark);"><%= article.title %></h1>
+            
+            <div class="d-flex align-items-center mb-4 pb-4 border-bottom">
+                <% if(article.author_id && article.author_id.avatar) { %>
+                    <img src="/images/avatars/<%= article.author_id.avatar %>" class="rounded-circle me-3 shadow-sm" width="50" height="50" style="object-fit:cover;">
+                <% } else { %>
+                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-3 shadow-sm" style="width:50px; height:50px; font-size:20px;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                <% } %>
+                <div>
+                    <h6 class="mb-1 fw-bold"><%= article.author_id ? article.author_id.fullname : 'Admin' %></h6>
+                    <div class="text-muted small">
+                        <span><i class="far fa-calendar-alt me-1"></i><%= new Date(article.createdAt).toLocaleDateString('vi-VN') %></span>
+                        <span class="mx-2">•</span>
+                        <span><i class="far fa-eye me-1"></i><%= article.views || 0 %> lượt xem</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="article-content mb-5" style="font-size: 1.1rem; line-height: 1.8;">
+                <%- article.content %>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="comments-section mt-5 pt-4 border-top">
+                <h4 class="fw-bold mb-4"><i class="far fa-comments me-2 text-success"></i>Bình luận (<%= article.comments ? article.comments.length : 0 %>)</h4>
+                
+                <% if (user) { %>
+                    <form action="/blogs/<%= article.slug %>/comment" method="POST" class="mb-5 bg-light p-4 rounded-4 shadow-sm">
+                        <div class="d-flex mb-3">
+                            <% if(user.avatar) { %>
+                                <img src="/images/avatars/<%= user.avatar %>" class="rounded-circle me-3" width="40" height="40" style="object-fit:cover;">
+                            <% } else { %>
+                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-3" style="width:40px; height:40px;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            <% } %>
+                            <div class="flex-grow-1">
+                                <textarea name="content" class="form-control" rows="3" placeholder="Chia sẻ suy nghĩ của bạn..." required></textarea>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold shadow-sm">Gửi bình luận</button>
+                        </div>
+                    </form>
+                <% } else { %>
+                    <div class="alert alert-secondary mb-5 rounded-4 d-flex justify-content-between align-items-center">
+                        <span>Vui lòng đăng nhập để tham gia bình luận.</span>
+                        <a href="/user/login" class="btn btn-outline-dark btn-sm rounded-pill px-3">Đăng nhập ngay</a>
+                    </div>
+                <% } %>
+
+                <div class="comments-list">
+                    <% if (article.comments && article.comments.length > 0) { %>
+                        <% article.comments.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).forEach(comment => { %>
+                            <div class="d-flex mb-4 pb-4 border-bottom">
+                                <% if(comment.user_id && comment.user_id.avatar) { %>
+                                    <img src="/images/avatars/<%= comment.user_id.avatar %>" class="rounded-circle me-3 shadow-sm" width="48" height="48" style="object-fit:cover;">
+                                <% } else { %>
+                                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-3 shadow-sm" style="width:48px; height:48px; font-size:18px;">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                <% } %>
+                                <div>
+                                    <h6 class="fw-bold mb-1"><%= comment.user_id ? comment.user_id.fullname : 'Khách' %></h6>
+                                    <div class="text-muted small mb-2"><i class="far fa-clock me-1"></i><%= new Date(comment.created_at).toLocaleString('vi-VN') %></div>
+                                    <p class="mb-0 text-dark"><%= comment.content %></p>
+                                </div>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="text-muted fst-italic">Chưa có bình luận nào. Hãy là người đầu tiên chia sẻ cảm nghĩ!</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="position-sticky" style="top: 100px;">
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4 pb-2 border-bottom font-serif">Bài Viết Mới Nhất</h5>
+                        <% if (related && related.length > 0) { %>
+                            <div class="d-flex flex-column gap-3">
+                                <% related.forEach(rel => { %>
+                                    <a href="/blogs/<%= rel.slug %>" class="d-flex text-decoration-none text-dark align-items-center related-article">
+                                        <img src="/images/products/<%= rel.image %>" class="rounded me-3" width="70" height="70" style="object-fit:cover;" onerror="this.src='/images/default-article.jpg'">
+                                        <div>
+                                            <h6 class="mb-1 fw-bold" style="font-size: 0.95rem; line-height: 1.4;"><%= rel.title %></h6>
+                                            <small class="text-muted"><i class="far fa-calendar-alt me-1"></i><%= new Date(rel.createdAt).toLocaleDateString('vi-VN') %></small>
+                                        </div>
+                                    </a>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <p class="text-muted small mb-0">Chưa có bài viết khác.</p>
+                        <% } %>
+                    </div>
+                </div>
+
+                <div class="card border-0 bg-success text-white rounded-4 shadow-sm text-center p-4">
+                    <div class="card-body">
+                        <i class="fas fa-seedling display-4 mb-3"></i>
+                        <h5 class="fw-bold mb-3 font-serif">Tư vấn chăm sóc cây miễn phí</h5>
+                        <p class="mb-4 small" style="color: rgba(255,255,255,0.8);">Đội ngũ chuyên gia của chúng tôi luôn sẵn sàng hỗ trợ bạn.</p>
+                        <a href="<%= user && user.role === 'admin' ? '/admin/chat' : (user && user.role === 'staff' ? '/staff/chat' : '/user/profile#chat') %>" class="btn btn-light rounded-pill px-4 fw-bold text-success">Chat Ngay</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../layouts/footer') %>

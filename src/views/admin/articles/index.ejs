@@ -1,0 +1,85 @@
+<%- include('../../layouts/header') %>
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="mb-0 fw-bold text-success"><i class="fas fa-newspaper me-2"></i>Quản lý Bài viết</h4>
+        <a href="/admin/articles/create" class="btn btn-success rounded-pill px-4 shadow-sm">
+            <i class="fas fa-plus me-1"></i>Viết bài mới
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Ảnh</th>
+                            <th>Tiêu đề</th>
+                            <th>Trạng thái</th>
+                            <th>Lượt xem</th>
+                            <th>Ngày tạo</th>
+                            <th class="text-end pe-4">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (articles && articles.length > 0) { %>
+                            <% articles.forEach(article => { %>
+                            <tr>
+                                <td class="ps-4">
+                                    <img src="/images/products/<%= article.image %>" class="rounded" width="60" height="40" style="object-fit:cover;" onerror="this.src='/images/default-article.jpg'">
+                                </td>
+                                <td>
+                                    <h6 class="mb-1 text-truncate" style="max-width: 250px;"><%= article.title %></h6>
+                                    <small class="text-muted">Slug: <%= article.slug %></small>
+                                </td>
+                                <td>
+                                    <% if (article.status === 'published') { %>
+                                        <span class="badge bg-success">Đã đăng</span>
+                                    <% } else { %>
+                                        <span class="badge bg-secondary">Bản nháp</span>
+                                    <% } %>
+                                </td>
+                                <td><%= article.views || 0 %></td>
+                                <td><%= new Date(article.createdAt).toLocaleDateString('vi-VN') %></td>
+                                <td class="text-end pe-4">
+                                    <a href="/admin/articles/<%= article._id %>/edit" class="btn btn-sm btn-outline-primary" title="Sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteArticle('<%= article._id %>')" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">Chưa có bài viết nào.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function deleteArticle(id) {
+    if (!confirm('Bạn có chắc chắn muốn xóa bài viết này không?')) return;
+    try {
+        const res = await fetch(`/admin/articles/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) {
+            window.location.reload();
+        } else {
+            alert(data.message || 'Lỗi xóa bài viết');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Lỗi kết nối máy chủ');
+    }
+}
+</script>
+
+<%- include('../../layouts/footer') %>

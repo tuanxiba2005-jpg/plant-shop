@@ -69,4 +69,13 @@ router.delete('/coupons/:id', adminController.deleteCoupon);
 const chatController = require('../controllers/ChatController');
 router.get('/chat', chatController.adminChat);
 
+// Articles / Blog
+const adminArticleController = require('../controllers/AdminArticleController');
+router.get('/articles', adminArticleController.index);
+router.get('/articles/create', adminArticleController.createForm);
+router.post('/articles/create', upload.single('image'), adminArticleController.create);
+router.get('/articles/:id/edit', adminArticleController.editForm);
+router.post('/articles/:id/edit', upload.single('image'), adminArticleController.update);
+router.delete('/articles/:id', adminArticleController.delete);
+
 module.exports = router;

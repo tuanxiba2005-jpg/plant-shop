@@ -45,7 +45,7 @@ class Product extends Model {
         }).populate('category_id', 'name').lean();
     }
 
-    async findWithPagination(page = 1, limit = 8, categoryId = null, keyword = '') {
+    async findWithPagination(page = 1, limit = 8, categoryId = null, keyword = '', minPrice = null, maxPrice = null, sort = 'newest') {
         const query = {};
         if (categoryId && mongoose.Types.ObjectId.isValid(categoryId)) {
             query.category_id = categoryId;
@@ -57,10 +57,20 @@ class Product extends Model {
             ];
         }
 
+        if (minPrice || maxPrice) {
+            query.price = {};
+            if (minPrice) query.price.$gte = Number(minPrice);
+            if (maxPrice) query.price.$lte = Number(maxPrice);
+        }
+
+        let sortOption = { createdAt: -1 };
+        if (sort === 'price_asc') sortOption = { price: 1 };
+        else if (sort === 'price_desc') sortOption = { price: -1 };
+
         const total = await this.model.countDocuments(query);
         const products = await this.model.find(query)
             .populate('category_id', 'name')
-            .sort({ createdAt: -1 })
+            .sort(sortOption)
             .skip((page - 1) * limit)
             .limit(limit)
             .lean();

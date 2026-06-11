@@ -1,95 +1,211 @@
 <%- include('../layouts/header') %>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="mb-0">
-        Tìm thấy <span class="text-success fw-bold"><%= total %></span> sản phẩm
-        <% if (keyword) { %>
-            <small class="text-muted fw-normal"> cho "<%= keyword %>"</small>
-        <% } %>
-        <% if (selectedCategory) { %>
-            <small class="text-muted fw-normal"> · <a href="/products" class="text-success">Xóa bộ lọc</a></small>
-        <% } %>
-    </h5>
-</div>
-
-<% if (products.length === 0) { %>
-<div class="text-center py-5">
-    <div class="fs-1">🌵</div>
-    <h5 class="text-muted">Không tìm thấy sản phẩm nào</h5>
-    <a href="/products" class="btn btn-success mt-2">Xem tất cả</a>
-</div>
-<% } else { %>
 <div class="row">
-    <% products.forEach(product => { %>
-    <div class="col-6 col-md-3 mb-4">
-        <div class="card h-100 shadow-sm product-card position-relative">
-            <button class="btn btn-wishlist position-absolute top-0 start-0 m-2 border-0 bg-transparent"
-                    style="z-index: 10; color: rgba(255, 255, 255, 0.8);"
-                    data-id="<%= product._id %>" title="Thêm vào yêu thích">
-                <i class="far fa-heart fs-5" style="text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></i>
-            </button>
-            <img src="/images/products/<%= product.image %>"
-                 class="card-img-top"
-                 alt="<%= product.name %>"
-                 style="height:180px; object-fit:contain;"
-                 onerror="this.src='/images/default.jpg'">
-            <div class="card-body d-flex flex-column">
-                <h6 class="card-title"><%= product.name %></h6>
-                <small class="text-muted"><%= product.category_name %></small>
-                <% if (product.stock === 0) { %>
-                    <span class="badge bg-danger mt-1" style="width:fit-content">Hết hàng</span>
-                <% } else if (product.stock < 10) { %>
-                    <span class="badge bg-warning mt-1" style="width:fit-content">Còn ít</span>
-                <% } %>
-                <p class="text-success fw-bold mt-auto mb-2">
-                    <%= parseInt(product.price).toLocaleString('vi-VN') %>đ
-                </p>
-                <div class="d-flex gap-1">
-                    <a href="/products/<%= product._id %>"
-                       class="btn btn-outline-success btn-sm flex-fill">
-                       Chi tiết
-                    </a>
-                    <% if (product.stock > 0) { %>
-                    <button class="btn btn-success btn-sm btn-add-cart"
-                            data-id="<%= product._id %>">
-                        <i class="fas fa-cart-plus"></i>
-                    </button>
-                    <% } %>
-                </div>
+    <!-- Sidebar / Bộ lọc -->
+    <div class="col-md-3 mb-4">
+        <div class="card border-0 shadow-sm rounded-4" style="background: #f8faf7;">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-4"><i class="fas fa-filter text-success me-2"></i>Bộ lọc</h5>
+                
+                <form id="filterForm" action="/products" method="GET">
+                    <input type="hidden" name="search" value="<%= keyword %>">
+                    <input type="hidden" name="sort" id="sortInput" value="<%= sort %>">
+
+                    <!-- Danh mục -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3">Danh mục</h6>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="category" value="" id="cat_all" <%= !selectedCategory ? 'checked' : '' %>>
+                            <label class="form-check-label" for="cat_all">Tất cả sản phẩm</label>
+                        </div>
+                        <% categories.forEach(cat => { %>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="category" value="<%= cat._id %>" id="cat_<%= cat._id %>" <%= selectedCategory == cat._id ? 'checked' : '' %>>
+                            <label class="form-check-label" for="cat_<%= cat._id %>"><%= cat.name %></label>
+                        </div>
+                        <% }) %>
+                    </div>
+
+                    <!-- Mức giá -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3">Khoảng giá</h6>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="priceRange" value="" id="price_all" <%= (!minPrice && !maxPrice) ? 'checked' : '' %>>
+                            <label class="form-check-label" for="price_all">Tất cả mức giá</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="priceRange" value="0-200000" id="price_1" <%= (minPrice == '' && maxPrice == '200000') ? 'checked' : '' %>>
+                            <label class="form-check-label" for="price_1">Dưới 200.000đ</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="priceRange" value="200000-500000" id="price_2" <%= (minPrice == '200000' && maxPrice == '500000') ? 'checked' : '' %>>
+                            <label class="form-check-label" for="price_2">Từ 200.000đ - 500.000đ</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="priceRange" value="500000-" id="price_3" <%= (minPrice == '500000' && maxPrice == '') ? 'checked' : '' %>>
+                            <label class="form-check-label" for="price_3">Trên 500.000đ</label>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="minPrice" id="minPriceInput" value="<%= minPrice %>">
+                    <input type="hidden" name="maxPrice" id="maxPriceInput" value="<%= maxPrice %>">
+
+                    <button type="submit" class="btn btn-success w-100 fw-bold rounded-pill" onclick="applyFilters()">Áp dụng</button>
+                </form>
             </div>
         </div>
     </div>
-    <% }) %>
+
+    <!-- Danh sách sản phẩm -->
+    <div class="col-md-9">
+        <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-white shadow-sm rounded-4">
+            <h5 class="mb-0">
+                Tìm thấy <span class="text-success fw-bold"><%= total %></span> sản phẩm
+                <% if (keyword) { %>
+                    <small class="text-muted fw-normal"> cho "<%= keyword %>"</small>
+                <% } %>
+            </h5>
+            <div class="d-flex align-items-center">
+                <span class="me-2 text-muted text-nowrap">Sắp xếp:</span>
+                <select class="form-select form-select-sm border-0 bg-light" style="width: 160px; font-weight: 500;" id="sortSelect" onchange="changeSort(this.value)">
+                    <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Mới nhất</option>
+                    <option value="price_asc" <%= sort === 'price_asc' ? 'selected' : '' %>>Giá: Thấp đến Cao</option>
+                    <option value="price_desc" <%= sort === 'price_desc' ? 'selected' : '' %>>Giá: Cao xuống Thấp</option>
+                </select>
+            </div>
+        </div>
+
+        <% if (products.length === 0) { %>
+        <div class="text-center py-5 bg-white shadow-sm rounded-4">
+            <div class="fs-1 mb-3">🌵</div>
+            <h5 class="text-muted">Không tìm thấy sản phẩm nào</h5>
+            <a href="/products" class="btn btn-outline-success mt-3 rounded-pill px-4">Xóa bộ lọc</a>
+        </div>
+        <% } else { %>
+        <div class="row g-4">
+            <% products.forEach(product => { %>
+            <div class="col-6 col-md-4">
+                <div class="card h-100 shadow-sm product-card position-relative border-0" style="border-radius: 16px; overflow: hidden;">
+                    <button class="btn btn-wishlist position-absolute top-0 start-0 m-2 border-0 bg-transparent"
+                            style="z-index: 10; color: rgba(255, 255, 255, 0.8);"
+                            data-id="<%= product._id %>" title="Thêm vào yêu thích">
+                        <i class="far fa-heart fs-5" style="text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></i>
+                    </button>
+                    <div style="aspect-ratio: 1/1; overflow: hidden;">
+                        <img src="/images/products/<%= product.image %>"
+                             class="card-img-top w-100 h-100 object-fit-cover"
+                             alt="<%= product.name %>"
+                             onerror="this.src='/images/default.jpg'" style="transition: 0.3s;">
+                    </div>
+                    <div class="card-body d-flex flex-column p-4">
+                        <h6 class="card-title fw-bold mb-1"><%= product.name %></h6>
+                        <small class="text-muted mb-2"><i class="fas fa-leaf me-1 text-success"></i><%= product.category_name %></small>
+                        <% if (product.stock === 0) { %>
+                            <span class="badge bg-danger mb-2" style="width:fit-content; border-radius: 4px;">Hết hàng</span>
+                        <% } else if (product.stock < 10) { %>
+                            <span class="badge bg-warning mb-2" style="width:fit-content; border-radius: 4px;">Còn ít</span>
+                        <% } else { %>
+                            <span class="badge bg-success-subtle text-success mb-2" style="width:fit-content; border-radius: 4px;">Còn hàng</span>
+                        <% } %>
+                        <p class="text-success fw-bold fs-5 mt-auto mb-3">
+                            <%= parseInt(product.price).toLocaleString('vi-VN') %>đ
+                        </p>
+                        <div class="d-flex gap-2">
+                            <a href="/products/<%= product._id %>"
+                               class="btn btn-outline-success flex-fill rounded-pill fw-medium">
+                               Chi tiết
+                            </a>
+                            <% if (product.stock > 0) { %>
+                            <button class="btn btn-success btn-add-cart rounded-pill px-3"
+                                    data-id="<%= product._id %>">
+                                <i class="fas fa-cart-plus"></i>
+                            </button>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% }) %>
+        </div>
+
+        <!-- Pagination -->
+        <% if (totalPages > 1) { %>
+        <nav class="mt-5">
+            <ul class="pagination justify-content-center">
+                <% if (currentPage > 1) { %>
+                <li class="page-item">
+                    <a class="page-link shadow-sm" href="?page=<%= currentPage - 1 %>&category=<%= selectedCategory || '' %>&search=<%= keyword %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>&sort=<%= sort %>" style="border-radius: 8px 0 0 8px;">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+                <% } %>
+                <% for(let i = 1; i <= totalPages; i++) { %>
+                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                    <a class="page-link shadow-sm" href="?page=<%= i %>&category=<%= selectedCategory || '' %>&search=<%= keyword %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>&sort=<%= sort %>">
+                        <%= i %>
+                    </a>
+                </li>
+                <% } %>
+                <% if (currentPage < totalPages) { %>
+                <li class="page-item">
+                    <a class="page-link shadow-sm" href="?page=<%= currentPage + 1 %>&category=<%= selectedCategory || '' %>&search=<%= keyword %>&minPrice=<%= minPrice %>&maxPrice=<%= maxPrice %>&sort=<%= sort %>" style="border-radius: 0 8px 8px 0;">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                <% } %>
+            </ul>
+        </nav>
+        <% } %>
+        <% } %>
+    </div>
 </div>
 
-<!-- Pagination -->
-<% if (totalPages > 1) { %>
-<nav class="mt-3">
-    <ul class="pagination justify-content-center">
-        <% if (currentPage > 1) { %>
-        <li class="page-item">
-            <a class="page-link" href="?page=<%= currentPage - 1 %>&category=<%= selectedCategory || '' %>&search=<%= keyword %>">
-                &laquo;
-            </a>
-        </li>
-        <% } %>
-        <% for(let i = 1; i <= totalPages; i++) { %>
-        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
-            <a class="page-link" href="?page=<%= i %>&category=<%= selectedCategory || '' %>&search=<%= keyword %>">
-                <%= i %>
-            </a>
-        </li>
-        <% } %>
-        <% if (currentPage < totalPages) { %>
-        <li class="page-item">
-            <a class="page-link" href="?page=<%= currentPage + 1 %>&category=<%= selectedCategory || '' %>&search=<%= keyword %>">
-                &raquo;
-            </a>
-        </li>
-        <% } %>
-    </ul>
-</nav>
-<% } %>
-<% } %>
+<script>
+    function applyFilters() {
+        const priceRangeEl = document.querySelector('input[name="priceRange"]:checked');
+        const priceRange = priceRangeEl ? priceRangeEl.value : '';
+        const minPriceInput = document.getElementById('minPriceInput');
+        const maxPriceInput = document.getElementById('maxPriceInput');
+        
+        if (priceRange) {
+            const [min, max] = priceRange.split('-');
+            minPriceInput.value = min || '';
+            maxPriceInput.value = max || '';
+        } else {
+            minPriceInput.value = '';
+            maxPriceInput.value = '';
+        }
+    }
+
+    function changeSort(val) {
+        document.getElementById('sortInput').value = val;
+        applyFilters();
+        document.getElementById('filterForm').submit();
+    }
+</script>
+
+<style>
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+    }
+    .product-card img:hover {
+        transform: scale(1.05);
+    }
+    .form-check-input:checked {
+        background-color: #198754;
+        border-color: #198754;
+    }
+    .page-link {
+        color: #198754;
+        border: none;
+        margin: 0 2px;
+    }
+    .page-item.active .page-link {
+        background-color: #198754;
+        border-radius: 8px;
+        color: white;
+    }
+</style>
 
 <%- include('../layouts/footer') %>

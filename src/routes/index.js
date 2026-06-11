@@ -7,6 +7,8 @@ router.get('/', async (req, res) => {
     try {
         const productModel = new Product();
         const categoryModel = new Category();
+        const Article = require('../models/Article');
+        const articleModel = new Article();
 
         const categories = await categoryModel.findAll();
 
@@ -21,9 +23,16 @@ router.get('/', async (req, res) => {
             })
         );
 
+        // Lấy 3 bài viết mới nhất
+        const latestArticles = await articleModel.model.find({ status: 'published' })
+            .sort({ createdAt: -1 })
+            .limit(3)
+            .lean();
+
         res.render('index', {
             title: 'Trang chủ - Plant Shop',
-            categoriesWithProducts
+            categoriesWithProducts,
+            latestArticles
         });
     } catch (err) {
         console.error('Home error:', err);
@@ -37,5 +46,11 @@ router.get('/plant-care', (req, res) => {
         title: 'Bí quyết chăm sóc cây - Cẩm nang'
     });
 });
+
+// Bài viết Blog
+const blogController = require('../controllers/BlogController');
+router.get('/blogs', blogController.index);
+router.get('/blogs/:slug', blogController.detail);
+router.post('/blogs/:slug/comment', blogController.comment);
 
 module.exports = router;

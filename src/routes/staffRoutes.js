@@ -27,4 +27,8 @@ router.post('/orders/:id/process-return', staffController.processReturn);
 
 router.get('/customers', staffController.customers);
 
+// Chat
+const chatController = require('../controllers/ChatController');
+router.get('/chat', chatController.adminChat);
+
 module.exports = router;

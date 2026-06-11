@@ -92,7 +92,7 @@ const addressRoutes = require('./src/routes/addressRoutes');
 const wishlistRoutes = require('./src/routes/wishlistRoutes');
 const chatRoutes = require('./src/routes/chatRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
-
+const newsletterRoutes = require('./src/routes/newsletter');
 app.use('/', indexRoutes);
 app.use('/products', productRoutes);
 app.use('/user', userRoutes);
@@ -102,6 +102,7 @@ app.use('/admin', adminRoutes);
 app.use('/staff', staffRoutes);
 app.use('/user/addresses', addressRoutes);
 app.use('/wishlist', wishlistRoutes);
+app.use('/newsletter', newsletterRoutes);
 app.use('/chat', chatRoutes);
 app.use('/api/notifications', notificationRoutes);
 

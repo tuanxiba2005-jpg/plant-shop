@@ -18,6 +18,11 @@ body {
     flex-direction: column;
     flex-shrink: 0;
     transition: all 0.3s;
+    position: sticky;
+    top: 20px;
+    height: calc(100vh - 60px);
+    border-radius: 12px;
+    overflow-y: auto;
 }
 
 .admin-sidebar .brand {

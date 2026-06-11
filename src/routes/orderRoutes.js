@@ -26,6 +26,10 @@ const upload = multer({
     }
 });
 
+// Public route: Lấy danh sách đánh giá của sản phẩm (Ai cũng xem được)
+router.get('/reviews/:productId', orderController.getReviews);
+
+// Yêu cầu đăng nhập cho tất cả các route bên dưới
 router.use(authMiddleware.isLoggedIn);
 
 router.get('/checkout', orderController.showCheckout);
@@ -35,7 +39,7 @@ router.get('/my-orders', orderController.myOrders);
 router.post('/:id/cancel', orderController.cancelOrder);
 router.post('/:id/retry-payment', orderController.retryPayment);
 router.post('/review', orderController.submitReview);
-router.get('/reviews/:productId', orderController.getReviews);
+
 router.post('/:id/return', upload.array('images', 5), orderController.returnOrder);
 
 // Payment callbacks (không cần đăng nhập)

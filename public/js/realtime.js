@@ -29,11 +29,12 @@ if (typeof currentUser !== 'undefined' && currentUser) {
 
     // ── Thông báo đơn hàng mới (cho staff/admin) ───────────
     socket.on('new_order', function (data) {
-        showRealtimeToast('🛒 Đơn hàng mới', data.message, 'primary', '/admin/orders');
+        const link = (typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'staff') ? '/staff/orders' : '/admin/orders';
+        showRealtimeToast('🛒 Đơn hàng mới', data.message, 'primary', link);
         addNotificationToDropdown({
             title: 'Đơn hàng mới',
             message: data.message,
-            link: `/admin/orders`,
+            link: link,
             created_at: new Date().toISOString()
         });
         incrementBadge();
@@ -84,6 +85,11 @@ async function fetchNotifications() {
 }
 
 function addNotificationToDropdown(n, append = false) {
+    if (typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'staff') {
+        if (n.link && n.link.startsWith('/admin/')) {
+            n.link = n.link.replace('/admin/', '/staff/');
+        }
+    }
     const list = document.getElementById('notificationList');
     if (!list) return;
 

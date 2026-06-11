@@ -39,7 +39,7 @@
                                             </td>
                                             <td>
                                                 <img src="/images/products/<%= product.image %>" width="60" height="60"
-                                                    style="object-fit:contain; border-radius:8px;"
+                                                    style="object-fit:cover; border-radius:8px;"
                                                     onerror="this.src='/images/default.jpg'">
                                             </td>
                                             <td>
@@ -205,4 +205,4 @@
                     </div>
                 </div>
 
-                <%- include('../layouts/footer') %>
+                <%- include('../layouts/footer', { extraJS: extraJS }) %>

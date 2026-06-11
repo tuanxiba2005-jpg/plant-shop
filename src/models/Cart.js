@@ -82,7 +82,7 @@ class Cart extends Model {
     async getCartCount(userId) {
         const cart = await this.model.findOne({ user_id: userId }).lean();
         if (!cart) return 0;
-        return cart.items.reduce((sum, item) => sum + item.quantity, 0);
+        return cart.items.length;
     }
 }
 

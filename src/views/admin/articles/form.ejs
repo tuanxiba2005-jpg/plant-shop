@@ -1,0 +1,94 @@
+<% extraCSS = ['https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-lite.min.css'] %>
+<%- include('../../layouts/header') %>
+
+<div class="py-2">
+    <div class="d-flex align-items-center mb-4 pb-3 border-bottom">
+        <a href="/admin/articles" class="btn btn-light rounded-circle shadow-sm me-3 d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+            <i class="fas fa-arrow-left text-secondary"></i>
+        </a>
+        <div>
+            <h3 class="mb-1 fw-bold" style="color: var(--primary-dark);"><%= article ? 'Chỉnh Sửa Bài Viết' : 'Tạo Bài Viết Mới' %></h3>
+            <p class="text-muted mb-0 small">Hoàn thiện nội dung bài viết của bạn để thu hút độc giả.</p>
+        </div>
+    </div>
+
+    <form action="/admin/articles/<%= article ? article._id + '/edit' : 'create' %>" method="POST" enctype="multipart/form-data" id="articleForm">
+        <div class="row g-4">
+            <!-- Cột trái: Nội dung chính -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4 p-lg-5">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark fs-5 mb-3">Tiêu đề bài viết <span class="text-danger">*</span></label>
+                            <input type="text" name="title" id="title" class="form-control form-control-lg bg-light border-0" 
+                                   value="<%= article ? article.title : '' %>" required 
+                                   placeholder="Nhập tiêu đề thật hấp dẫn..."
+                                   style="font-size: 1.2rem;">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark">Đường dẫn tĩnh (Slug) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0 text-muted">plantshop.vn/blogs/</span>
+                                <input type="text" name="slug" id="slug" class="form-control bg-light border-0" 
+                                       value="<%= article ? article.slug : '' %>" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark">Mô tả ngắn gọn (Summary)</label>
+                            <textarea name="summary" class="form-control bg-light border-0" rows="3" 
+                                      placeholder="Tóm tắt ngắn gọn nội dung bài viết (hiển thị ở thẻ bài viết)..."><%= article ? article.summary : '' %></textarea>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label fw-bold text-dark fs-5 mb-3">Nội dung bài viết <span class="text-danger">*</span></label>
+                            <textarea name="content" id="editor"><%= article ? article.content : '' %></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Cài đặt xuất bản -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 mb-4 sticky-top" style="top: 20px;">
+                    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                        <h5 class="fw-bold text-dark mb-0"><i class="fas fa-cog text-success me-2"></i>Cài đặt hiển thị</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-secondary small text-uppercase">Trạng thái</label>
+                            <select name="status" class="form-select form-select-lg border-0 bg-light cursor-pointer">
+                                <option value="published" <%= article && article.status === 'published' ? 'selected' : '' %>>🟢 Xuất bản ngay</option>
+                                <option value="draft" <%= article && article.status === 'draft' ? 'selected' : '' %>>📝 Lưu bản nháp</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-secondary small text-uppercase">Ảnh bìa bài viết</label>
+                            <div class="image-upload-box text-center p-4 rounded-4 bg-light position-relative cursor-pointer" onclick="document.getElementById('imageInput').click()" style="border: 2px dashed #dee2e6; transition: all 0.3s ease;">
+                                <img id="imgPreview" src="<%= article && article.image ? '/images/products/' + article.image : '/images/default-article.jpg' %>" 
+                                     class="img-fluid rounded-3 mb-3 shadow-sm" style="max-height: 180px; object-fit: cover; width: 100%;">
+                                <div class="upload-btn-wrapper">
+                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-4 bg-white">
+                                        <i class="fas fa-cloud-upload-alt me-2"></i>Chọn ảnh khác
+                                    </button>
+                                    <input type="file" name="image" id="imageInput" class="d-none" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="border-light my-4">
+                        
+                        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold rounded-pill shadow-sm" id="submitBtn">
+                            <i class="fas fa-paper-plane me-2"></i><%= article ? 'CẬP NHẬT BÀI VIẾT' : 'ĐĂNG BÀI VIẾT' %>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<% extraJS = ['https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-lite.min.js', '/js/admin/article-form.js'] %>
+<%- include('../../layouts/footer') %>

@@ -47,7 +47,7 @@ class ChatController {
             const chatList = await Message.getAdminChatList();
             res.render('admin/chat', { 
                 title: 'Hỗ trợ khách hàng (Live Chat)',
-                path: '/admin/chat',
+                path: req.baseUrl + '/chat',
                 hideFooter: true,
                 chatList 
             });
