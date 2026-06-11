@@ -9,6 +9,7 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS,
     },
     connectionTimeout: 5000,
+    family: 4, // Bắt buộc dùng IPv4
     tls: {
         rejectUnauthorized: false
     }
