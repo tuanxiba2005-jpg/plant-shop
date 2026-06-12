@@ -2,7 +2,7 @@ const socket = io();
 let currentRoom = null;
 const adminId = document.getElementById('adminIdData') ? document.getElementById('adminIdData').value : '';
 
-async function openChat(room, customerName) {
+async function openChat(room, customerName, customerAvatar) {
     currentRoom = room;
     
     // Highlight active item
@@ -19,6 +19,10 @@ async function openChat(room, customerName) {
     document.getElementById('chat-messages').classList.remove('d-none');
     document.getElementById('chat-input-area').classList.remove('d-none');
     document.getElementById('current-chat-name').textContent = customerName;
+    
+    if(customerAvatar) {
+        document.getElementById('current-chat-avatar').src = customerAvatar;
+    }
 
     // Fetch history
     const customerId = room.replace('chat_', '');

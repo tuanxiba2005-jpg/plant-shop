@@ -17,7 +17,7 @@
             <div class="chat-list" id="customer-list">
                 <% if (chatList && chatList.length > 0) { %>
                     <% chatList.forEach(chat => { %>
-                        <div class="chat-item d-flex align-items-center" data-room="<%= chat._id %>" onclick="openChat('<%= chat._id %>', '<%= chat.user.name %>')">
+                        <div class="chat-item d-flex align-items-center" data-room="<%= chat._id %>" onclick="openChat('<%= chat._id %>', '<%= chat.user.name %>', '<%= chat.user.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(chat.user.name) + '&background=e2e8e4&color=2d5f3f' %>')">
                             <div class="position-relative">
                                 <img src="<%= chat.user.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(chat.user.name) + '&background=e2e8e4&color=2d5f3f' %>" class="rounded-circle border" width="48" height="48" style="object-fit:cover;">
                                 <% if (chat.unreadCount > 0) { %>
@@ -44,7 +44,11 @@
         <!-- Main Chat Area -->
         <div class="chat-main">
             <div class="p-3 border-bottom bg-light d-flex align-items-center" id="chat-header" style="display: none !important;">
-                <h6 class="m-0 fw-bold" id="current-chat-name">Đang tải...</h6>
+                <img id="current-chat-avatar" src="" class="rounded-circle me-3 border shadow-sm" width="45" height="45" style="object-fit:cover;">
+                <div>
+                    <h6 class="m-0 fw-bold" id="current-chat-name">Đang tải...</h6>
+                    <small class="text-success"><i class="fas fa-circle me-1" style="font-size: 8px;"></i>Đang kết nối</small>
+                </div>
             </div>
             
             <div id="no-chat-selected" class="flex-fill d-flex align-items-center justify-content-center text-muted flex-column">

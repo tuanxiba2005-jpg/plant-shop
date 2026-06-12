@@ -3,6 +3,8 @@ const router  = express.Router();
 const userController  = require('../controllers/UserController');
 const authMiddleware  = require('../middlewares/authMiddleware');
 const { loginLimiter, generalLimiter } = require('../middlewares/rateLimitMiddleware');
+const multer = require('multer');
+const upload = multer({ dest: 'public/images/avatars/temp/' });
 
 // Auth
 router.get('/login',    userController.showLogin);
@@ -15,6 +17,7 @@ router.get('/logout',   userController.logout);
 router.get('/profile',                  authMiddleware.isLoggedIn, userController.profile);
 router.post('/profile/update',          authMiddleware.isLoggedIn, userController.updateProfile);
 router.post('/profile/change-password', authMiddleware.isLoggedIn, userController.changePassword);
+router.post('/profile/avatar',          authMiddleware.isLoggedIn, upload.single('avatar'), userController.uploadAvatar);
 
 // Quên mật khẩu
 router.get('/forgot-password',              userController.showForgotPassword);

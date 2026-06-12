@@ -1,4 +1,7 @@
 const crypto = require('crypto');
+const sharp = require('sharp');
+const fs = require('fs');
+const path = require('path');
 const User = require('../models/User');
 const Order = require('../models/Order');
 const Wishlist = require('../models/wishlist');
@@ -21,6 +24,7 @@ class UserController {
         this.forgotPassword     = this.forgotPassword.bind(this);
         this.showResetPassword  = this.showResetPassword.bind(this);
         this.resetPassword      = this.resetPassword.bind(this);
+        this.uploadAvatar       = this.uploadAvatar.bind(this);
     }
 
     showLogin(req, res) {
@@ -169,6 +173,44 @@ class UserController {
         } catch (err) {
             console.error('Update profile error:', err);
             res.redirect('/user/profile?error=Lỗi server');
+        }
+    }
+
+    async uploadAvatar(req, res) {
+        try {
+            if (!req.file) {
+                return res.redirect('/user/profile?error=Vui lòng chọn ảnh');
+            }
+
+            const userId = req.session.user.id;
+            const ext = path.extname(req.file.originalname).toLowerCase();
+            if (!['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext)) {
+                fs.unlinkSync(req.file.path);
+                return res.redirect('/user/profile?error=Định dạng ảnh không hợp lệ');
+            }
+
+            const filename = `avatar_${userId}.jpg`;
+            const outputPath = path.join(__dirname, '../../public/images/avatars', filename);
+
+            await sharp(req.file.path)
+                .resize(150, 150, { fit: 'cover' })
+                .jpeg({ quality: 80 })
+                .toFile(outputPath);
+
+            // Xóa file temp
+            fs.unlinkSync(req.file.path);
+
+            const avatarUrl = `/images/avatars/${filename}?v=${Date.now()}`;
+            await this.userModel.updateUser(userId, { avatar: avatarUrl });
+            
+            // Cập nhật session
+            req.session.user.avatar = avatarUrl;
+
+            res.redirect('/user/profile?success=Cập nhật ảnh đại diện thành công');
+        } catch (err) {
+            console.error('Upload avatar error:', err);
+            if (req.file) fs.unlinkSync(req.file.path);
+            res.redirect('/user/profile?error=Lỗi khi tải ảnh lên');
         }
     }
 
