@@ -74,15 +74,15 @@
                     <% if (user.role === 'admin') { %>
                         <li class="nav-item ps-3 ms-2 border-start d-flex align-items-center">
                             <div class="d-flex align-items-center bg-white rounded-pill px-3 py-1 shadow-sm border border-success-subtle">
-                                <a href="/admin/dashboard" class="text-success text-decoration-none fw-medium me-2" style="font-size: 0.85rem;">
+                                <a href="/admin/dashboard" class="text-success text-decoration-none fw-medium me-2 header-user-role">
                                     <i class="fas fa-cog"></i> Quản trị
                                 </a>
                                 <span class="text-muted opacity-25 mx-1">|</span>
                                 <div class="dropdown ms-2">
-                                    <a class="text-dark text-decoration-none fw-medium dropdown-toggle" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false" style="font-size: 0.85rem;">
+                                    <a class="text-dark text-decoration-none fw-medium dropdown-toggle header-user-role" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false">
                                         <i class="far fa-user-circle me-1 text-success"></i><%= user.name %>
                                     </a>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-modern" style="font-size: 0.9rem; margin-top: 10px;">
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-modern header-dropdown-menu-modern">
                                         <li>
                                             <div class="px-3 py-2 border-bottom mb-1 bg-light rounded-top">
                                                 <span class="d-block fw-bold text-dark"><%= user.name %></span>
@@ -105,15 +105,15 @@
                     <% } else if (user.role === 'staff') { %>
                         <li class="nav-item ps-3 ms-2 border-start d-flex align-items-center">
                             <div class="d-flex align-items-center bg-white rounded-pill px-3 py-1 shadow-sm border border-success-subtle">
-                                <a href="/staff/dashboard" class="text-success text-decoration-none fw-medium me-2" style="font-size: 0.85rem;">
+                                <a href="/staff/dashboard" class="text-success text-decoration-none fw-medium me-2 header-user-role">
                                     <i class="fas fa-cog"></i> Quản trị
                                 </a>
                                 <span class="text-muted opacity-25 mx-1">|</span>
                                 <div class="dropdown ms-2">
-                                    <a class="text-dark text-decoration-none fw-medium dropdown-toggle" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false" style="font-size: 0.85rem;">
+                                    <a class="text-dark text-decoration-none fw-medium dropdown-toggle header-user-role" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false">
                                         <i class="far fa-user-circle me-1 text-success"></i><%= user.name %>
                                     </a>
-                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-modern" style="font-size: 0.9rem; margin-top: 10px;">
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-modern header-dropdown-menu-modern">
                                         <li>
                                             <div class="px-3 py-2 border-bottom mb-1 bg-light rounded-top">
                                                 <span class="d-block fw-bold text-dark"><%= user.name %></span>
@@ -135,7 +135,7 @@
                             <a class="nav-link text-muted p-0 fw-medium dropdown-toggle hover-success" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false">
                                 <i class="fas fa-user me-1 text-success"></i><%= user.name %>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-modern" style="font-size: 0.9rem;">
+                            <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-modern header-dropdown-menu-sm">
                                 <li>
                                     <div class="px-3 py-2 border-bottom mb-1 bg-light rounded-top">
                                         <span class="d-block fw-bold text-dark"><%= user.name %></span>
@@ -154,7 +154,7 @@
                         <a class="nav-link text-muted p-0 dropdown-toggle hover-success" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false">
                             <i class="fas fa-user-circle me-1"></i>Khách
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="font-size: 0.9rem;">
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm header-dropdown-menu-sm">
                             <li><a class="dropdown-item fw-medium text-success" href="/user/login"><i class="fas fa-sign-in-alt me-2"></i>Đăng nhập</a></li>
                             <li><a class="dropdown-item" href="/user/register"><i class="fas fa-user-plus me-2 text-muted"></i>Tạo tài khoản</a></li>
                         </ul>
@@ -164,12 +164,14 @@
         </div>
     </div>
 
-    <!-- Tier 2: Main Bar -->
-    <div class="bg-white py-3 border-bottom position-relative z-2">
+    <!-- Sticky Header Wrapper -->
+    <header class="sticky-top shadow-sm header-sticky-wrapper">
+        <!-- Tier 2: Main Bar -->
+        <div class="bg-white py-3 border-bottom position-relative z-2">
         <div class="container d-flex align-items-center justify-content-between flex-wrap">
             <!-- Logo -->
             <a class="navbar-brand fw-bold d-flex align-items-center m-0 order-1" href="/">
-                <img src="/images/logo.png" alt="Tuan's Green" style="height: 55px; width: auto; object-fit: contain;">
+                <img src="/images/logo.png" alt="Tuan's Green" class="header-logo">
             </a>
 
             <!-- Search Bar -->
@@ -179,7 +181,7 @@
                         <i class="fas fa-search text-success ms-3 me-2"></i>
                         <input type="text" name="search" class="form-control border-0 px-3 py-2 rounded-pill shadow-sm search-input-pill"
                             placeholder="Tìm cây cảnh, kinh nghiệm..." value="<%= typeof keyword !== 'undefined' ? keyword : '' %>">
-                        <button type="submit" class="btn btn-success rounded-pill px-4 ms-2 me-1 fw-medium" style="font-size: 0.9rem; padding-top: 0.4rem; padding-bottom: 0.4rem;">
+                        <button type="submit" class="btn btn-success rounded-pill px-4 ms-2 me-1 fw-medium header-search-btn">
                             Tìm
                         </button>
                     </div>
@@ -197,7 +199,7 @@
                                 <span class="visually-hidden">New alerts</span>
                             </span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-modern p-0" aria-labelledby="notificationDropdown" id="notificationList" style="width: 350px; max-height: 400px; overflow-y: auto; margin-top: 10px;">
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-modern p-0" aria-labelledby="notificationDropdown" id="notificationList" class="header-notification-menu">
                             <li><h6 class="dropdown-header fw-bold text-dark border-bottom py-3 bg-light rounded-top">Thông báo mới</h6></li>
                             <li><div class="dropdown-item text-center text-muted small py-4"><i class="fas fa-spinner fa-spin me-2"></i> Đang tải thông báo...</div></li>
                         </ul>
@@ -225,7 +227,7 @@
 
                 <!-- Dashboard Button for Admin/Staff -->
                 <% if (user && (user.role === 'admin' || user.role === 'staff')) { %>
-                    <a href="/<%= user.role %>/dashboard" class="btn btn-action btn-action-modern rounded-4 border px-3 d-flex align-items-center justify-content-center gap-2 text-decoration-none" style="height: 44px;">
+                    <a href="/<%= user.role %>/dashboard" class="btn btn-action btn-action-modern rounded-4 border px-3 d-flex align-items-center justify-content-center gap-2 text-decoration-none" class="header-dashboard-btn">
                         <i class="fas fa-th-large text-dark"></i>
                         <span class="fw-medium text-dark d-none d-sm-inline">Dashboard</span>
                     </a>
@@ -257,9 +259,9 @@
                     
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle text-white-50 py-3 px-3 hover-text-white d-flex align-items-center gap-1" href="#" data-bs-toggle="dropdown">
-                            <i class="fas fa-leaf" style="color: #a3d9a5;"></i> Danh mục
+                            <i class="fas fa-leaf" class="header-cat-icon"></i> Danh mục
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-modern shadow-sm mt-0" style="border-radius: 0 0 12px 12px; border: none;">
+                        <ul class="dropdown-menu dropdown-menu-modern shadow-sm mt-0" class="header-cat-dropdown">
                             <li><a class="dropdown-item py-2" href="/products">Tất cả sản phẩm</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <% if (typeof globalCategories !== 'undefined') { %>
@@ -273,5 +275,6 @@
             </div>
         </div>
     </nav>
+    </header>
 
     <main class="container my-4">

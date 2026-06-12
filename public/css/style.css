@@ -1478,4 +1478,15 @@ input[type=number] {
 }
 .text-success-light {
     color: #a3d9a5;
-}
+}
+/* HEADER EJS INLINE STYLES MOVED HERE */
+.header-user-role { font-size: 0.85rem; }
+.header-dropdown-menu-modern { font-size: 0.9rem; margin-top: 10px; }
+.header-dropdown-menu-sm { font-size: 0.9rem; }
+.header-sticky-wrapper { z-index: 1030; top: -1px; }
+.header-logo { height: 55px; width: auto; object-fit: contain; }
+.header-search-btn { font-size: 0.9rem; padding-top: 0.4rem; padding-bottom: 0.4rem; }
+.header-notification-menu { width: 350px; max-height: 400px; overflow-y: auto; margin-top: 10px; }
+.header-dashboard-btn { height: 44px; }
+.header-cat-icon { color: #a3d9a5; }
+.header-cat-dropdown { border-radius: 0 0 12px 12px; border: none; }
