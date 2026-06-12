@@ -17,9 +17,9 @@
             <div class="chat-list" id="customer-list">
                 <% if (chatList && chatList.length > 0) { %>
                     <% chatList.forEach(chat => { %>
-                        <div class="chat-item d-flex align-items-center" data-room="<%= chat._id %>" onclick="openChat('<%= chat._id %>', '<%= chat.user.fullname %>')">
+                        <div class="chat-item d-flex align-items-center" data-room="<%= chat._id %>" onclick="openChat('<%= chat._id %>', '<%= chat.user.name %>')">
                             <div class="position-relative">
-                                <img src="<%= chat.user.avatar || '/images/default-avatar.png' %>" class="rounded-circle border" width="48" height="48" style="object-fit:cover;">
+                                <img src="<%= chat.user.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(chat.user.name) + '&background=e2e8e4&color=2d5f3f' %>" class="rounded-circle border" width="48" height="48" style="object-fit:cover;">
                                 <% if (chat.unreadCount > 0) { %>
                                     <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="width: 12px; height: 12px;" id="badge-<%= chat._id %>">
                                         <span class="visually-hidden">New alerts</span>
@@ -30,7 +30,7 @@
                                 <% } %>
                             </div>
                             <div class="ms-3 flex-fill overflow-hidden">
-                                <h6 class="mb-1 text-truncate"><%= chat.user.fullname %></h6>
+                                <h6 class="mb-1 text-truncate"><%= chat.user.name %></h6>
                                 <p class="mb-0 text-muted small text-truncate" id="lastmsg-<%= chat._id %>"><%= chat.lastMessage.content %></p>
                             </div>
                         </div>
