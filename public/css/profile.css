@@ -18,6 +18,10 @@ body {
     margin: 0 auto;
 }
 
+.dashboard-container.admin-view {
+    grid-template-columns: 240px 1fr;
+}
+
 /* Common Classes */
 .dash-card {
     background: #FFFFFF;
