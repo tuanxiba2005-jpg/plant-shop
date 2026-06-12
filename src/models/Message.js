@@ -14,7 +14,7 @@ class Message extends Model {
     }
 
     async getHistory(room) {
-        return await this.model.find({ room }).populate('sender', 'fullname role').sort({ createdAt: 1 }).lean();
+        return await this.model.find({ room }).populate('sender', 'name role').sort({ createdAt: 1 }).lean();
     }
 
     async getAdminChatList() {
@@ -46,7 +46,7 @@ class Message extends Model {
                     let: { userId: { $toObjectId: { $substr: ['$_id', 5, -1] } } },
                     pipeline: [
                         { $match: { $expr: { $eq: ['$_id', '$$userId'] } } },
-                        { $project: { fullname: 1, email: 1, avatar: 1 } }
+                        { $project: { name: 1, email: 1, avatar: 1 } }
                     ],
                     as: 'user'
                 }
