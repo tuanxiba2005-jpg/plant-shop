@@ -1413,6 +1413,7 @@ input[type=number] {
 .top-bar-custom {
     font-size: 0.85rem;
     background-color: #f4fbf7;
+    z-index: 1040 !important;
 }
 
 .search-container-custom {

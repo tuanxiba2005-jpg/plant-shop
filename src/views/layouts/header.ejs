@@ -58,9 +58,15 @@
                             <span id="header-chat-badge-<%= user.role %>" class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="display: none;"></span>
                         </a>
                     </li>
-                <% } else { %>
+                <% } else if (user) { %>
                     <li class="nav-item border-end px-3">
                         <a class="nav-link text-muted p-0 hover-success" href="/support">
+                            <i class="fas fa-headset me-1"></i>Hỗ trợ
+                        </a>
+                    </li>
+                <% } else { %>
+                    <li class="nav-item border-end px-3">
+                        <a class="nav-link text-muted p-0 hover-success" href="#" onclick="Swal.fire({icon: 'info', title: 'Yêu cầu đăng nhập', text: 'Vui lòng đăng nhập để chat với nhân viên hỗ trợ!', showCancelButton: true, confirmButtonText: 'Đăng nhập ngay', cancelButtonText: 'Để sau', confirmButtonColor: '#2d5f3f'}).then((result) => { if(result.isConfirmed) window.location.href='/user/login'; }); return false;">
                             <i class="fas fa-headset me-1"></i>Hỗ trợ
                         </a>
                     </li>
@@ -80,7 +86,12 @@
                                 <span class="text-muted opacity-25 mx-1">|</span>
                                 <div class="dropdown ms-2">
                                     <a class="text-dark text-decoration-none fw-medium dropdown-toggle header-user-role" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false">
-                                        <i class="far fa-user-circle me-1 text-success"></i><%= user.name %>
+                                        <% if (user && user.avatar) { %>
+                                            <img src="<%= user.avatar %>" alt="Avatar" class="rounded-circle me-1" style="width: 20px; height: 20px; object-fit: cover;">
+                                        <% } else { %>
+                                            <i class="far fa-user-circle me-1 text-success"></i>
+                                        <% } %>
+                                        <%= user.name %>
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-modern header-dropdown-menu-modern">
                                         <li>
@@ -111,7 +122,12 @@
                                 <span class="text-muted opacity-25 mx-1">|</span>
                                 <div class="dropdown ms-2">
                                     <a class="text-dark text-decoration-none fw-medium dropdown-toggle header-user-role" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false">
-                                        <i class="far fa-user-circle me-1 text-success"></i><%= user.name %>
+                                        <% if (user && user.avatar) { %>
+                                            <img src="<%= user.avatar %>" alt="Avatar" class="rounded-circle me-1" style="width: 20px; height: 20px; object-fit: cover;">
+                                        <% } else { %>
+                                            <i class="far fa-user-circle me-1 text-success"></i>
+                                        <% } %>
+                                        <%= user.name %>
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-modern header-dropdown-menu-modern">
                                         <li>
@@ -133,7 +149,12 @@
                     <% } else { %>
                         <li class="nav-item px-3 dropdown">
                             <a class="nav-link text-muted p-0 fw-medium dropdown-toggle hover-success" href="#" data-bs-toggle="dropdown" role="button" aria-expanded="false">
-                                <i class="fas fa-user me-1 text-success"></i><%= user.name %>
+                                <% if (user && user.avatar) { %>
+                                    <img src="<%= user.avatar %>" alt="Avatar" class="rounded-circle me-1" style="width: 20px; height: 20px; object-fit: cover;">
+                                <% } else { %>
+                                    <i class="fas fa-user me-1 text-success"></i>
+                                <% } %>
+                                <%= user.name %>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow-sm dropdown-menu-modern header-dropdown-menu-sm">
                                 <li>
@@ -221,7 +242,11 @@
 
                     <!-- User Profile -->
                     <a href="<%= user ? '/user/profile' : '/user/login' %>" class="btn btn-action btn-action-modern rounded-4 border p-2 d-flex align-items-center justify-content-center action-btn-custom text-decoration-none">
-                        <i class="far fa-user-circle text-dark fs-5"></i>
+                        <% if (typeof user !== 'undefined' && user && user.avatar) { %>
+                            <img src="<%= user.avatar %>" alt="Avatar" class="rounded-circle" style="width: 28px; height: 28px; object-fit: cover;">
+                        <% } else { %>
+                            <i class="far fa-user-circle text-dark fs-5"></i>
+                        <% } %>
                     </a>
                 <% } %>
 
