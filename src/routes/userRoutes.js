@@ -14,6 +14,16 @@ router.post('/login', loginLimiter, userController.login);
 router.get('/logout',   userController.logout);
 
 // Profile
+router.get('/test-dump', async (req, res) => {
+    try {
+        const Product = require('../models/Product');
+        const pModel = new Product();
+        const products = await pModel.model.find({ name: /Xương rồng/i }).select('name image').lean();
+        res.json(products);
+    } catch (err) {
+        res.json({ error: err.message });
+    }
+});
 router.get('/profile',                  authMiddleware.isLoggedIn, userController.profile);
 router.post('/profile/update',          authMiddleware.isLoggedIn, userController.updateProfile);
 router.post('/profile/change-password', authMiddleware.isLoggedIn, userController.changePassword);

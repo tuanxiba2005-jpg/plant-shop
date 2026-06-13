@@ -28,7 +28,7 @@ const processImages = async (req, res, next) => {
             await sharp(req.file.buffer)
                 .resize({ width: 800, withoutEnlargement: true })
                 .webp({ quality: 80 })
-                .toFile(path.join('public/images/products/', filename));
+                .toFile(path.join(__dirname, '../../public/images/products/', filename));
             req.file.filename = filename;
         }
 
@@ -40,7 +40,7 @@ const processImages = async (req, res, next) => {
                     await sharp(file.buffer)
                         .resize({ width: 800, withoutEnlargement: true })
                         .webp({ quality: 80 })
-                        .toFile(path.join('public/images/products/', filename));
+                        .toFile(path.join(__dirname, '../../public/images/products/', filename));
                     file.filename = filename;
                 }
             }
