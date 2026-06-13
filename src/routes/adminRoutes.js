@@ -21,14 +21,21 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({ storage, fileFilter, limits: { fileSize: MAX_FILE_SIZE } });
 
 const sharp = require('sharp');
+const fs = require('fs');
+const ImageStore = require('../models/ImageStore');
+
 const processImages = async (req, res, next) => {
     try {
         if (req.file) {
             const filename = Date.now() + '-' + Math.round(Math.random() * 1E9) + '.webp';
-            await sharp(req.file.buffer)
+            const buffer = await sharp(req.file.buffer)
                 .resize({ width: 800, withoutEnlargement: true })
                 .webp({ quality: 80 })
-                .toFile(path.join(__dirname, '../../public/images/products/', filename));
+                .toBuffer();
+            
+            await ImageStore.create({ filename, data: buffer, contentType: 'image/webp' }).catch(err => console.error('Lỗi lưu ảnh DB:', err));
+            fs.promises.writeFile(path.join(__dirname, '../../public/images/products/', filename), buffer).catch(err => console.error('Lỗi lưu ảnh đĩa:', err));
+            
             req.file.filename = filename;
         }
 
@@ -37,10 +44,14 @@ const processImages = async (req, res, next) => {
                 const files = req.files[fieldName];
                 for (let file of files) {
                     const filename = Date.now() + '-' + Math.round(Math.random() * 1E9) + '.webp';
-                    await sharp(file.buffer)
+                    const buffer = await sharp(file.buffer)
                         .resize({ width: 800, withoutEnlargement: true })
                         .webp({ quality: 80 })
-                        .toFile(path.join(__dirname, '../../public/images/products/', filename));
+                        .toBuffer();
+                    
+                    await ImageStore.create({ filename, data: buffer, contentType: 'image/webp' }).catch(err => console.error('Lỗi lưu ảnh DB:', err));
+                    fs.promises.writeFile(path.join(__dirname, '../../public/images/products/', filename), buffer).catch(err => console.error('Lỗi lưu ảnh đĩa:', err));
+                    
                     file.filename = filename;
                 }
             }

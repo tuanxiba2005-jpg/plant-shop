@@ -6,6 +6,6 @@ const authMiddleware = require('../middlewares/authMiddleware');
 router.use(authMiddleware.isLoggedIn);
 
 router.get('/history', chatController.getHistory);
-router.get('/admin/history/:userId', authMiddleware.isAdmin, chatController.getAdminHistory);
+router.get('/admin/history/:userId', authMiddleware.isStaff, chatController.getAdminHistory);
 
 module.exports = router;

@@ -49,6 +49,31 @@ app.use(xss());
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Tự động phục hồi ảnh từ MongoDB nếu file không tồn tại trên ổ đĩa (do máy chủ xoá ổ ảo)
+app.get('/images/:folder/:filename', async (req, res, next) => {
+    try {
+        const ImageStore = require('./src/models/ImageStore');
+        const fs = require('fs');
+        const img = await ImageStore.findOne({ filename: req.params.filename });
+        
+        if (img && img.data) {
+            // Trả ảnh về cho trình duyệt
+            res.setHeader('Content-Type', img.contentType || 'image/webp');
+            res.setHeader('Cache-Control', 'public, max-age=31536000');
+            res.send(img.data);
+            
+            // Ghi lại ra đĩa để lần sau express.static phục vụ
+            const dir = path.join(__dirname, 'public/images', req.params.folder);
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+            fs.promises.writeFile(path.join(dir, req.params.filename), img.data).catch(() => {});
+        } else {
+            next();
+        }
+    } catch (e) {
+        next();
+    }
+});
+
 const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,

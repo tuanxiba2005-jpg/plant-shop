@@ -21,6 +21,7 @@ class Database {
             await mongoose.connect(process.env.MONGODB_URI, {
                 serverSelectionTimeoutMS: 5000, // timeout 5s
                 socketTimeoutMS: 45000,
+                family: 4 // Bắt buộc dùng IPv4 để tránh lỗi querySrv trên một số mạng
             });
             this.isConnected = true;
             console.log('✅ Kết nối MongoDB Atlas thành công!');
