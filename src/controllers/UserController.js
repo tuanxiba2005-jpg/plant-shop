@@ -192,10 +192,20 @@ class UserController {
             const filename = `avatar_${userId}.jpg`;
             const outputPath = path.join(__dirname, '../../public/images/avatars', filename);
 
-            await sharp(req.file.path)
+            const buffer = await sharp(req.file.path)
                 .resize(150, 150, { fit: 'cover' })
                 .jpeg({ quality: 80 })
-                .toFile(outputPath);
+                .toBuffer();
+
+            const ImageStore = require('../models/ImageStore');
+            await ImageStore.findOneAndUpdate(
+                { filename }, 
+                { data: buffer, contentType: 'image/jpeg' }, 
+                { upsert: true }
+            ).catch(err => console.error('Lỗi lưu avatar DB:', err));
+
+            const fsPromises = require('fs').promises;
+            await fsPromises.writeFile(outputPath, buffer).catch(err => console.error('Lỗi lưu avatar đĩa:', err));
 
             // Xóa file temp
             fs.unlinkSync(req.file.path);
