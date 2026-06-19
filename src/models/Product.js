@@ -179,7 +179,7 @@ class Product extends Model {
                     products = pagedResults;
                 }
             } catch (e) {
-                console.error('Vector search pagination error:', e);
+                console.error('Vector search pagination error:', e.message);
                 useVector = false; // Fallback
             }
 
