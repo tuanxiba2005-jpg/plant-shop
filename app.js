@@ -143,7 +143,10 @@ const chatRoutes = require('./src/routes/chatRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
 const newsletterRoutes = require('./src/routes/newsletter');
 const authRoutes = require('./src/routes/authRoutes');
+const pageRoutes = require('./src/routes/pageRoutes');
+
 app.use('/', indexRoutes);
+app.use('/support', pageRoutes);
 app.use('/auth', authRoutes);
 app.use('/products', productRoutes);
 app.use('/user', userRoutes);

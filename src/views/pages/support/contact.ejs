@@ -1,0 +1,109 @@
+<%- include('../../layouts/header') %>
+
+<div class="container my-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none" style="color: var(--secondary);">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Liên hệ</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4 mt-2">
+        <!-- Thông tin liên hệ -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 h-100" style="background-color: var(--primary); color: white;">
+                <h3 class="font-serif mb-4">Kết nối với Tuan's Green</h3>
+                <p class="mb-5 text-white-50">Chúng tôi luôn sẵn sàng lắng nghe và giải đáp mọi thắc mắc của bạn về cây xanh, cách chăm sóc cũng như các dịch vụ setup cảnh quan.</p>
+
+                <div class="d-flex align-items-start mb-4">
+                    <div class="icon-box me-3">
+                        <i class="fas fa-map-marker-alt fs-4 text-white"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1 fw-bold">Địa chỉ cửa hàng</h5>
+                        <p class="mb-0 text-white-50">123 Hoàng Hoa Thám, Ba Đình, Hà Nội</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-start mb-4">
+                    <div class="icon-box me-3">
+                        <i class="fas fa-phone-alt fs-4 text-white"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1 fw-bold">Hotline & Zalo</h5>
+                        <p class="mb-0 text-white-50">0334.081.597</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-start mb-4">
+                    <div class="icon-box me-3">
+                        <i class="fas fa-envelope fs-4 text-white"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1 fw-bold">Email hỗ trợ</h5>
+                        <p class="mb-0 text-white-50">pmt300405@gmail.com</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex align-items-start">
+                    <div class="icon-box me-3">
+                        <i class="fas fa-clock fs-4 text-white"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1 fw-bold">Giờ mở cửa</h5>
+                        <p class="mb-0 text-white-50">Thứ 2 - Chủ Nhật: 8:00 AM - 8:00 PM</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bản đồ và Form -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 h-100">
+                <h3 class="font-serif mb-4 text-dark">Gửi lời nhắn cho chúng tôi</h3>
+                
+                <form action="#" method="POST" onsubmit="event.preventDefault(); alert('Cảm ơn bạn đã gửi lời nhắn! Chúng tôi sẽ phản hồi sớm nhất có thể qua email.'); this.reset();">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Họ và tên *</label>
+                            <input type="text" class="form-control rounded-3 py-2" required placeholder="Ví dụ: Nguyễn Văn A">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Số điện thoại *</label>
+                            <input type="tel" class="form-control rounded-3 py-2" required placeholder="09xxxxxxx">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Chủ đề hỗ trợ</label>
+                        <select class="form-select rounded-3 py-2">
+                            <option>Tư vấn chọn cây</option>
+                            <option>Hỗ trợ đơn hàng/Đổi trả</option>
+                            <option>Thiết kế & Setup mảng xanh</option>
+                            <option>Khác</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-muted">Nội dung tin nhắn *</label>
+                        <textarea class="form-control rounded-3" rows="4" required placeholder="Hãy mô tả chi tiết vấn đề bạn cần hỗ trợ..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn text-white px-5 py-2 rounded-pill shadow-sm" style="background-color: var(--secondary);">Gửi Tin Nhắn <i class="fas fa-paper-plane ms-2"></i></button>
+                </form>
+
+                <hr class="my-5">
+                
+                <!-- Google Maps Embed (iframe) -->
+                <h4 class="font-serif mb-3">Bản đồ đường đi</h4>
+                <div class="ratio ratio-21x9 rounded-4 overflow-hidden border">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3723.8659129528577!2d105.81596707471465!3d21.03805068061358!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ab13320f2693%3A0xc3c5b8b98df0da2d!2zSG_DoG5nIEhvYSBUaMOhbSwgQmEgxJDDrG5oLCBIw6AgTuG7mWksIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1709230000000!5m2!1svi!2s" 
+                        allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../../layouts/footer') %>

@@ -1,0 +1,117 @@
+<%- include('../../layouts/header') %>
+
+<div class="container my-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none" style="color: var(--secondary);">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Câu hỏi thường gặp</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+                <h1 class="font-serif mb-4 text-center" style="color: var(--primary);">Câu Hỏi Thường Gặp (FAQ)</h1>
+                
+                <div class="content-section mt-5">
+                    <div class="accordion accordion-flush" id="faqAccordion">
+                        
+                        <!-- FAQ Item 1 -->
+                        <div class="accordion-item border-bottom">
+                            <h2 class="accordion-header" id="faq-heading-1">
+                                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-1" aria-expanded="false" aria-controls="faq-collapse-1" style="font-size: 1.1rem; color: var(--primary);">
+                                    1. Cây mua về bị héo rũ, lá vàng thì phải làm sao?
+                                </button>
+                            </h2>
+                            <div id="faq-collapse-1" class="accordion-collapse collapse" aria-labelledby="faq-heading-1" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted">
+                                    Cây khi mới chuyển môi trường từ vườn ươm về nhà mới thường sẽ bị "sốc nhiệt" nhẹ dẫn đến héo một chút. Bạn chỉ cần đặt cây ở nơi thoáng mát, tránh nắng gắt trực tiếp, tưới một chút nước vào gốc và phun sương lên lá. Sau khoảng 2-3 ngày cây sẽ tươi tắn trở lại. Nếu sau 3 ngày cây vẫn héo, hãy nhắn tin ngay cho shop để được hỗ trợ nhé!
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FAQ Item 2 -->
+                        <div class="accordion-item border-bottom">
+                            <h2 class="accordion-header" id="faq-heading-2">
+                                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-2" aria-expanded="false" aria-controls="faq-collapse-2" style="font-size: 1.1rem; color: var(--primary);">
+                                    2. Tôi là người mới chơi cây, có loại cây nào dễ chăm sóc không?
+                                </button>
+                            </h2>
+                            <div id="faq-collapse-2" class="accordion-collapse collapse" aria-labelledby="faq-heading-2" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted">
+                                    Chắc chắn rồi! Nếu bạn quá bận rộn hoặc chưa có kinh nghiệm, hãy thử bắt đầu với: <strong>Cây Kim Tiền, Lưỡi Hổ, Trầu Bà hoặc Sen Đá</strong>. Đây là những "chiến binh" thực thụ, có thể sống tốt trong môi trường thiếu sáng và chỉ cần tưới nước 1-2 lần/tuần.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FAQ Item 3 -->
+                        <div class="accordion-item border-bottom">
+                            <h2 class="accordion-header" id="faq-heading-3">
+                                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-3" aria-expanded="false" aria-controls="faq-collapse-3" style="font-size: 1.1rem; color: var(--primary);">
+                                    3. Hình thức thanh toán khi nhận hàng (COD) có được mở ra xem trước không?
+                                </button>
+                            </h2>
+                            <div id="faq-collapse-3" class="accordion-collapse collapse" aria-labelledby="faq-heading-3" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted">
+                                    Tuan's Green <strong>luôn khuyến khích</strong> khách hàng đồng kiểm (mở hộp kiểm tra) cùng với shipper ngay lúc nhận hàng. Bạn hãy quay video lại lúc mở hộp, nếu thấy cây bị gãy, dập nát hoặc chậu vỡ thì hoàn toàn có quyền từ chối nhận hàng mà không mất bất kỳ chi phí nào.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FAQ Item 4 -->
+                        <div class="accordion-item border-bottom">
+                            <h2 class="accordion-header" id="faq-heading-4">
+                                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-4" aria-expanded="false" aria-controls="faq-collapse-4" style="font-size: 1.1rem; color: var(--primary);">
+                                    4. Shop có nhận setup cây cảnh cho quán cafe hoặc văn phòng không?
+                                </button>
+                            </h2>
+                            <div id="faq-collapse-4" class="accordion-collapse collapse" aria-labelledby="faq-heading-4" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted">
+                                    Có nhé! Chúng tôi cung cấp dịch vụ khảo sát và thiết kế mảng xanh trọn gói cho chung cư, ban công, quán cafe, văn phòng làm việc. Vui lòng liên hệ số Hotline <strong>0334.081.597</strong> để chuyên viên của chúng tôi đến tận nơi tư vấn miễn phí cho bạn.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FAQ Item 5 -->
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq-heading-5">
+                                <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#faq-collapse-5" aria-expanded="false" aria-controls="faq-collapse-5" style="font-size: 1.1rem; color: var(--primary);">
+                                    5. Làm sao để biết cây cần tưới nước?
+                                </button>
+                            </h2>
+                            <div id="faq-collapse-5" class="accordion-collapse collapse" aria-labelledby="faq-heading-5" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted">
+                                    Mẹo đơn giản nhất là <strong>"Test đất bằng ngón tay"</strong>. Bạn chọc ngón tay chừng 3-4cm xuống đất, nếu thấy đất khô ráo hoàn toàn thì hãy tưới nước đẫm. Nếu đất vẫn còn hơi ẩm, hãy khoan tưới nhé, vì tưới dư nước là nguyên nhân số 1 khiến cây cảnh bị chết úng.
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="text-center mt-5 pt-4 border-top">
+                        <p class="mb-3 text-muted">Bạn không tìm thấy câu trả lời của mình?</p>
+                        <a href="/support/contact" class="btn btn-outline-secondary rounded-pill px-4">Liên hệ trực tiếp với chúng tôi</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Custom accordion styles */
+.accordion-button:not(.collapsed) {
+    background-color: #f1f8f5;
+    color: var(--secondary) !important;
+    box-shadow: none;
+}
+.accordion-button:focus {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 0.25rem rgba(45, 95, 63, 0.25);
+}
+.accordion-button::after {
+    filter: sepia(1) hue-rotate(90deg) saturate(3);
+}
+</style>
+
+<%- include('../../layouts/footer') %>
