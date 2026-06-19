@@ -164,9 +164,6 @@ class Product extends Model {
                             $addFields: {
                                 _score: { $meta: 'vectorSearchScore' }
                             }
-                        },
-                        {
-                            $match: { _score: { $gte: 0.75 } } // Chỉ lấy kết quả đủ liên quan
                         }
                     ];
 
@@ -174,18 +171,23 @@ class Product extends Model {
                         pipeline.push({ $match: matchStage });
                     }
 
-                    // Thực hiện aggregation
+                    // Thực hiện aggregation (lấy tất cả trước, rồi lọc theo ngưỡng thích ứng)
                     let rawResults = await this.model.aggregate(pipeline);
-                    
-                    // Sorting and Pagination in memory for the top 100
+
+                    // Ngưỡng thích ứng: chỉ giữ kết quả trong khoảng 0.06 điểm so với điểm cao nhất
+                    if (rawResults.length > 0) {
+                        const topScore = rawResults[0]._score;
+                        const minScore = Math.max(topScore - 0.06, 0.78);
+                        rawResults = rawResults.filter(r => r._score >= minScore);
+                    }
+
+                    // Sắp xếp (nếu cần)
                     if (sort === 'price_asc') rawResults.sort((a, b) => a.price - b.price);
                     else if (sort === 'price_desc') rawResults.sort((a, b) => b.price - a.price);
-                    
+
                     total = rawResults.length;
-                    
                     const pagedResults = rawResults.slice((page - 1) * limit, page * limit);
-                    
-                    // Populate category manually since aggregate doesn't use standard populate
+
                     const CategoryModel = require('./Category');
                     const categoryInstance = new CategoryModel();
                     for (let p of pagedResults) {
