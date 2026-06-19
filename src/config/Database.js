@@ -1,5 +1,9 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
+const dns = require('dns');
+
+// Ép NodeJS dùng DNS của Google và Cloudflare để tránh bị nhà mạng VN chặn
+dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
 
 class Database {
     static instance = null;
@@ -19,7 +23,7 @@ class Database {
         if (this.isConnected) return;
         try {
             await mongoose.connect(process.env.MONGODB_URI, {
-                serverSelectionTimeoutMS: 5000, // timeout 5s
+                serverSelectionTimeoutMS: 30000, // timeout 30s
                 socketTimeoutMS: 45000,
                 family: 4 // Bắt buộc dùng IPv4 để tránh lỗi querySrv trên một số mạng
             });
