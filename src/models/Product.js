@@ -169,10 +169,11 @@ class Product extends Model {
                     const pagedResults = rawResults.slice((page - 1) * limit, page * limit);
                     
                     // Populate category manually since aggregate doesn't use standard populate
-                    const Category = mongoose.models.Category || mongoose.model('Category');
+                    const CategoryModel = require('./Category');
+                    const categoryInstance = new CategoryModel();
                     for (let p of pagedResults) {
                         if (p.category_id) {
-                            p.category_id = await Category.findById(p.category_id).lean();
+                            p.category_id = await categoryInstance.findById(p.category_id);
                         }
                     }
                     products = pagedResults;
