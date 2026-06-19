@@ -82,9 +82,18 @@ class Product extends Model {
                             path: 'embedding',
                             queryVector: vector,
                             numCandidates: 100,
-                            limit: 8
+                            limit: 25
                         }
                     },
+                    {
+                        $addFields: {
+                            _score: { $meta: 'vectorSearchScore' }
+                        }
+                    },
+                    {
+                        $match: { _score: { $gte: 0.75 } } // Chỉ lấy kết quả đủ liên quan
+                    },
+                    { $limit: 8 },
                     {
                         $lookup: {
                             from: 'categories',
@@ -148,8 +157,16 @@ class Product extends Model {
                                 path: 'embedding',
                                 queryVector: vector,
                                 numCandidates: 100,
-                                limit: 100 // Lấy top 100 liên quan nhất rồi lọc
+                                limit: 100
                             }
+                        },
+                        {
+                            $addFields: {
+                                _score: { $meta: 'vectorSearchScore' }
+                            }
+                        },
+                        {
+                            $match: { _score: { $gte: 0.75 } } // Chỉ lấy kết quả đủ liên quan
                         }
                     ];
 
