@@ -59,10 +59,11 @@ class UserController {
             req.session.regenerate((err) => {
                 if (err) return res.status(500).render('user/login', { title: 'Đăng nhập', error: 'Lỗi server' });
                 req.session.user = {
-                    id:    user._id.toString(),
-                    name:  user.name,
-                    email: user.email,
-                    role:  user.role
+                    id:     user._id.toString(),
+                    name:   user.name,
+                    email:  user.email,
+                    role:   user.role,
+                    avatar: user.avatar || null
                 };
                 if (user.role === 'admin') return res.redirect('/admin/dashboard');
                 if (user.role === 'staff') return res.redirect('/staff/dashboard');

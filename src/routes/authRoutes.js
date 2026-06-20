@@ -15,10 +15,11 @@ router.get('/google/callback',
     (req, res) => {
         // Đăng nhập thành công, lưu thông tin vào session giống cách hệ thống đang làm
         req.session.user = {
-            id: req.user._id,
-            name: req.user.name,
-            email: req.user.email,
-            role: req.user.role
+            id:     req.user._id,
+            name:   req.user.name,
+            email:  req.user.email,
+            role:   req.user.role,
+            avatar: req.user.avatar || null
         };
         res.redirect('/');
     }
@@ -36,10 +37,11 @@ router.get('/facebook/callback',
     passport.authenticate('facebook', { failureRedirect: '/user/login?error=FacebookAuthFailed' }),
     (req, res) => {
         req.session.user = {
-            id: req.user._id,
-            name: req.user.name,
-            email: req.user.email,
-            role: req.user.role
+            id:     req.user._id,
+            name:   req.user.name,
+            email:  req.user.email,
+            role:   req.user.role,
+            avatar: req.user.avatar || null
         };
         res.redirect('/');
     }
