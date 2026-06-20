@@ -221,6 +221,8 @@
                             </div>
                             <!-- Hidden input lưu chuỗi địa chỉ gộp lại cho backend -->
                             <input type="hidden" name="address" id="checkoutAddressFinal">
+                            <!-- Hidden input lưu danh sách sản phẩm được chọn để mua -->
+                            <input type="hidden" name="selected_items" value="<%= locals.selectedIds || '' %>">
                         </div>
                     </div>
 

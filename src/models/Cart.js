@@ -86,6 +86,17 @@ class Cart extends Model {
         if (!cart) return 0;
         return cart.items.length;
     }
+
+    // Xóa nhiều sản phẩm cụ thể (dùng khi checkout theo lựa chọn)
+    async removeItems(userId, productIds) {
+        const ids = productIds.map(id => id.toString());
+        const cart = await this.getOrCreateCart(userId);
+        cart.items = cart.items.filter(
+            i => !ids.includes(i.product_id.toString())
+        );
+        await cart.save();
+        return cart.items.length; // trả về số sản phẩm còn lại
+    }
 }
 
 module.exports = Cart;

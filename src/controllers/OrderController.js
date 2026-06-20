@@ -32,17 +32,31 @@ class OrderController {
 
     async showCheckout(req, res) {
         try {
-            const items = await this.cartModel.getCartItems(req.session.user.id);
+            const allItems = await this.cartModel.getCartItems(req.session.user.id);
+            if (allItems.length === 0) return res.redirect('/cart');
+
+            // Lọc theo sản phẩm được chọn (nếu có)
+            const selectedIds = req.query.items ? req.query.items.split(',').filter(Boolean) : null;
+            const items = selectedIds
+                ? allItems.filter(i => selectedIds.includes(i.product_id.toString()))
+                : allItems;
+
             if (items.length === 0) return res.redirect('/cart');
+
             const total = items.reduce((sum, i) => sum + parseFloat(i.subtotal), 0);
             const user = await this.userModel.findById(req.session.user.id);
-            
+
             const errorType = req.query.error;
             let errorMsg = null;
             if (errorType === 'payment_not_configured') errorMsg = 'Hệ thống đang bảo trì cổng thanh toán. Vui lòng chọn Thanh toán khi nhận hàng (COD)!';
             else if (errorType === 'momo_failed') errorMsg = 'Thanh toán MoMo thất bại hoặc bị hủy.';
 
-            res.render('orders/checkout', { title: 'Đặt hàng', items, total, user, error: errorMsg });
+            res.render('orders/checkout', {
+                title: 'Đặt hàng',
+                items, total, user,
+                error: errorMsg,
+                selectedIds: (selectedIds || items.map(i => i.product_id.toString())).join(',')
+            });
         } catch (err) {
             res.status(500).render('error', { title: 'Lỗi', status: 500, message: err.message });
         }
@@ -61,24 +75,34 @@ class OrderController {
 
     async placeOrder(req, res) {
         try {
-            const { address, phone, note, payment_method, coupon_code } = req.body;
+            const { address, phone, note, payment_method, coupon_code, selected_items } = req.body;
             console.log('========== PLACE ORDER DEBUG ==========');
             console.log('req.body:', JSON.stringify(req.body));
             console.log('payment_method:', JSON.stringify(payment_method));
-            console.log('typeof payment_method:', typeof payment_method);
+            console.log('selected_items:', selected_items);
             console.log('=======================================');
 
+            // Lấy danh sách IDs sản phẩm được chọn
+            const selectedIds = selected_items ? selected_items.split(',').filter(Boolean) : null;
+
             if (!address || !phone) {
-                const items = await this.cartModel.getCartItems(req.session.user.id);
+                const allItems = await this.cartModel.getCartItems(req.session.user.id);
+                const items = selectedIds
+                    ? allItems.filter(i => selectedIds.includes(i.product_id.toString()))
+                    : allItems;
                 const total = items.reduce((sum, i) => sum + parseFloat(i.subtotal), 0);
                 const user = await this.userModel.findById(req.session.user.id);
                 return res.render('orders/checkout', {
                     title: 'Đặt hàng', items, total, user,
-                    error: 'Vui lòng điền đầy đủ địa chỉ và số điện thoại'
+                    error: 'Vui lòng điền đầy đủ địa chỉ và số điện thoại',
+                    selectedIds: selected_items || ''
                 });
             }
 
-            const items = await this.cartModel.getCartItems(req.session.user.id);
+            const allItems = await this.cartModel.getCartItems(req.session.user.id);
+            const items = selectedIds
+                ? allItems.filter(i => selectedIds.includes(i.product_id.toString()))
+                : allItems;
             if (items.length === 0) return res.redirect('/cart');
 
             let total = items.reduce((sum, i) => sum + parseFloat(i.subtotal), 0);
@@ -104,8 +128,10 @@ class OrderController {
 
             if (couponUsed) await this.couponModel.markUsed(couponUsed);
 
-            await this.cartModel.clearCart(req.session.user.id);
-            req.session.cartCount = 0;
+            // Chỉ xóa các sản phẩm đã đặt, giữ lại phần còn lại trong giỏ
+            const orderedProductIds = items.map(i => i.product_id.toString());
+            const remainingCount = await this.cartModel.removeItems(req.session.user.id, orderedProductIds);
+            req.session.cartCount = remainingCount;
 
             // Gửi email xác nhận
             try {

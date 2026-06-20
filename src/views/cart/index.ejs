@@ -41,7 +41,7 @@
     background: linear-gradient(135deg, #f8fdf9, #f0f7f2);
     padding: 1rem 1.5rem;
     display: grid;
-    grid-template-columns: 2fr 1fr 1.2fr 1fr 48px;
+    grid-template-columns: 40px 2fr 1fr 1.2fr 1fr 48px;
     gap: 1rem;
     border-bottom: 1px solid #e8f5e9;
 }
@@ -55,7 +55,7 @@
 
 .cart-item-row {
     display: grid;
-    grid-template-columns: 2fr 1fr 1.2fr 1fr 48px;
+    grid-template-columns: 40px 2fr 1fr 1.2fr 1fr 48px;
     gap: 1rem;
     align-items: center;
     padding: 1.25rem 1.5rem;
@@ -330,7 +330,7 @@
 @media (max-width: 768px) {
     .cart-header-row { display: none; }
     .cart-item-row {
-        grid-template-columns: 1fr;
+        grid-template-columns: 40px 1fr;
         gap: 0.75rem;
         padding: 1rem;
     }
@@ -338,6 +338,21 @@
     .cart-subtotal::before { content: 'Thành tiền: '; font-weight: 400; color: #8aab90; font-size: 0.8rem; }
     .btn-remove-modern { position: absolute; top: 1rem; right: 1rem; }
 }
+
+/* Checkbox style */
+.cart-checkbox {
+    width: 20px; height: 20px;
+    accent-color: #2d5f3f;
+    cursor: pointer;
+    border-radius: 6px;
+}
+.cart-item-row.unchecked {
+    opacity: 0.55;
+    background: #fafafa;
+}
+.cart-item-row.unchecked .cart-product-name,
+.cart-item-row.unchecked .cart-price,
+.cart-item-row.unchecked .cart-subtotal { color: #aaa; }
 </style>
 
 <div class="cart-page-wrapper">
@@ -372,6 +387,9 @@
             <div class="cart-items-panel">
                 <!-- Header -->
                 <div class="cart-header-row">
+                    <div style="display:flex;align-items:center;">
+                        <input type="checkbox" class="cart-checkbox" id="selectAllCheckbox" title="Chọn tất cả" checked>
+                    </div>
                     <span>Sản phẩm</span>
                     <span>Đơn giá</span>
                     <span>Số lượng</span>
@@ -381,7 +399,11 @@
                 <!-- Items -->
                 <div id="cartItemsContainer">
                 <% items.forEach(item => { %>
-                <div class="cart-item-row" data-id="<%= item.product_id %>">
+                <div class="cart-item-row" data-id="<%= item.product_id %>" data-price="<%= item.price %>">
+                    <!-- Checkbox -->
+                    <div style="display:flex;align-items:center;">
+                        <input type="checkbox" class="cart-checkbox item-checkbox" checked>
+                    </div>
                     <!-- Product -->
                     <div class="cart-product-cell">
                         <img src="/images/products/<%= item.image %>"
@@ -442,7 +464,7 @@
 
                     <!-- Lines -->
                     <div class="summary-line">
-                        <span class="label">Tạm tính (<%= items.length %> sản phẩm)</span>
+                        <span class="label">Đã chọn (<span id="selectedCount"><%= items.length %></span> sản phẩm)</span>
                         <span class="value" id="summarySubtotal"><%= parseInt(total).toLocaleString('vi-VN') %>đ</span>
                     </div>
                     <div class="summary-line">
@@ -461,9 +483,9 @@
                     </div>
 
                     <!-- CTA -->
-                    <a href="/orders/checkout" class="btn-checkout">
+                    <button id="btnCheckout" class="btn-checkout" onclick="goToCheckout()">
                         <i class="fas fa-lock"></i> Đặt hàng ngay
-                    </a>
+                    </button>
 
                     <!-- Trust badges -->
                     <div class="d-flex justify-content-center gap-3 mt-3 pt-2 border-top">
