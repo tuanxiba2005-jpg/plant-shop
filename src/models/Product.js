@@ -8,6 +8,7 @@ const productSchema = new mongoose.Schema({
     stock:       { type: Number, default: 0 },
     image:       { type: String, default: 'default.jpg' },
     images:      [{ type: String }],
+    original_price: { type: Number, default: null },
     category_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
     embedding:   { type: [Number], index: true }
 }, { timestamps: true });

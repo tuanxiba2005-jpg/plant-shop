@@ -6,7 +6,7 @@ const orderSchema = new mongoose.Schema({
     total_price: { type: Number, required: true },
     status: {
         type: String,
-        enum: ['pending', 'confirmed', 'shipping', 'delivered', 'cancelled', 'return_requested', 'returned', 'return_rejected'],
+        enum: ['pending', 'confirmed', 'shipping', 'delivered', 'cancelled', 'return_requested', 'returned', 'partially_returned', 'return_rejected'],
         default: 'pending'
     },
     payment_method: {
@@ -29,6 +29,12 @@ const orderSchema = new mongoose.Schema({
         price: { type: Number }
     }],
     return_request: {
+        items: [{
+            product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+            name: { type: String },
+            price: { type: Number },
+            quantity: { type: Number }
+        }],
         reason: { type: String },
         images: [{ type: String }],
         requested_at: { type: Date }
@@ -78,8 +84,8 @@ class Order extends Model {
         return { success: true };
     }
 
-    async getOrdersByUser(userId) {
-        return await this.model.find({ user_id: userId })
+    async getOrdersByUser(userId, filter = {}) {
+        return await this.model.find({ user_id: userId, ...filter })
             .populate('items.product_id', 'image name slug')
             .sort({ createdAt: -1 }).lean();
     }
@@ -94,6 +100,7 @@ class Order extends Model {
     async getAllOrders(filter = {}) {
         return await this.model.find(filter)
             .populate('user_id', 'name email')
+            .populate('items.product_id', 'image name slug')
             .sort({ createdAt: -1 }).lean();
     }
 
@@ -115,6 +122,30 @@ class Order extends Model {
                     await ProductModel.findByIdAndUpdate(
                         item.product_id, { $inc: { stock: item.quantity } }
                     );
+                }
+            }
+        }
+
+        // Hoàn lại kho nếu duyệt hoàn trả
+        if (['returned', 'partially_returned'].includes(status) && !['returned', 'partially_returned'].includes(oldStatus)) {
+            const ProductModel = mongoose.model('Product');
+            // Nếu có danh sách items trả lại cụ thể (partial return)
+            if (order.return_request && order.return_request.items && order.return_request.items.length > 0) {
+                for (const item of order.return_request.items) {
+                    if (item.product_id) {
+                        await ProductModel.findByIdAndUpdate(
+                            item.product_id, { $inc: { stock: item.quantity } }
+                        );
+                    }
+                }
+            } else {
+                // Trả toàn bộ đơn
+                for (const item of order.items) {
+                    if (item.product_id) {
+                        await ProductModel.findByIdAndUpdate(
+                            item.product_id, { $inc: { stock: item.quantity } }
+                        );
+                    }
                 }
             }
         }

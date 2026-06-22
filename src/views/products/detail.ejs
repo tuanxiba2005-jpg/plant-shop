@@ -68,8 +68,13 @@
             </div>
 
             <!-- Price -->
-            <div class="mb-3">
-                <span class="pd-price"><%= parseInt(product.price).toLocaleString('vi-VN') %>đ</span>
+            <div class="mb-3 d-flex align-items-center gap-3">
+                <span class="pd-price <%= product.original_price ? 'text-danger' : '' %>"><%= parseInt(product.price).toLocaleString('vi-VN') %>đ</span>
+                <% if (product.original_price) { %>
+                    <span class="text-muted text-decoration-line-through fs-4"><%= parseInt(product.original_price).toLocaleString('vi-VN') %>đ</span>
+                    <% const percent = Math.round(100 - (product.price / product.original_price * 100)); %>
+                    <span class="badge bg-danger fs-6 px-2 py-1" style="border-radius: 4px;">Giảm <%= percent %>%</span>
+                <% } %>
             </div>
 
             <hr class="pd-divider">

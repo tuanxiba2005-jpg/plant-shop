@@ -16,7 +16,21 @@
             </div>
             <% } %>
 
-                <div class="card shadow-sm">
+        <div class="row mb-3">
+            <div class="col-md-6 mb-2 mb-md-0">
+                <input type="text" id="searchInput" class="form-control" placeholder="🔍 Tìm kiếm tên sản phẩm...">
+            </div>
+            <div class="col-md-6">
+                <select id="categoryFilter" class="form-select">
+                    <option value="all">Tất cả danh mục</option>
+                    <% categories.forEach(cat => { %>
+                        <option value="<%= cat._id %>"><%= cat.name %></option>
+                    <% }) %>
+                </select>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover mb-0 align-middle">
@@ -33,7 +47,7 @@
                                 </thead>
                                 <tbody>
                                     <% products.forEach((product, index)=> { %>
-                                        <tr>
+                                        <tr class="product-row" data-name="<%= product.name.toLowerCase() %>" data-category="<%= product.category_id?._id || '' %>">
                                             <td>
                                                 <%= index + 1 %>
                                             </td>
@@ -204,5 +218,35 @@
                         </div>
                     </div>
                 </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const searchInput = document.getElementById('searchInput');
+                        const categoryFilter = document.getElementById('categoryFilter');
+                        const rows = document.querySelectorAll('.product-row');
+
+                        function filterProducts() {
+                            const searchTerm = searchInput.value.toLowerCase();
+                            const categoryId = categoryFilter.value;
+
+                            rows.forEach(row => {
+                                const name = row.getAttribute('data-name');
+                                const category = row.getAttribute('data-category');
+                                
+                                const matchesSearch = name.includes(searchTerm);
+                                const matchesCategory = categoryId === 'all' || category === categoryId;
+
+                                if (matchesSearch && matchesCategory) {
+                                    row.style.display = '';
+                                } else {
+                                    row.style.display = 'none';
+                                }
+                            });
+                        }
+
+                        searchInput.addEventListener('input', filterProducts);
+                        categoryFilter.addEventListener('change', filterProducts);
+                    });
+                </script>
 
                 <%- include('../layouts/footer', { extraJS: extraJS }) %>

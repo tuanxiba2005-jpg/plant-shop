@@ -114,6 +114,11 @@ let cachedCategories = null;
 let lastCacheTime = 0;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+app.locals.clearCategoryCache = () => {
+    cachedCategories = null;
+    lastCacheTime = 0;
+};
+
 app.use(async (req, res, next) => {
     res.locals.user = req.session.user || null;
     res.locals.cartCount = req.session.cartCount || 0;

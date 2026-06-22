@@ -228,6 +228,9 @@
                         <div class="lux-product-card h-100 position-relative">
                             <% if (product.stock===0) { %>
                                 <span class="badge bg-danger position-absolute top-0 end-0 m-3 z-1">Hết hàng</span>
+                                <% } else if (product.original_price) { %>
+                                    <% const percent = Math.round(100 - (product.price / product.original_price * 100)); %>
+                                    <span class="badge bg-danger position-absolute top-0 start-0 m-2 z-1 px-2 py-1 fs-6" style="border-radius: 4px;">Giảm <%= percent %>%</span>
                                 <% } else if (Math.random()> 0.6) { %>
                                     <span class="badge position-absolute top-0 end-0 m-3 z-1"
                                         style="background: var(--secondary);">Hot</span>
@@ -261,8 +264,11 @@
                                                     href="/products/<%= product._id %>" class="text-dark">
                                                     <%= product.name %>
                                                 </a></h6>
-                                            <div class="fw-bold fs-5" style="color: var(--primary);">
-                                                <%= parseInt(product.price).toLocaleString('vi-VN') %>đ
+                                            <div class="fw-bold fs-5">
+                                                <span class="<%= product.original_price ? 'text-danger' : '' %>" style="<%= !product.original_price ? 'color: var(--primary);' : '' %>"><%= parseInt(product.price).toLocaleString('vi-VN') %>đ</span>
+                                                <% if (product.original_price) { %>
+                                                    <span class="text-muted text-decoration-line-through fs-6 ms-2 fw-normal"><%= parseInt(product.original_price).toLocaleString('vi-VN') %>đ</span>
+                                                <% } %>
                                             </div>
                                         </div>
                         </div>

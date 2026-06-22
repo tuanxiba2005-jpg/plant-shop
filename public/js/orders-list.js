@@ -102,18 +102,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.style.display = 'none';
             }
         });
+
+        document.querySelectorAll('.date-group').forEach(group => {
+            let hasVisible = false;
+            group.querySelectorAll('.order-card').forEach(c => {
+                if (c.style.display !== 'none') hasVisible = true;
+            });
+            group.style.display = hasVisible ? 'block' : 'none';
+        });
     }
 
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
             const status = tab.dataset.status;
-            window.history.pushState({}, '', `/orders/my-orders?tab=${status}`);
+            let url = `/orders/my-orders?tab=${status}`;
+            const dateVal = document.getElementById('filterDate')?.value;
+            if (dateVal) url += `&date=${dateVal}`;
+            window.history.pushState({}, '', url);
             switchTab(status);
         });
     });
 
     switchTab(initialTab);
+
+    // Date Filter
+    const filterDate = document.getElementById('filterDate');
+    if (filterDate) {
+        filterDate.addEventListener('change', (e) => {
+            const dateVal = e.target.value;
+            let url = `/orders/my-orders?tab=${document.querySelector('.tab-item.active').dataset.status}`;
+            if (dateVal) url += `&date=${dateVal}`;
+            window.location.href = url;
+        });
+    }
 });
+
+window.clearDateFilter = function() {
+    const activeTab = document.querySelector('.tab-item.active').dataset.status;
+    window.location.href = `/orders/my-orders?tab=${activeTab}`;
+};
 
 // Open modal from inline onclick
 window.openReviewModal = function (productId, orderId, productName) {
@@ -161,6 +188,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 return showToast('Vui lòng tải lên hình ảnh minh chứng', 'danger');
             }
 
+            // Thu thập các items được chọn
+            const selectedItems = [];
+            document.querySelectorAll('.return-item-checkbox:checked').forEach(cb => {
+                const pid = cb.value;
+                const qtyInput = document.getElementById(`return_qty_${pid}`);
+                const price = cb.dataset.price;
+                const name = cb.dataset.name;
+                selectedItems.push({
+                    product_id: pid,
+                    name: name,
+                    price: parseFloat(price),
+                    quantity: parseInt(qtyInput.value)
+                });
+            });
+
+            if (selectedItems.length === 0) {
+                return showToast('Vui lòng chọn ít nhất một sản phẩm để trả lại', 'danger');
+            }
+
+            formData.append('items', JSON.stringify(selectedItems));
+
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang gửi...';
 
@@ -188,11 +236,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-window.openReturnModal = function(orderId) {
+window.openReturnModal = function(orderId, itemsJson) {
     if (!returnModalInstance) return;
     document.getElementById('returnOrderId').value = orderId;
     document.getElementById('returnForm').reset();
     document.getElementById('returnImagePreview').innerHTML = '';
+
+    const container = document.getElementById('returnItemsContainer');
+    container.innerHTML = '';
+
+    try {
+        const items = JSON.parse(itemsJson);
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'd-flex justify-content-between align-items-center border-bottom pb-2 mb-2';
+            div.innerHTML = `
+                <div class="form-check">
+                    <input class="form-check-input return-item-checkbox" type="checkbox" value="${item.product_id}" id="return_item_${item.product_id}" data-price="${item.price}" data-name="${item.name.replace(/"/g, '&quot;')}">
+                    <label class="form-check-label d-flex align-items-center" for="return_item_${item.product_id}">
+                        <img src="${item.image ? '/images/products/' + item.image : '/images/default.jpg'}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; margin-left: 10px; margin-right: 10px;">
+                        <div>
+                            <div style="font-size: 14px;" class="fw-bold">${item.name}</div>
+                            <div class="text-danger small">₫${parseInt(item.price).toLocaleString('vi-VN')}</div>
+                        </div>
+                    </label>
+                </div>
+                <div style="width: 100px;">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">SL</span>
+                        <input type="number" class="form-control" id="return_qty_${item.product_id}" value="1" min="1" max="${item.max_quantity}" disabled>
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+
+            const cb = div.querySelector('.return-item-checkbox');
+            const qtyInput = div.querySelector(`#return_qty_${item.product_id}`);
+            cb.addEventListener('change', () => {
+                qtyInput.disabled = !cb.checked;
+            });
+        });
+    } catch (e) {
+        console.error('Lỗi parse items', e);
+        container.innerHTML = '<span class="text-danger">Không tải được sản phẩm</span>';
+    }
+
     returnModalInstance.show();
 };
 

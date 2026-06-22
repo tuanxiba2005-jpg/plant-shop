@@ -25,6 +25,7 @@ class StaffController {
         this.updateProduct = this.updateProduct.bind(this);
         this.orders = this.orders.bind(this);
         this.updateOrderStatus = this.updateOrderStatus.bind(this);
+        this.getOrderDetail = this.getOrderDetail.bind(this);
         this.getReturnDetail = this.getReturnDetail.bind(this);
         this.processReturn = this.processReturn.bind(this);
         this.customers = this.customers.bind(this);
@@ -91,11 +92,40 @@ class StaffController {
     async orders(req, res) {
         try {
             const statusFilter = req.query.status && req.query.status !== 'all' ? { status: req.query.status } : {};
+            if (req.query.startDate && req.query.endDate) {
+                const startDate = new Date(req.query.startDate);
+                startDate.setHours(0, 0, 0, 0);
+                const endDate = new Date(req.query.endDate);
+                endDate.setHours(23, 59, 59, 999);
+                statusFilter.createdAt = { $gte: startDate, $lte: endDate };
+            }
+
             const orders = await this.orderModel.getAllOrders(statusFilter);
+            const statsArray = await this.orderModel.countByStatus();
+            const statusStats = {};
+            statsArray.forEach(st => {
+                statusStats[st._id] = st.count;
+            });
+            
+            // Tính toán KPI hôm nay
+            const todayStart = new Date();
+            todayStart.setHours(0, 0, 0, 0);
+            const todayEnd = new Date();
+            todayEnd.setHours(23, 59, 59, 999);
+            const todayOrders = await this.orderModel.model.find({ createdAt: { $gte: todayStart, $lte: todayEnd } }).lean();
+            const kpi = {
+                todayCount: todayOrders.length,
+                todayRevenue: todayOrders.reduce((sum, o) => sum + o.total_price, 0)
+            };
+
             res.render('staff/orders', { 
                 title: 'Quản lý đơn hàng', 
                 orders,
-                currentStatus: req.query.status || 'all'
+                statusStats,
+                kpi,
+                currentStatus: req.query.status || 'all',
+                filterStartDate: req.query.startDate || '',
+                filterEndDate: req.query.endDate || ''
             });
         } catch (err) {
             console.error('Staff orders error:', err.message);
@@ -139,6 +169,19 @@ class StaffController {
         }
     }
 
+    async getOrderDetail(req, res) {
+        try {
+            const order = await this.orderModel.model.findById(req.params.id)
+                .populate('user_id', 'name email phone')
+                .populate('items.product_id', 'image')
+                .lean();
+            if (!order) return res.json({ success: false, message: 'Không tìm thấy đơn hàng' });
+            res.json({ success: true, order });
+        } catch (err) {
+            res.json({ success: false, message: err.message });
+        }
+    }
+
     async getReturnDetail(req, res) {
         try {
             const order = await this.orderModel.model.findById(req.params.id)
@@ -154,11 +197,19 @@ class StaffController {
     async processReturn(req, res) {
         try {
             const { action } = req.body;
-            const newStatus = action === 'approve' ? 'returned' : 'return_rejected';
             
             const order = await this.orderModel.model.findById(req.params.id).lean();
             if (!order || order.status !== 'return_requested') {
                 return res.json({ success: false, message: 'Đơn hàng không ở trạng thái yêu cầu hoàn' });
+            }
+
+            let newStatus = 'return_rejected';
+            if (action === 'approve') {
+                if (order.return_request && order.return_request.items && order.return_request.items.length > 0) {
+                    newStatus = 'partially_returned';
+                } else {
+                    newStatus = 'returned';
+                }
             }
 
             await this.orderModel.update(req.params.id, { status: newStatus });

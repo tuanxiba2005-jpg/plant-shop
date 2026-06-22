@@ -248,7 +248,16 @@ class OrderController {
 
     async myOrders(req, res) {
         try {
-            const orders = await this.orderModel.getOrdersByUser(req.session.user.id);
+            const filter = {};
+            if (req.query.date) {
+                const startDate = new Date(req.query.date);
+                startDate.setHours(0, 0, 0, 0);
+                const endDate = new Date(req.query.date);
+                endDate.setHours(23, 59, 59, 999);
+                filter.createdAt = { $gte: startDate, $lte: endDate };
+            }
+
+            const orders = await this.orderModel.getOrdersByUser(req.session.user.id, filter);
             const reviewStatus = {};
             for (const order of orders) {
                 if (order.status === 'delivered') {
@@ -261,7 +270,12 @@ class OrderController {
                     }
                 }
             }
-            res.render('orders/list', { title: 'Đơn hàng của tôi', orders, reviewStatus });
+            res.render('orders/list', { 
+                title: 'Đơn hàng của tôi', 
+                orders, 
+                reviewStatus,
+                filterDate: req.query.date || '' 
+            });
         } catch (err) {
             res.status(500).render('error', { title: 'Lỗi', status: 500, message: err.message });
         }
@@ -307,9 +321,18 @@ class OrderController {
 
     async returnOrder(req, res) {
         try {
-            const { reason } = req.body;
+            const { reason, items } = req.body;
             const images = req.files ? req.files.map(f => f.filename) : [];
             
+            let parsedItems = [];
+            if (items) {
+                try {
+                    parsedItems = JSON.parse(items);
+                } catch (e) {
+                    console.error('Lỗi parse items:', e);
+                }
+            }
+
             const order = await this.orderModel.model.findOne({ _id: req.params.id, user_id: req.session.user.id });
             if (!order) return res.json({ success: false, message: 'Không tìm thấy đơn hàng' });
             if (order.status !== 'delivered') return res.json({ success: false, message: 'Chỉ có thể yêu cầu hoàn hàng cho đơn hàng đã giao. Trạng thái hiện tại: ' + order.status });
@@ -317,6 +340,7 @@ class OrderController {
             await this.orderModel.update(req.params.id, {
                 status: 'return_requested',
                 return_request: {
+                    items: parsedItems,
                     reason,
                     images,
                     requested_at: new Date()

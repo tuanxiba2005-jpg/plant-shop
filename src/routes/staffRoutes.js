@@ -54,6 +54,7 @@ router.post('/products/update/:id', upload.single('image'), processStaffImages, 
 // Orders
 router.get('/orders', staffController.orders);
 router.post('/orders/:id/status', staffController.updateOrderStatus);
+router.get('/orders/:id/detail', staffController.getOrderDetail);
 router.get('/orders/:id/return-detail', staffController.getReturnDetail);
 router.post('/orders/:id/process-return', staffController.processReturn);
 

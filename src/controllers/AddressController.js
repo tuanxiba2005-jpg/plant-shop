@@ -23,7 +23,7 @@ class AddressController {
     // POST /user/addresses → thêm địa chỉ mới
     async add(req, res) {
         try {
-            const { name, phone, address, isDefault } = req.body;
+            const { name, phone, province, district, ward, address, isDefault } = req.body;
 
             if (!name || !phone || !address) {
                 return res.json({ success: false, message: 'Vui lòng điền đầy đủ thông tin' });
@@ -32,6 +32,9 @@ class AddressController {
             const newAddr = await this.addressModel.addAddress(req.session.user.id, {
                 name,
                 phone,
+                province: province || '',
+                district: district || '',
+                ward: ward || '',
                 address,
                 isDefault: isDefault === 'true' || isDefault === true
             });
@@ -45,7 +48,7 @@ class AddressController {
     // POST /user/addresses/:id/update → cập nhật địa chỉ
     async update(req, res) {
         try {
-            const { name, phone, address, isDefault } = req.body;
+            const { name, phone, province, district, ward, address, isDefault } = req.body;
 
             if (!name || !phone || !address) {
                 return res.json({ success: false, message: 'Vui lòng điền đầy đủ thông tin' });
@@ -54,7 +57,7 @@ class AddressController {
             const updated = await this.addressModel.updateAddress(
                 req.params.id,
                 req.session.user.id,
-                { name, phone, address, isDefault: isDefault === 'true' || isDefault === true }
+                { name, phone, province: province || '', district: district || '', ward: ward || '', address, isDefault: isDefault === 'true' || isDefault === true }
             );
 
             if (!updated) return res.json({ success: false, message: 'Không tìm thấy địa chỉ' });

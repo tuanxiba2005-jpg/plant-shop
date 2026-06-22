@@ -155,13 +155,13 @@
                 }
                 list.innerHTML = data.addresses.map(a => `
                 <div class="border rounded p-3 mb-3 bg-white shadow-sm hover-shadow ${a.isDefault ? 'border-success' : ''}" style="cursor:pointer; transition: 0.3s;"
-                     onclick="applyAddress('${a.phone.replace(/'/g, "\\'")}','${a.address.replace(/'/g, "\\'").replace(/\n/g, ' ')}')">
+                     onclick="applyAddress('${a.phone.replace(/'/g, "\\'")}','${(a.province||'').replace(/'/g, "\\'")}','${(a.district||'').replace(/'/g, "\\'")}','${(a.ward||'').replace(/'/g, "\\'")}','${a.address.replace(/'/g, "\\'").replace(/\n/g, ' ')}')">
                     <div class="d-flex justify-content-between">
                         <strong class="text-dark">${a.name}</strong> 
                         ${a.isDefault ? '<span class="badge bg-success">Mặc định</span>' : ''}
                     </div>
                     <div class="text-muted small mt-1"><i class="fas fa-phone-alt me-1"></i> ${a.phone}</div>
-                    <div class="small mt-1"><i class="fas fa-map-marker-alt me-1"></i> ${a.address}</div>
+                    <div class="small mt-1"><i class="fas fa-map-marker-alt me-1"></i> ${a.address}${a.ward ? ', '+a.ward : ''}${a.district ? ', '+a.district : ''}${a.province ? ', '+a.province : ''}</div>
                 </div>`).join('');
             } catch (e) {
                 list.innerHTML = '<div class="text-center text-danger py-4">Có lỗi xảy ra khi tải danh sách địa chỉ.</div>';
@@ -208,17 +208,43 @@
     }
 })();
 
-// Hàm apply địa chỉ khi chọn từ Modal (Vì địa chỉ lưu là string nên sẽ tự fill vào ô Số nhà, người dùng tự chọn lại tỉnh/huyện)
-window.applyAddress = function (phone, address) {
+// Hàm apply địa chỉ khi chọn từ Modal (Tự động chọn Tỉnh/Huyện/Xã)
+window.applyAddress = function (phone, province, district, ward, address) {
     document.getElementById('checkoutPhone').value = phone;
     document.getElementById('streetInput').value = address;
 
-    // Gợi ý người dùng chọn lại tỉnh thành
-    const msg = document.createElement('div');
-    msg.className = 'text-primary small mt-1';
-    msg.innerHTML = '<i class="fas fa-info-circle me-1"></i> Vui lòng chọn lại Tỉnh/Quận/Phường cho chính xác.';
-    document.getElementById('streetInput').parentNode.appendChild(msg);
-    setTimeout(() => msg.remove(), 5000);
+    const provSelect = document.getElementById('provinceSelect');
+    const distSelect = document.getElementById('districtSelect');
+    const wardSelect = document.getElementById('wardSelect');
+
+    const selectOptionByText = (selectElem, text) => {
+        Array.from(selectElem.options).forEach(opt => {
+            if (opt.text === text) selectElem.value = opt.value;
+        });
+    };
+
+    if (province) {
+        selectOptionByText(provSelect, province);
+        provSelect.dispatchEvent(new Event('change'));
+        setTimeout(() => {
+            if (district) {
+                selectOptionByText(distSelect, district);
+                distSelect.dispatchEvent(new Event('change'));
+                setTimeout(() => {
+                    if (ward) {
+                        selectOptionByText(wardSelect, ward);
+                    }
+                }, 300);
+            }
+        }, 300);
+    } else {
+        // Gợi ý người dùng chọn lại tỉnh thành nếu địa chỉ cũ thiếu thông tin
+        const msg = document.createElement('div');
+        msg.className = 'text-primary small mt-1';
+        msg.innerHTML = '<i class="fas fa-info-circle me-1"></i> Vui lòng chọn lại Tỉnh/Quận/Phường cho chính xác.';
+        document.getElementById('streetInput').parentNode.appendChild(msg);
+        setTimeout(() => msg.remove(), 5000);
+    }
 
     bootstrap.Modal.getInstance(document.getElementById('pickAddressModal')).hide();
 }

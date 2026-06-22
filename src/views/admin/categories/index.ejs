@@ -1,0 +1,152 @@
+<%- include('../../layouts/header') %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">📁 Quản lý danh mục</h4>
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#categoryModal" onclick="openAddModal()">
+        <i class="fas fa-plus me-2"></i>Thêm danh mục
+    </button>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Tên danh mục</th>
+                    <th>Mô tả</th>
+                    <th>Ngày tạo</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% categories.forEach(c => { %>
+                    <tr>
+                        <td class="fw-bold text-success"><%= c.name %></td>
+                        <td><%= c.description || '<em class="text-muted">Không có mô tả</em>' %></td>
+                        <td><%= new Date(c.createdAt).toLocaleDateString('vi-VN') %></td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-primary me-1" 
+                                onclick="openEditModal('<%= c._id %>', '<%= c.name %>', '<%= c.description %>')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteCategory('<%= c._id %>')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                <% }) %>
+                <% if (!categories.length) { %>
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">Chưa có danh mục nào</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="modalTitle">Thêm danh mục</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="categoryError" class="alert alert-danger d-none"></div>
+                <input type="hidden" id="categoryId">
+                <div class="mb-3">
+                    <label class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+                    <input type="text" id="categoryName" class="form-control" placeholder="VD: Cây để bàn">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mô tả</label>
+                    <textarea id="categoryDesc" class="form-control" rows="3" placeholder="Mô tả danh mục..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button class="btn btn-success" onclick="saveCategory()">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let categoryModalInstance = null;
+    document.addEventListener("DOMContentLoaded", function() {
+        categoryModalInstance = new bootstrap.Modal(document.getElementById('categoryModal'));
+    });
+    
+    function openAddModal() {
+        document.getElementById('modalTitle').textContent = 'Thêm danh mục';
+        document.getElementById('categoryId').value = '';
+        document.getElementById('categoryName').value = '';
+        document.getElementById('categoryDesc').value = '';
+        document.getElementById('categoryError').classList.add('d-none');
+        if(categoryModalInstance) categoryModalInstance.show();
+    }
+
+    function openEditModal(id, name, desc) {
+        document.getElementById('modalTitle').textContent = 'Sửa danh mục';
+        document.getElementById('categoryId').value = id;
+        document.getElementById('categoryName').value = name;
+        document.getElementById('categoryDesc').value = desc !== 'undefined' ? desc : '';
+        document.getElementById('categoryError').classList.add('d-none');
+        if(categoryModalInstance) categoryModalInstance.show();
+    }
+
+    async function saveCategory() {
+        const id = document.getElementById('categoryId').value;
+        const name = document.getElementById('categoryName').value.trim();
+        const description = document.getElementById('categoryDesc').value.trim();
+        const errDiv = document.getElementById('categoryError');
+
+        if (!name) {
+            errDiv.textContent = 'Vui lòng nhập tên danh mục';
+            errDiv.classList.remove('d-none');
+            return;
+        }
+
+        const url = id ? `/admin/categories/${id}/update` : '/admin/categories/create';
+        
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description })
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                location.reload();
+            } else {
+                errDiv.textContent = data.message;
+                errDiv.classList.remove('d-none');
+            }
+        } catch (err) {
+            errDiv.textContent = 'Lỗi kết nối';
+            errDiv.classList.remove('d-none');
+        }
+    }
+
+    async function deleteCategory(id) {
+        if (!confirm('Bạn có chắc chắn muốn xoá danh mục này?')) return;
+        
+        try {
+            const res = await fetch(`/admin/categories/${id}`, { method: 'DELETE' });
+            const data = await res.json();
+            
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        } catch (err) {
+            alert('Lỗi kết nối');
+        }
+    }
+</script>
+
+<%- include('../../layouts/footer') %>

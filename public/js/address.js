@@ -35,7 +35,7 @@ async function loadAddresses(containerId, mode = 'manage') {
                     <div class="d-flex flex-column gap-1 ms-3">
                         ${mode === 'manage' ? `
                         <button class="btn btn-sm btn-outline-secondary"
-                                onclick="openEditModal('${addr._id}','${escHtml(addr.name)}','${escHtml(addr.phone)}','${escHtml(addr.address)}',${addr.isDefault})">
+                                onclick="openEditModal('${addr._id}','${escHtml(addr.name)}','${escHtml(addr.phone)}','${escHtml(addr.province)}','${escHtml(addr.district)}','${escHtml(addr.ward)}','${escHtml(addr.address)}',${addr.isDefault})">
                             <i class="fas fa-pen"></i>
                         </button>
                         ${!addr.isDefault ? `
@@ -81,13 +81,41 @@ async function submitAddAddress(event) {
 }
 
 // ── Sửa địa chỉ ────────────────────────────────────────────
-function openEditModal(id, name, phone, address, isDefault) {
+function openEditModal(id, name, phone, province, district, ward, address, isDefault) {
     document.getElementById('editAddrId').value      = id;
     document.getElementById('editAddrName').value    = name;
     document.getElementById('editAddrPhone').value   = phone;
     document.getElementById('editAddrAddress').value = address;
     document.getElementById('editAddrDefault').checked = isDefault;
     document.getElementById('editAddrError').textContent = '';
+
+    // Trigger API for dropdowns
+    const provSelect = document.getElementById('editProvinceSelect');
+    const distSelect = document.getElementById('editDistrictSelect');
+    const wardSelect = document.getElementById('editWardSelect');
+
+    const selectOptionByText = (selectElem, text) => {
+        Array.from(selectElem.options).forEach(opt => {
+            if (opt.text === text) selectElem.value = opt.value;
+        });
+    };
+
+    if (province) {
+        selectOptionByText(provSelect, province);
+        provSelect.dispatchEvent(new Event('change'));
+        setTimeout(() => {
+            if (district) {
+                selectOptionByText(distSelect, district);
+                distSelect.dispatchEvent(new Event('change'));
+                setTimeout(() => {
+                    if (ward) {
+                        selectOptionByText(wardSelect, ward);
+                    }
+                }, 300);
+            }
+        }, 300);
+    }
+
     new bootstrap.Modal(document.getElementById('editAddressModal')).show();
 }
 
@@ -174,3 +202,79 @@ function showToast(msg, type = 'success') {
     document.body.appendChild(el);
     setTimeout(() => el.remove(), 3000);
 }
+
+// ── Tích hợp API Tỉnh / Thành phố cho Modal ───────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    ['add', 'edit'].forEach(prefix => {
+        const provinceSelect = document.getElementById(`${prefix}ProvinceSelect`);
+        const districtSelect = document.getElementById(`${prefix}DistrictSelect`);
+        const wardSelect = document.getElementById(`${prefix}WardSelect`);
+
+        if (!provinceSelect) return;
+
+        // Fetch Provinces
+        fetch('https://esgoo.net/api-tinhthanh/1/0.htm')
+            .then(res => res.json())
+            .then(resData => {
+                if (resData.error === 0) {
+                    resData.data.forEach(p => {
+                        const option = document.createElement('option');
+                        option.value = p.name;
+                        option.dataset.code = p.id;
+                        option.textContent = p.name;
+                        provinceSelect.appendChild(option);
+                    });
+                }
+            }).catch(err => console.error('Lỗi tải tỉnh thành:', err));
+
+        provinceSelect.addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+            wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+            wardSelect.disabled = true;
+
+            if (this.value && selectedOption && selectedOption.dataset.code) {
+                districtSelect.disabled = false;
+                fetch(`https://esgoo.net/api-tinhthanh/2/${selectedOption.dataset.code}.htm`)
+                    .then(res => res.json())
+                    .then(resData => {
+                        if (resData.error === 0) {
+                            resData.data.forEach(d => {
+                                const option = document.createElement('option');
+                                option.value = d.name;
+                                option.dataset.code = d.id;
+                                option.textContent = d.name;
+                                districtSelect.appendChild(option);
+                            });
+                        }
+                    });
+            } else {
+                districtSelect.disabled = true;
+            }
+        });
+
+        districtSelect.addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+
+            if (this.value && selectedOption && selectedOption.dataset.code) {
+                wardSelect.disabled = false;
+                fetch(`https://esgoo.net/api-tinhthanh/3/${selectedOption.dataset.code}.htm`)
+                    .then(res => res.json())
+                    .then(resData => {
+                        if (resData.error === 0) {
+                            resData.data.forEach(w => {
+                                const option = document.createElement('option');
+                                option.value = w.name;
+                                option.dataset.code = w.id;
+                                option.textContent = w.name;
+                                wardSelect.appendChild(option);
+                            });
+                        }
+                    });
+            } else {
+                wardSelect.disabled = true;
+            }
+        });
+    });
+});

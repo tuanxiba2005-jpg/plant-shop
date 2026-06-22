@@ -5,7 +5,10 @@ const addressSchema = new mongoose.Schema({
     user_id:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     name:       { type: String, required: true },       // tên người nhận
     phone:      { type: String, required: true },
-    address:    { type: String, required: true },       // địa chỉ chi tiết
+    province:   { type: String, default: '' },
+    district:   { type: String, default: '' },
+    ward:       { type: String, default: '' },
+    address:    { type: String, required: true },       // địa chỉ cụ thể (số nhà, tên đường)
     isDefault:  { type: Boolean, default: false }
 }, { timestamps: true });
 

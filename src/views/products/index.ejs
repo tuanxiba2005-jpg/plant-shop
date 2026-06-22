@@ -91,6 +91,10 @@
                             data-id="<%= product._id %>" title="Thêm vào yêu thích">
                         <i class="far fa-heart fs-5" style="text-shadow: 0 2px 4px rgba(0,0,0,0.3);"></i>
                     </button>
+                    <% if (product.original_price) { %>
+                        <% const percent = Math.round(100 - (product.price / product.original_price * 100)); %>
+                        <span class="badge bg-danger position-absolute top-0 end-0 m-2 z-1 px-2 py-1 fs-6" style="border-radius: 4px;">Giảm <%= percent %>%</span>
+                    <% } %>
                     <div style="aspect-ratio: 1/1; overflow: hidden;">
                         <img src="/images/products/<%= product.image %>"
                              class="card-img-top w-100 h-100 object-fit-cover"
@@ -107,8 +111,11 @@
                         <% } else { %>
                             <span class="badge bg-success-subtle text-success mb-2" style="width:fit-content; border-radius: 4px;">Còn hàng</span>
                         <% } %>
-                        <p class="text-success fw-bold fs-5 mt-auto mb-3">
-                            <%= parseInt(product.price).toLocaleString('vi-VN') %>đ
+                        <p class="fw-bold fs-5 mt-auto mb-3">
+                            <span class="<%= product.original_price ? 'text-danger' : 'text-success' %>"><%= parseInt(product.price).toLocaleString('vi-VN') %>đ</span>
+                            <% if (product.original_price) { %>
+                                <span class="text-muted text-decoration-line-through fs-6 ms-2 fw-normal"><%= parseInt(product.original_price).toLocaleString('vi-VN') %>đ</span>
+                            <% } %>
                         </p>
                         <div class="d-flex gap-2">
                             <a href="/products/<%= product._id %>"

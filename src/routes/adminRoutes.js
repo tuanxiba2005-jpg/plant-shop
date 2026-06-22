@@ -81,9 +81,17 @@ router.post('/products/create', uploadFields, processImages, adminController.cre
 router.post('/products/update/:id', uploadFields, processImages, adminController.updateProduct);
 router.delete('/products/:id', adminController.deleteProduct);
 
+// Categories
+const adminCategoryController = require('../controllers/AdminCategoryController');
+router.get('/categories', adminCategoryController.index);
+router.post('/categories/create', adminCategoryController.create);
+router.post('/categories/:id/update', adminCategoryController.update);
+router.delete('/categories/:id', adminCategoryController.delete);
+
 // Quản lý đơn hàng
 router.get('/orders', adminController.orders);
 router.post('/orders/:id/status', adminController.updateOrderStatus);
+router.get('/orders/:id/detail', adminController.getOrderDetail);
 router.get('/orders/:id/return-detail', adminController.getReturnDetail);
 router.post('/orders/:id/process-return', adminController.processReturn);
 
@@ -103,6 +111,12 @@ router.get('/coupons', adminController.coupons);
 router.post('/coupons/create', adminController.createCoupon);
 router.post('/coupons/:id/toggle', adminController.toggleCoupon);
 router.delete('/coupons/:id', adminController.deleteCoupon);
+
+// Discounts (Khuyến mãi SP)
+const adminDiscountController = require('../controllers/AdminDiscountController');
+router.get('/discounts', adminDiscountController.index);
+router.post('/discounts/create', adminDiscountController.create);
+router.post('/discounts/:id/remove', adminDiscountController.remove);
 
 // Chat
 const chatController = require('../controllers/ChatController');
