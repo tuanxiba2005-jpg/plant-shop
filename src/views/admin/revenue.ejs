@@ -1,122 +1,213 @@
 <% extraJS = ['/js/admin/revenue.js'] %>
 <%- include('../layouts/header') %>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3>📊 Báo cáo doanh thu</h3>
-    <form action="/admin/revenue" method="GET" class="d-flex gap-2">
-        <select name="year" class="form-select" onchange="this.form.submit()">
-            <% 
-                // Lấy năm hiện tại
-                const currentYear = new Date().getFullYear();
-                // Đảm bảo biến year truyền từ controller là kiểu số để so sánh chính xác
-                const selectedYear = Number(year) || currentYear;
-            %>
-            <% for(let y = currentYear; y >= 2023; y--) { %>
-                <option value="<%= y %>" <%= y === selectedYear ? 'selected' : '' %>><%= y %></option>
-            <% } %>
-        </select>
-    </form>
-</div>
+<!-- Tabler Icons cho icon đẹp -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<!-- html2pdf.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-<!-- Thống kê tổng quan -->
-<div class="row mb-4">
-    <div class="col-md-3 mb-3">
-        <div class="card border-0 shadow-sm text-center p-3">
-            <div class="fs-1">💰</div>
-            <h5 class="text-success fw-bold mt-2">
-                <%# Thêm fallback || 0 để tránh lỗi toLocaleString khi data trống %>
-                <%= Number(totalRevenue || 0).toLocaleString('vi-VN') %>đ
-            </h5>
-            <p class="text-muted mb-0">Tổng doanh thu</p>
+<div class="rev-dashboard pt-3">
+    <!-- Header & Breadcrumb -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Báo cáo doanh thu</h3>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0" style="font-size: 14px;">
+                    <li class="breadcrumb-item"><a href="/admin/dashboard" class="text-decoration-none" style="color: var(--rev-primary);">Admin</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Báo cáo doanh thu</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="d-flex gap-2 filter-row">
+            <select id="yearSelector" class="form-select" style="width: auto; border-radius: 8px;">
+                <% 
+                    const currentYear = new Date().getFullYear();
+                    const selectedYear = Number(year) || currentYear;
+                %>
+                <% for(let y = currentYear; y >= 2023; y--) { %>
+                    <option value="<%= y %>" <%= y === selectedYear ? 'selected' : '' %>><%= y %></option>
+                <% } %>
+            </select>
+            <button id="btnExportPdf" class="btn btn-dark d-flex align-items-center gap-2" style="border-radius: 8px; background-color: #111827;">
+                <i class="ti ti-file-type-pdf"></i> Xuất PDF
+            </button>
         </div>
     </div>
 
-    <% 
-    const statusLabels = {
-        pending: 'Chờ xác nhận', confirmed: 'Đã xác nhận',
-        shipping: 'Đang giao', delivered: 'Đã giao', cancelled: 'Đã hủy'
-    }
-    const statusColors = {
-        pending: 'warning', confirmed: 'info',
-        shipping: 'primary', delivered: 'success', cancelled: 'danger'
-    } 
-    %>
-
-    <%# Kiểm tra nếu statusStats tồn tại mới chạy vòng lặp %>
-    <% if (typeof statusStats !== 'undefined' && statusStats.length > 0) { %>
-        <% statusStats.forEach(s => { %>
-        <div class="col-md-3 mb-3">
-            <div class="card border-0 shadow-sm text-center p-3">
-                <h5 class="text-<%= statusColors[s._id] || 'secondary' %> fw-bold mt-2"><%= s.count %></h5>
-                <p class="text-muted mb-0"><%= statusLabels[s._id] || s._id %></p>
+    <div id="pdfContentArea">
+        <!-- Row 1: Metric Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg">
+                <div class="rev-card metric-card p-3 d-flex flex-column align-items-start">
+                    <div class="metric-icon-box total mb-2"><i class="ti ti-cash"></i></div>
+                    <div>
+                        <div class="metric-value" id="metricTotalRevenue"><%= Number(totalRevenue || 0).toLocaleString('vi-VN') %>đ</div>
+                        <div class="metric-label mt-1">Tổng doanh thu</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg">
+                <div class="rev-card metric-card p-3 d-flex flex-column align-items-start">
+                    <div class="metric-icon-box delivered mb-2"><i class="ti ti-circle-check"></i></div>
+                    <div>
+                        <div class="metric-value" id="metricDelivered"><%= statusStats['delivered'] || 0 %></div>
+                        <div class="metric-label mt-1">Đã giao thành công</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg">
+                <div class="rev-card metric-card p-3 d-flex flex-column align-items-start">
+                    <div class="metric-icon-box processing mb-2"><i class="ti ti-truck"></i></div>
+                    <div>
+                        <div class="metric-value" id="metricProcessing"><%= (statusStats['pending']||0) + (statusStats['confirmed']||0) + (statusStats['shipping']||0) %></div>
+                        <div class="metric-label mt-1">Đang giao</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg">
+                <div class="rev-card metric-card p-3 d-flex flex-column align-items-start">
+                    <div class="metric-icon-box cancelled mb-2"><i class="ti ti-circle-x"></i></div>
+                    <div>
+                        <div class="metric-value" id="metricCancelled"><%= statusStats['cancelled'] || 0 %></div>
+                        <div class="metric-label mt-1">Đã hủy</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg">
+                <div class="rev-card metric-card p-3 d-flex flex-column align-items-start">
+                    <div class="metric-icon-box returned mb-2"><i class="ti ti-arrow-back-up"></i></div>
+                    <div>
+                        <div class="metric-value" id="metricReturned"><%= statusStats['return'] || 0 %></div>
+                        <div class="metric-label mt-1">Hoàn trả</div>
+                    </div>
+                </div>
             </div>
         </div>
-        <% }) %>
-    <% } %>
+
+        <!-- Date Filter -->
+        <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 filter-row">
+            <div class="d-flex flex-wrap gap-2">
+                <div class="date-filter-pill" data-filter="today">Hôm nay</div>
+                <div class="date-filter-pill" data-filter="7days">7 ngày</div>
+                <div class="date-filter-pill" data-filter="30days">30 ngày</div>
+                <div class="date-filter-pill active" data-filter="thisMonth">Tháng này</div>
+                <div class="date-filter-pill" data-filter="thisYear">Năm này</div>
+                <div class="date-filter-pill" data-filter="custom">Tùy chọn <i class="ti ti-chevron-down ms-1" style="font-size: 12px;"></i></div>
+            </div>
+            <div id="customDateContainer" class="d-none d-flex gap-2 mt-2 mt-md-0 align-items-center">
+                <input type="date" id="fromDate" class="form-control form-control-sm" style="border-radius: 6px;">
+                <span class="text-muted">-</span>
+                <input type="date" id="toDate" class="form-control form-control-sm" style="border-radius: 6px;">
+                <button id="applyCustomDate" class="btn btn-sm text-white" style="background: var(--rev-primary); border-radius: 6px;">Áp dụng</button>
+            </div>
+        </div>
+
+        <!-- Biểu đồ -->
+        <div class="rev-card mb-4">
+            <div class="p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0 text-dark">Biểu đồ doanh thu</h5>
+                    <span class="badge bg-light text-dark border px-3 py-2" id="currentFilterLabel" style="font-size: 13px; font-weight: 500;">Tháng này</span>
+                </div>
+                <div style="height: 350px;">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 3: Top Products & Top Customers -->
+        <div class="row g-4">
+            <!-- Top Sản phẩm -->
+            <div class="col-lg-6">
+                <div class="rev-card h-100">
+                    <div class="p-4 border-bottom d-flex align-items-center gap-2">
+                        <i class="ti ti-leaf text-success fs-4"></i>
+                        <h6 class="fw-bold mb-0 flex-grow-1 text-dark">Top 5 Sản phẩm bán chạy</h6>
+                    </div>
+                    <div class="p-0">
+                        <table class="table table-hover mb-0 align-middle" style="font-size: 14px;">
+                            <thead style="background: #f8fafb;">
+                                <tr>
+                                    <th class="ps-4 border-0" style="width: 50px;">#</th>
+                                    <th class="border-0">Sản phẩm</th>
+                                    <th class="border-0 text-center">Đã bán</th>
+                                    <th class="border-0 text-end pe-4">Doanh thu</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topProductsTbody">
+                                <% if (!topProducts || topProducts.length === 0) { %>
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">Chưa có dữ liệu sản phẩm</td>
+                                </tr>
+                                <% } else { %>
+                                    <% topProducts.forEach((p, index) => { %>
+                                    <tr>
+                                        <td class="ps-4 text-center">
+                                            <% if (index === 0) { %>🥇
+                                            <% } else if (index === 1) { %>🥈
+                                            <% } else if (index === 2) { %>🥉
+                                            <% } else { %><span class="text-muted fw-bold"><%= index + 1 %></span>
+                                            <% } %>
+                                        </td>
+                                        <td class="fw-medium"><%= p.name %></td>
+                                        <td class="text-center">
+                                            <span class="badge bg-light text-dark border"><%= p.totalQty %></span>
+                                        </td>
+                                        <td class="text-end fw-bold pe-4" style="color: var(--rev-primary);">
+                                            <%= Number(p.revenue || 0).toLocaleString('vi-VN') %>đ
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Khách hàng -->
+            <div class="col-lg-6">
+                <div class="rev-card h-100">
+                    <div class="p-4 border-bottom d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="ti ti-crown text-warning fs-4"></i>
+                            <h6 class="fw-bold mb-0 text-dark">Khách hàng chi tiêu cao nhất</h6>
+                        </div>
+                        <select id="topCustomersLimit" class="form-select form-select-sm" style="width: auto; border-radius: 6px;">
+                            <option value="5" selected>Top 5</option>
+                            <option value="10">Top 10</option>
+                            <option value="20">Top 20</option>
+                        </select>
+                    </div>
+                    <div class="p-0">
+                        <table class="table table-hover mb-0 align-middle" style="font-size: 14px;">
+                            <thead style="background: #f8fafb;">
+                                <tr>
+                                    <th class="ps-4 border-0 text-center" style="width: 50px;">Hạng</th>
+                                    <th class="border-0">Khách hàng</th>
+                                    <th class="border-0 text-center">Số đơn</th>
+                                    <th class="border-0 text-end">Tổng chi tiêu</th>
+                                    <th class="border-0 text-center pe-4" style="width: 60px;">Xem</th>
+                                </tr>
+                            </thead>
+                            <tbody id="topCustomersTbody">
+                                <tr><td colspan="5" class="text-center py-4 text-muted">Đang tải...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- Biểu đồ doanh thu theo tháng -->
-<div class="card shadow-sm mb-4">
-    <div class="card-header bg-success text-white fw-bold">
-        📈 Doanh thu theo tháng năm <%= selectedYear %>
-    </div>
-    <div class="card-body">
-        <%# Đảm bảo bạn đã nạp thư viện Chart.js ở footer hoặc header %>
-        <canvas id="revenueChart" height="100"></canvas>
-    </div>
-</div>
-
-<!-- Top sản phẩm bán chạy -->
-<div class="card shadow-sm">
-    <div class="card-header bg-success text-white fw-bold">
-        🏆 Top sản phẩm bán chạy
-    </div>
-    <div class="card-body p-0">
-        <table class="table table-hover mb-0 align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>#</th>
-                    <th>Tên sản phẩm</th>
-                    <th>Số lượng bán</th>
-                    <th>Doanh thu</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% if (!topProducts || topProducts.length === 0) { %>
-                <tr>
-                    <td colspan="4" class="text-center py-4 text-muted">
-                        Chưa có dữ liệu sản phẩm
-                    </td>
-                </tr>
-                <% } else { %>
-                    <% topProducts.forEach((p, index) => { %>
-                    <tr>
-                        <td>
-                            <% if (index === 0) { %>🥇
-                            <% } else if (index === 1) { %>🥈
-                            <% } else if (index === 2) { %>🥉
-                            <% } else { %><%= index + 1 %>
-                            <% } %>
-                        </td>
-                        <td><%= p.name %></td>
-                        <td>
-                            <span class="badge bg-success"><%= p.totalQty %> sản phẩm</span>
-                        </td>
-                        <td class="text-success fw-bold">
-                            <%= Number(p.revenue || 0).toLocaleString('vi-VN') %>đ
-                        </td>
-                    </tr>
-                    <% }) %>
-                <% } %>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<!-- Data cho chart -->
 <script>
-    // Thêm fallback [] để script không bị crash nếu biến months bị null
-    window.revenueData = <%- JSON.stringify(typeof months !== 'undefined' ? months : []) %>;
+    // Dữ liệu fallback từ server (cho initial render nếu có)
+    window.chartInitData = {
+        labels: [],
+        revenue: [],
+        orders: []
+    };
 </script>
 
 <%- include('../layouts/footer') %>

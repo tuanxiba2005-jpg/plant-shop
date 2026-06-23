@@ -175,23 +175,51 @@ class Order extends Model {
         ]);
     }
 
-    async countByStatus() {
+    async revenueChartData(dateFilter = null) {
+        let matchStage = { status: 'delivered' };
+        if (dateFilter) matchStage.createdAt = dateFilter;
+
         return await this.model.aggregate([
-            { $group: { _id: '$status', count: { $sum: 1 } } }
+            { $match: matchStage },
+            {
+                $group: {
+                    _id: { 
+                        year: { $year: '$createdAt' }, 
+                        month: { $month: '$createdAt' }, 
+                        day: { $dayOfMonth: '$createdAt' } 
+                    },
+                    revenue: { $sum: '$total_price' },
+                    orders: { $sum: 1 }
+                }
+            },
+            { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 } }
         ]);
     }
 
-    async totalRevenue() {
+    async countByStatus(dateFilter = null) {
+        let pipeline = [];
+        if (dateFilter) pipeline.push({ $match: { createdAt: dateFilter } });
+        pipeline.push({ $group: { _id: '$status', count: { $sum: 1 } } });
+        return await this.model.aggregate(pipeline);
+    }
+
+    async totalRevenue(dateFilter = null) {
+        let matchStage = { status: 'delivered' };
+        if (dateFilter) matchStage.createdAt = dateFilter;
+        
         const result = await this.model.aggregate([
-            { $match: { status: 'delivered' } },
+            { $match: matchStage },
             { $group: { _id: null, total: { $sum: '$total_price' } } }
         ]);
         return result[0]?.total || 0;
     }
 
-    async topProducts(limit = 5) {
+    async topProducts(limit = 5, dateFilter = null) {
+        let matchStage = { status: 'delivered' };
+        if (dateFilter) matchStage.createdAt = dateFilter;
+
         return await this.model.aggregate([
-            { $match: { status: 'delivered' } },
+            { $match: matchStage },
             { $unwind: '$items' },
             {
                 $group: {

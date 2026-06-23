@@ -42,6 +42,7 @@ class AdminController {
         this.createCoupon = this.createCoupon.bind(this);
         this.toggleCoupon = this.toggleCoupon.bind(this);
         this.deleteCoupon = this.deleteCoupon.bind(this);
+        this.topCustomers = this.topCustomers.bind(this);
     }
 
     async dashboard(req, res) {
@@ -351,20 +352,108 @@ class AdminController {
 
     async revenue(req, res) {
         try {
+            let dateFilter = null;
+            if (req.query.from && req.query.to) {
+                const start = new Date(req.query.from);
+                start.setHours(0, 0, 0, 0);
+                const end = new Date(req.query.to);
+                end.setHours(23, 59, 59, 999);
+                dateFilter = { $gte: start, $lte: end };
+            }
+
             const year = parseInt(req.query.year) || new Date().getFullYear();
-            const [monthlyRevenue, totalRevenue, topProducts, statusStats] = await Promise.all([
-                this.orderModel.revenueByMonth(year),
-                this.orderModel.totalRevenue(),
-                this.orderModel.topProducts(5),
-                this.orderModel.countByStatus()
+            
+            const [chartData, totalRevenue, topProducts, statsArray] = await Promise.all([
+                this.orderModel.revenueChartData(dateFilter),
+                this.orderModel.totalRevenue(dateFilter),
+                this.orderModel.topProducts(5, dateFilter),
+                this.orderModel.countByStatus(dateFilter)
             ]);
-            const months = Array.from({ length: 12 }, (_, i) => {
-                const found = monthlyRevenue.find(r => r._id === i + 1);
-                return { month: i + 1, revenue: found?.revenue || 0, orders: found?.orders || 0 };
+
+            const statusStats = {};
+            statsArray.forEach(st => {
+                statusStats[st._id] = st.count;
             });
+
+            // Format chart data
+            const labels = [];
+            const revenueData = [];
+            const ordersData = [];
+
+            if (chartData.length > 0) {
+                chartData.forEach(item => {
+                    labels.push(`${item._id.day}/${item._id.month}/${item._id.year}`);
+                    revenueData.push(item.revenue);
+                    ordersData.push(item.orders);
+                });
+            }
+
+            if (req.xhr || req.headers.accept?.includes('application/json')) {
+                return res.json({
+                    success: true,
+                    data: {
+                        totalRevenue,
+                        statusStats,
+                        chart: { labels, revenue: revenueData, orders: ordersData },
+                        topProducts
+                    }
+                });
+            }
+
+            // Fallback for initial render
+            const months = chartData.map(item => ({
+                month: item._id.month,
+                revenue: item.revenue,
+                orders: item.orders
+            }));
+
             res.render('admin/revenue', { title: 'Báo cáo doanh thu', months, totalRevenue, topProducts, statusStats, year });
         } catch (err) {
+            console.error(err);
+            if (req.xhr || req.headers.accept?.includes('application/json')) {
+                return res.status(500).json({ success: false, message: err.message });
+            }
             res.status(500).render('error', { title: 'Lỗi', status: 500, message: err.message });
+        }
+    }
+
+    async topCustomers(req, res) {
+        try {
+            const limit = parseInt(req.query.limit) || 5;
+            const topCustomers = await this.orderModel.model.aggregate([
+                { $match: { status: 'delivered' } },
+                {
+                    $group: {
+                        _id: '$user_id',
+                        totalSpent: { $sum: '$total_price' },
+                        ordersCount: { $sum: 1 }
+                    }
+                },
+                { $sort: { totalSpent: -1 } },
+                { $limit: limit },
+                {
+                    $lookup: {
+                        from: 'users',
+                        localField: '_id',
+                        foreignField: '_id',
+                        as: 'user'
+                    }
+                },
+                { $unwind: '$user' },
+                {
+                    $project: {
+                        _id: 1,
+                        name: '$user.name',
+                        email: '$user.email',
+                        totalSpent: 1,
+                        ordersCount: 1
+                    }
+                }
+            ]);
+
+            res.json({ success: true, data: topCustomers });
+        } catch (err) {
+            res.status(500).json({ success: false, message: err.message });
         }
     }
 

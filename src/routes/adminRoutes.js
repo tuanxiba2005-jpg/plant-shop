@@ -105,6 +105,7 @@ router.post('/users/:id/role', adminController.updateRole);
 
 // Revenue
 router.get('/revenue', adminController.revenue);
+router.get('/revenue/top-customers', adminController.topCustomers);
 
 // Coupons
 router.get('/coupons', adminController.coupons);
