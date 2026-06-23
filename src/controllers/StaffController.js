@@ -3,6 +3,7 @@ const Category = require('../models/Category');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
+const Shift = require('../models/Shift');
 
 const STATUS_LABELS = {
     pending: 'Chờ xác nhận',
@@ -18,6 +19,7 @@ class StaffController {
         this.categoryModel = new Category();
         this.orderModel = new Order();
         this.userModel = new User();
+        this.shiftModel = new Shift();
 
         this.dashboard = this.dashboard.bind(this);
         this.products = this.products.bind(this);
@@ -29,6 +31,11 @@ class StaffController {
         this.getReturnDetail = this.getReturnDetail.bind(this);
         this.processReturn = this.processReturn.bind(this);
         this.customers = this.customers.bind(this);
+
+        this.shiftsPage = this.shiftsPage.bind(this);
+        this.shiftsApi = this.shiftsApi.bind(this);
+        this.checkIn = this.checkIn.bind(this);
+        this.checkOut = this.checkOut.bind(this);
     }
 
     async dashboard(req, res) {
@@ -246,9 +253,125 @@ class StaffController {
         try {
             const users = await this.userModel.getAllUsers();
             res.render('staff/customers', { title: 'Danh sách khách hàng', users });
-        } catch (err) {
-            console.error('Staff customers error:', err.message);
-            res.status(500).render('error', { title: 'Lỗi', status: 500, message: err.message });
+        } catch (error) {
+            res.status(500).send('Lỗi máy chủ');
+        }
+    }
+
+    // --- Shift Management ---
+
+    async shiftsPage(req, res) {
+        try {
+            res.render('staff/shifts', { 
+                title: 'Lịch làm việc',
+                path: '/staff/shifts',
+                user: req.session.user
+            });
+        } catch (error) {
+            console.error('Lỗi khi render trang lịch làm việc:', error);
+            res.status(500).send('Lỗi server');
+        }
+    }
+
+    async shiftsApi(req, res) {
+        try {
+            const { start, end } = req.query;
+            if (!start || !end) {
+                return res.status(400).json({ success: false, message: 'Thiếu thời gian start/end' });
+            }
+            
+            const startDate = start.split('T')[0];
+            const endDate = end.split('T')[0];
+
+            const shifts = await this.shiftModel.getShiftsByUser(req.session.user.id, startDate, endDate);
+            
+            const events = [];
+            shifts.forEach(shift => {
+                let shiftColor = '';
+                let shiftTime = '';
+                let title = 'Ca làm việc';
+
+                if (shift.type === 'morning') {
+                    shiftColor = '#10b981';
+                    shiftTime = '08:00 - 12:00';
+                    title = 'Ca Sáng';
+                } else if (shift.type === 'afternoon') {
+                    shiftColor = '#3b82f6';
+                    shiftTime = '13:00 - 17:00';
+                    title = 'Ca Chiều';
+                } else if (shift.type === 'evening') {
+                    shiftColor = '#f59e0b';
+                    shiftTime = '18:00 - 22:00';
+                    title = 'Ca Tối';
+                }
+
+                events.push({
+                    id: shift._id,
+                    title: title,
+                    start: shift.date,
+                    allDay: true,
+                    backgroundColor: shiftColor,
+                    borderColor: shiftColor,
+                    extendedProps: {
+                        type: shift.type,
+                        time: shiftTime,
+                        checkIn: shift.checkIn,
+                        checkOut: shift.checkOut
+                    }
+                });
+            });
+
+            res.json(events);
+        } catch (error) {
+            console.error('Lỗi khi lấy dữ liệu ca làm:', error);
+            res.status(500).json({ success: false, message: 'Lỗi server' });
+        }
+    }
+
+    async checkIn(req, res) {
+        try {
+            const shiftId = req.params.id;
+            const shift = await this.shiftModel.findById(shiftId);
+            
+            if (!shift || shift.user.toString() !== req.session.user.id.toString()) {
+                return res.status(403).json({ success: false, message: 'Bạn không có quyền điểm danh ca này' });
+            }
+
+            if (shift.checkIn) {
+                return res.status(400).json({ success: false, message: 'Ca này đã được check-in' });
+            }
+
+            // Có thể thêm logic kiểm tra thời gian hiện tại có nằm trong khoảng ca làm không
+            await this.shiftModel.checkIn(shiftId);
+            res.json({ success: true, message: 'Check-in thành công' });
+        } catch (error) {
+            console.error('Lỗi check-in:', error);
+            res.status(500).json({ success: false, message: 'Lỗi server' });
+        }
+    }
+
+    async checkOut(req, res) {
+        try {
+            const shiftId = req.params.id;
+            const shift = await this.shiftModel.findById(shiftId);
+            
+            if (!shift || shift.user.toString() !== req.session.user.id.toString()) {
+                return res.status(403).json({ success: false, message: 'Bạn không có quyền điểm danh ca này' });
+            }
+
+            if (!shift.checkIn) {
+                return res.status(400).json({ success: false, message: 'Ca này chưa check-in' });
+            }
+
+            if (shift.checkOut) {
+                return res.status(400).json({ success: false, message: 'Ca này đã được check-out' });
+            }
+
+            await this.shiftModel.checkOut(shiftId);
+            res.json({ success: true, message: 'Check-out thành công' });
+        } catch (error) {
+            console.error('Lỗi check-out:', error);
+            res.status(500).json({ success: false, message: 'Lỗi server' });
         }
     }
 }

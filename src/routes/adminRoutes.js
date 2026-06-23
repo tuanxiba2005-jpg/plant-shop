@@ -113,6 +113,11 @@ router.post('/coupons/create', adminController.createCoupon);
 router.post('/coupons/:id/toggle', adminController.toggleCoupon);
 router.delete('/coupons/:id', adminController.deleteCoupon);
 
+// Shifts
+router.get('/shifts', adminController.shiftsPage);
+router.get('/shifts/api', adminController.shiftsApi);
+router.post('/shifts/assign', adminController.assignShifts);
+
 // Discounts (Khuyến mãi SP)
 const adminDiscountController = require('../controllers/AdminDiscountController');
 router.get('/discounts', adminDiscountController.index);

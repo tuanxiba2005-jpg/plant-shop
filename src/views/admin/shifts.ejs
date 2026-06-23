@@ -1,0 +1,112 @@
+<% extraCSS = ['https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css', '/css/shifts.css'] %>
+<% extraJS = ['https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js', 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js', '/js/admin/shifts.js'] %>
+
+<%- include('../layouts/header') %>
+
+<div class="pt-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Phân ca làm việc</h3>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0" style="font-size: 14px;">
+                    <li class="breadcrumb-item"><a href="/admin/dashboard" class="text-decoration-none text-success">Admin</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Phân ca làm việc</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Chú thích -->
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Chú thích ca làm</h5>
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge rounded-circle p-2 me-2" style="background-color: #10b981;">&nbsp;</span>
+                        <div>
+                            <div class="fw-bold">Ca Sáng</div>
+                            <small class="text-muted">08:00 - 12:00</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge rounded-circle p-2 me-2" style="background-color: #3b82f6;">&nbsp;</span>
+                        <div>
+                            <div class="fw-bold">Ca Chiều</div>
+                            <small class="text-muted">13:00 - 17:00</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge rounded-circle p-2 me-2" style="background-color: #f59e0b;">&nbsp;</span>
+                        <div>
+                            <div class="fw-bold">Ca Tối</div>
+                            <small class="text-muted">18:00 - 22:00</small>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    <small class="text-muted">
+                        <em>* Nhấn vào một ngày trên lịch để xếp ca cho nhân viên.</em>
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lịch FullCalendar -->
+        <div class="col-md-9 mb-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Xếp Ca -->
+<div class="modal fade" id="shiftModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold" id="shiftModalTitle">Phân ca làm việc</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3" id="shiftDateDisplay"></p>
+                <form id="shiftForm">
+                    <input type="hidden" id="shiftDate" name="date">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Chọn ca làm việc</label>
+                        <select class="form-select" id="shiftType" name="type" required>
+                            <option value="morning">Ca Sáng (08:00 - 12:00)</option>
+                            <option value="afternoon">Ca Chiều (13:00 - 17:00)</option>
+                            <option value="evening">Ca Tối (18:00 - 22:00)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-medium">Nhân viên trực</label>
+                        <select class="form-select select2-staffs" id="shiftStaffs" name="staffIds" multiple="multiple" style="width: 100%;">
+                            <% staffs.forEach(staff => { %>
+                                <option value="<%= staff._id %>"><%= staff.name %> (<%= staff.email %>)</option>
+                            <% }) %>
+                        </select>
+                        <small class="form-text text-muted">Có thể chọn nhiều nhân viên cho một ca.</small>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-success" id="btnSaveShift">
+                            <i class="fas fa-save me-1"></i> Lưu thay đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<%- include('../layouts/footer') %>

@@ -14,14 +14,23 @@
                     <a href="/admin/products" class="nav-item">
                         <i class="fas fa-box-open"></i> Sản phẩm
                     </a>
+                    <a href="/admin/categories" class="nav-item">
+                        <i class="fas fa-folder"></i> Danh mục
+                    </a>
                     <a href="/admin/orders" class="nav-item">
                         <i class="fas fa-shopping-bag"></i> Đơn hàng
                     </a>
                     <a href="/admin/users" class="nav-item">
                         <i class="fas fa-users"></i> Người dùng
                     </a>
+                    <a href="/admin/shifts" class="nav-item">
+                        <i class="fas fa-calendar-alt"></i> Phân ca làm việc
+                    </a>
                     <a href="/admin/revenue" class="nav-item">
                         <i class="fas fa-chart-line"></i> Doanh thu
+                    </a>
+                    <a href="/admin/discounts" class="nav-item">
+                        <i class="fas fa-percent"></i> Khuyến mãi SP
                     </a>
                     <a href="/admin/coupons" class="nav-item">
                         <i class="fas fa-tags"></i> Mã giảm giá
@@ -47,26 +56,7 @@
                     <div class="d-flex align-items-center">
                         <h4 class="mb-0 fw-bold text-dark">Dashboard</h4>
                     </div>
-                    <div class="d-flex align-items-center">
-                        <div class="position-relative me-4">
-                            <input type="text"
-                                class="form-control form-control-sm bg-light border-0 rounded-pill px-4 py-2"
-                                placeholder="Tìm kiếm...">
-                            <i class="fas fa-search position-absolute text-muted" style="top: 10px; left: 14px;"></i>
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="d-flex align-items-center gap-2">
-                                <img src="<%= user.avatar || '/images/default-avatar.png' %>"
-                                    class="rounded-circle border" width="40" height="40" alt="Admin">
-                                <div class="d-none d-md-block">
-                                    <p class="mb-0 fw-bold small">
-                                        <%= user.name %>
-                                    </p>
-                                    <p class="mb-0 text-muted" style="font-size: 0.75rem;">Administrator</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
                 </header>
 
                 <!-- Content Area -->

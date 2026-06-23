@@ -1,0 +1,108 @@
+<% extraCSS = ['/css/shifts.css'] %>
+<% extraJS = ['https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js', '/js/staff/shifts.js'] %>
+
+<%- include('../layouts/header') %>
+
+<div class="pt-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Lịch làm việc của tôi</h3>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0" style="font-size: 14px;">
+                    <li class="breadcrumb-item"><a href="/staff/dashboard" class="text-decoration-none text-success">Staff</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Lịch làm việc</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Chú thích -->
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">Chú thích ca làm</h5>
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge rounded-circle p-2 me-2" style="background-color: #10b981;">&nbsp;</span>
+                        <div>
+                            <div class="fw-bold">Ca Sáng</div>
+                            <small class="text-muted">08:00 - 12:00</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge rounded-circle p-2 me-2" style="background-color: #3b82f6;">&nbsp;</span>
+                        <div>
+                            <div class="fw-bold">Ca Chiều</div>
+                            <small class="text-muted">13:00 - 17:00</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="badge rounded-circle p-2 me-2" style="background-color: #f59e0b;">&nbsp;</span>
+                        <div>
+                            <div class="fw-bold">Ca Tối</div>
+                            <small class="text-muted">18:00 - 22:00</small>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    <div class="alert alert-info py-2" style="font-size: 0.9rem;">
+                        <i class="fas fa-info-circle me-1"></i> Nhấn vào một ca làm việc trên lịch để thực hiện <strong>Điểm danh (Check-in/Check-out)</strong>.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lịch FullCalendar -->
+        <div class="col-md-9 mb-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Điểm danh -->
+<div class="modal fade" id="attendanceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold">Điểm danh ca làm việc</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center pt-2">
+                <h4 id="attShiftTitle" class="text-success mb-1">Ca Sáng</h4>
+                <p class="text-muted mb-4" id="attShiftTime">08:00 - 12:00</p>
+                
+                <div class="row g-3 justify-content-center mb-4">
+                    <div class="col-6">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <div class="text-muted mb-1 small text-uppercase fw-bold">Giờ vào (Check-in)</div>
+                            <h5 class="mb-0 text-dark" id="attCheckInTime">--:--</h5>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <div class="text-muted mb-1 small text-uppercase fw-bold">Giờ ra (Check-out)</div>
+                            <h5 class="mb-0 text-dark" id="attCheckOutTime">--:--</h5>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="button" class="btn btn-primary px-4 py-2" id="btnCheckIn" style="border-radius: 8px;">
+                        <i class="fas fa-sign-in-alt me-2"></i> Check-in
+                    </button>
+                    <button type="button" class="btn btn-warning px-4 py-2" id="btnCheckOut" style="border-radius: 8px;">
+                        <i class="fas fa-sign-out-alt me-2"></i> Check-out
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<%- include('../layouts/footer') %>

@@ -4,6 +4,7 @@ const Order = require('../models/Order');
 const User = require('../models/User');
 const Coupon = require('../models/Coupon');
 const Notification = require('../models/Notification');
+const Shift = require('../models/Shift');
 
 const STATUS_LABELS = {
     pending: 'Chờ xác nhận',
@@ -43,6 +44,11 @@ class AdminController {
         this.toggleCoupon = this.toggleCoupon.bind(this);
         this.deleteCoupon = this.deleteCoupon.bind(this);
         this.topCustomers = this.topCustomers.bind(this);
+
+        this.shiftModel = new Shift();
+        this.shiftsPage = this.shiftsPage.bind(this);
+        this.shiftsApi = this.shiftsApi.bind(this);
+        this.assignShifts = this.assignShifts.bind(this);
     }
 
     async dashboard(req, res) {
@@ -501,6 +507,133 @@ class AdminController {
             res.json({ success: true });
         } catch (err) {
             res.json({ success: false, message: err.message });
+        }
+    }
+    // --- Shift Management ---
+
+    async shiftsPage(req, res) {
+        try {
+            // Lấy danh sách nhân viên để hiển thị trong modal xếp lịch
+            const staffs = await this.userModel.model.find({ role: 'staff' }).select('name email avatar').lean();
+            res.render('admin/shifts', { 
+                title: 'Phân ca làm việc',
+                path: '/admin/shifts',
+                user: req.session.user,
+                staffs
+            });
+        } catch (error) {
+            console.error('Lỗi khi render trang xếp lịch:', error);
+            res.status(500).send('Lỗi server');
+        }
+    }
+
+    async shiftsApi(req, res) {
+        try {
+            const { start, end } = req.query; // FullCalendar truyền start và end dạng ISO string
+            if (!start || !end) {
+                return res.status(400).json({ success: false, message: 'Thiếu thời gian start/end' });
+            }
+            
+            // Format to YYYY-MM-DD
+            const startDate = start.split('T')[0];
+            const endDate = end.split('T')[0];
+
+            const shifts = await this.shiftModel.getShiftsByDateRange(startDate, endDate);
+            
+            // Format data cho FullCalendar
+            const events = [];
+            shifts.forEach(shift => {
+                let shiftColor = '';
+                let shiftTime = '';
+                let title = shift.user.name;
+
+                if (shift.type === 'morning') {
+                    shiftColor = '#10b981'; // Green
+                    shiftTime = '08:00 - 12:00';
+                } else if (shift.type === 'afternoon') {
+                    shiftColor = '#3b82f6'; // Blue
+                    shiftTime = '13:00 - 17:00';
+                } else if (shift.type === 'evening') {
+                    shiftColor = '#f59e0b'; // Orange
+                    shiftTime = '18:00 - 22:00';
+                }
+
+                events.push({
+                    id: shift._id,
+                    title: `${title}`,
+                    start: shift.date, // Gán vào ngày
+                    allDay: true,
+                    backgroundColor: shiftColor,
+                    borderColor: shiftColor,
+                    extendedProps: {
+                        userId: shift.user._id,
+                        type: shift.type,
+                        time: shiftTime,
+                        avatar: shift.user.avatar
+                    }
+                });
+            });
+
+            res.json(events);
+        } catch (error) {
+            console.error('Lỗi khi lấy dữ liệu ca làm:', error);
+            res.status(500).json({ success: false, message: 'Lỗi server' });
+        }
+    }
+
+    async assignShifts(req, res) {
+        try {
+            const { date, type, staffIds } = req.body;
+            
+            if (!date || !type) {
+                return res.status(400).json({ success: false, message: 'Thiếu thông tin ngày hoặc ca' });
+            }
+
+            // Danh sách nhân viên đang được chọn cho ngày và ca đó
+            const currentStaffIds = Array.isArray(staffIds) ? staffIds : (staffIds ? [staffIds] : []);
+
+            // Tìm các ca làm việc hiện tại của ngày và ca này
+            const existingShifts = await this.shiftModel.model.find({ date, type }).lean();
+            const existingStaffIds = existingShifts.map(s => s.user.toString());
+
+            // Tìm những staff mới được thêm vào
+            const staffsToAdd = currentStaffIds.filter(id => !existingStaffIds.includes(id));
+            
+            // Tìm những staff bị xóa khỏi ca
+            const staffsToRemove = existingStaffIds.filter(id => !currentStaffIds.includes(id));
+
+            // Thực hiện thêm
+            for (let id of staffsToAdd) {
+                await this.shiftModel.assignShift(id, date, type);
+                
+                // Tạo thông báo cho nhân viên
+                await Notification.create({
+                    user_id: id,
+                    title: 'Lịch làm việc mới',
+                    message: `Bạn đã được phân công ca làm việc vào ngày ${new Date(date).toLocaleDateString('vi-VN')} (${type})`,
+                    type: 'system',
+                    link: '/staff/shifts'
+                });
+            }
+
+            // Thực hiện xóa
+            for (let id of staffsToRemove) {
+                await this.shiftModel.removeShift(id, date, type);
+                
+                // Tạo thông báo cho nhân viên
+                await Notification.create({
+                    user_id: id,
+                    title: 'Hủy lịch làm việc',
+                    message: `Lịch làm việc ngày ${new Date(date).toLocaleDateString('vi-VN')} (${type}) của bạn đã bị hủy`,
+                    type: 'system',
+                    link: '/staff/shifts'
+                });
+            }
+
+            res.json({ success: true, message: 'Cập nhật phân ca thành công' });
+        } catch (error) {
+            console.error('Lỗi khi phân ca:', error);
+            res.status(500).json({ success: false, message: error.message || 'Lỗi server' });
         }
     }
 }

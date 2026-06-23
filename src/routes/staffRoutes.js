@@ -55,10 +55,19 @@ router.post('/products/update/:id', upload.single('image'), processStaffImages, 
 router.get('/orders', staffController.orders);
 router.post('/orders/:id/status', staffController.updateOrderStatus);
 router.get('/orders/:id/detail', staffController.getOrderDetail);
-router.get('/orders/:id/return-detail', staffController.getReturnDetail);
-router.post('/orders/:id/process-return', staffController.processReturn);
 
+// Return Orders (Refund)
+router.get('/returns/:id', staffController.getReturnDetail);
+router.post('/returns/:id', staffController.processReturn);
+
+// Customers
 router.get('/customers', staffController.customers);
+
+// Shifts
+router.get('/shifts', staffController.shiftsPage);
+router.get('/shifts/api', staffController.shiftsApi);
+router.post('/shifts/:id/checkin', staffController.checkIn);
+router.post('/shifts/:id/checkout', staffController.checkOut);
 
 // Chat
 const chatController = require('../controllers/ChatController');
