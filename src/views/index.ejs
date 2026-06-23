@@ -237,8 +237,10 @@
                                     <% } %>
 
                                         <div class="lux-product-image">
-                                            <img src="/images/products/<%= product.image %>" alt="<%= product.name %>"
-                                                onerror="this.src='/images/default.jpg'">
+                                            <a href="/products/<%= product._id %>" class="d-block w-100 h-100">
+                                                <img src="/images/products/<%= product.image %>" alt="<%= product.name %>"
+                                                    onerror="this.src='/images/default.jpg'">
+                                            </a>
                                             <div class="lux-quick-actions">
                                                 <button class="btn btn-outline-secondary rounded-circle btn-wishlist"
                                                     style="width: 40px; height: 40px;" data-id="<%= product._id %>"

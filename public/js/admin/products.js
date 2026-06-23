@@ -1,30 +1,89 @@
-// Mở modal sửa và điền dữ liệu vào form
-document.querySelectorAll('.btn-edit').forEach(btn => {
-    btn.addEventListener('click', function () {
-        const id = this.dataset.id;
-        document.getElementById('editName').value = this.dataset.name;
-        document.getElementById('editPrice').value = this.dataset.price;
-        document.getElementById('editStock').value = this.dataset.stock;
-        document.getElementById('editDescription').value = this.dataset.description;
-        document.getElementById('editCategory').value = this.dataset.category;
+// Event delegation cho các nút trong bảng
+document.addEventListener('click', async function(e) {
+    // Xử lý nút Sửa
+    const editBtn = e.target.closest('.btn-edit');
+    if (editBtn) {
+        const id = editBtn.dataset.id;
+        document.getElementById('editName').value = editBtn.dataset.name;
+        document.getElementById('editPrice').value = editBtn.dataset.price;
+        document.getElementById('editStock').value = editBtn.dataset.stock;
+        document.getElementById('editDescription').value = editBtn.dataset.description;
+        document.getElementById('editCategory').value = editBtn.dataset.category;
         document.getElementById('formEdit').action = `/admin/products/update/${id}`;
         new bootstrap.Modal(document.getElementById('modalEditProduct')).show();
-    });
-});
+    }
 
-// Xóa sản phẩm
-document.querySelectorAll('.btn-delete').forEach(btn => {
-    btn.addEventListener('click', async function () {
+    // Xử lý nút Xóa
+    const deleteBtn = e.target.closest('.btn-delete');
+    if (deleteBtn) {
         if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
-        const id = this.dataset.id;
+        const id = deleteBtn.dataset.id;
         const res = await fetch(`/admin/products/${id}`, { method: 'DELETE' });
         const data = await res.json();
         if (data.success) {
-            this.closest('tr').remove();
+            deleteBtn.closest('tr').remove();
             showToast('Đã xóa sản phẩm!', 'success');
         }
-    });
+    }
 });
+
+// Xử lý form submit bằng AJAX để không phải load lại trang
+function handleAjaxForm(formId, modalId, successMessage) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+        submitBtn.disabled = true;
+
+        try {
+            const formData = new FormData(form);
+            const res = await fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                // Đóng modal
+                bootstrap.Modal.getInstance(document.getElementById(modalId)).hide();
+                showToast(successMessage, 'success');
+                
+                // Cập nhật lại HTML của bảng mà không load lại trang
+                const htmlRes = await fetch(window.location.href);
+                const htmlText = await htmlRes.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, 'text/html');
+                
+                // Lấy phần tbody mới và thay thế
+                const newTbody = doc.querySelector('table tbody');
+                const oldTbody = document.querySelector('table tbody');
+                if (newTbody && oldTbody) {
+                    oldTbody.innerHTML = newTbody.innerHTML;
+                }
+                
+                form.reset();
+            } else {
+                showToast(data.message || 'Có lỗi xảy ra', 'error');
+            }
+        } catch (err) {
+            showToast('Lỗi kết nối server', 'error');
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+}
+
+handleAjaxForm('formAddProduct', 'modalAddProduct', 'Đã thêm sản phẩm thành công!');
+handleAjaxForm('formEdit', 'modalEditProduct', 'Đã cập nhật sản phẩm!');
 
 function previewMultiImages(input, previewId) {
     const preview = document.getElementById(previewId);

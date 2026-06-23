@@ -30,13 +30,23 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Mật khẩu</label>
-                        <input type="password" name="password" class="form-control"
-                               placeholder="Tối thiểu 6 ký tự" required minlength="6">
+                        <div class="input-group">
+                            <input type="password" name="password" id="password" class="form-control"
+                                   placeholder="Mật khẩu" required minlength="6">
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('password', 'eyeIcon1')">
+                                <i class="fas fa-eye" id="eyeIcon1"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Xác nhận mật khẩu</label>
-                        <input type="password" name="confirmPassword" class="form-control"
-                               placeholder="Nhập lại mật khẩu" required>
+                        <div class="input-group">
+                            <input type="password" name="confirmPassword" id="confirmPassword" class="form-control"
+                                   placeholder="Nhập lại mật khẩu" required>
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('confirmPassword', 'eyeIcon2')">
+                                <i class="fas fa-eye" id="eyeIcon2"></i>
+                            </button>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-success w-100 py-2 fw-bold">
                         Đăng ký
@@ -65,5 +75,21 @@
         </div>
     </div>
 </div>
+
+<script>
+    function togglePasswordVisibility(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+</script>
 
 <%- include('../layouts/footer') %>

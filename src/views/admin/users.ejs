@@ -157,7 +157,12 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Mật khẩu <span class="text-danger">*</span></label>
-                    <input type="password" id="createPassword" class="form-control" placeholder="Tối thiểu 6 ký tự">
+                    <div class="input-group">
+                        <input type="password" id="createPassword" class="form-control" placeholder="Mật khẩu">
+                        <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('createPassword', 'eyeIconCreate')">
+                            <i class="fas fa-eye" id="eyeIconCreate"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Vai trò</label>
@@ -200,7 +205,12 @@
                     <label class="form-label">Mật khẩu mới
                         <small class="text-muted fw-normal">(để trống nếu không đổi)</small>
                     </label>
-                    <input type="password" id="editPassword" class="form-control" placeholder="Nhập mật khẩu mới...">
+                    <div class="input-group">
+                        <input type="password" id="editPassword" class="form-control" placeholder="Mật khẩu">
+                        <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('editPassword', 'eyeIconEdit')">
+                            <i class="fas fa-eye" id="eyeIconEdit"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -237,5 +247,20 @@
 </div>
 
 <script src="/js/admin/users.js"></script>
+<script>
+    function togglePasswordVisibility(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+</script>
 
 <%- include('../layouts/footer') %>

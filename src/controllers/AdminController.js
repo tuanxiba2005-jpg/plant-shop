@@ -100,8 +100,15 @@ class AdminController {
             const image = req.files?.image?.[0]?.filename || 'default.jpg';
             const images = req.files?.images?.map(f => f.filename) || [];
             await this.productModel.create({ name, description, price, stock, category_id, image, images });
-            res.redirect('/admin/products');
+            
+            if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
+                return res.json({ success: true, message: 'Thêm sản phẩm thành công!' });
+            }
+            res.redirect('/admin/products?success=' + encodeURIComponent('Thêm sản phẩm thành công!'));
         } catch (err) {
+            if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
+                return res.json({ success: false, message: err.message });
+            }
             res.redirect('/admin/products?error=' + encodeURIComponent(err.message));
         }
     }
@@ -115,8 +122,15 @@ class AdminController {
                 data.images = req.files.images.map(f => f.filename);
             }
             await this.productModel.update(req.params.id, data);
-            res.redirect('/admin/products');
+            
+            if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
+                return res.json({ success: true, message: 'Cập nhật sản phẩm thành công!' });
+            }
+            res.redirect('/admin/products?success=' + encodeURIComponent('Cập nhật sản phẩm thành công!'));
         } catch (err) {
+            if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
+                return res.json({ success: false, message: err.message });
+            }
             res.redirect('/admin/products?error=' + encodeURIComponent(err.message));
         }
     }

@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+function initShiftsCalendar() {
     // Init Select2
     $('.select2-staffs').select2({
         dropdownParent: $('#shiftModal'),
@@ -49,7 +49,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    calendar.render();
+    setTimeout(() => {
+        calendar.render();
+        window.dispatchEvent(new Event('resize'));
+    }, 150);
 
     const shiftModalElement = document.getElementById('shiftModal');
     let shiftModal;
@@ -137,4 +140,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-});
+}
+
+if (document.readyState === 'complete') {
+    initShiftsCalendar();
+} else {
+    window.addEventListener('load', initShiftsCalendar);
+}
